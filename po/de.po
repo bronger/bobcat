@@ -1,0 +1,17 @@
+# German translations for the Gummi program.
+# Copyright (C) 2006 THE GUMMI'S COPYRIGHT HOLDERS
+# This file is distributed under the same license as the Gummi program.
+# Torsten Bronger <bronger@physik.rwth-aachen.de>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Gummi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-09-01 15:49+0100\n"
+"PO-Revision-Date: 2007-09-01 15:36+0200\n"
+"Last-Translator: Torsten Bronger <bronger@physik.rwth-aachen.de>\n"
+"Language-Team: German <bronger@physik.rwth-aachen.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+

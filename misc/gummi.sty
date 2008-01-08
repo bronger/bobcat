@@ -1,0 +1,602 @@
+%%
+%% This is file `tbook.sty',
+%% generated on 2002/10/10 at 04:43 with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% tbookltx.dtx  (with options: `tbooksty')
+%%
+%%======================================================================
+%%    tbook.sty - Part of the tbook Program
+%%    Copyright 2002 Torsten Bronger <bronger@users.sourceforge.net>
+%%
+%%  This program may be distributed and/or modified under the
+%%  conditions of the LaTeX Project Public License, either version 1.2
+%%  of this license or (at your option) any later version.
+%%  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%%  and version 1.2 or later is part of all distributions of LaTeX
+%%  version 1999/12/01 or later.
+%%
+%%  This file may only be distributed together with a copy of the tbook
+%%  base system. You may however distribute the tbook base system
+%%  without such generated files.
+%%
+%%  The program tbook consists of all files listed in manifest.txt.
+%%======================================================================
+%%
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\NeedsTeXFormat{LaTeX2e}[2000/06/01]
+\ProvidesPackage{tbook}[2002/07/22 v1.3 tbook core Document
+                                        Package (TBr)]
+
+\newif\ifpdflatex
+  \ifx\pdfoutput\undefined\pdflatexfalse\else\pdflatextrue\fi
+
+\newif\iftwocolumn\twocolumnfalse
+
+\newif\iftbookcfg
+\IfFileExists{tbook.cfg}{\tbookcfgtrue}{\tbookcfgfalse}
+
+\newif\ifgallery\galleryfalse
+
+\newif\ifonlylabels\onlylabelsfalse
+
+\newif\ifdraft\draftfalse
+
+\newcommand*{\dvips}{%
+        \typeout{dvips driver selected}%
+        \PassOptionsToPackage{dvips}{graphicx}%
+        \PassOptionsToPackage{dvips}{color}%
+        }
+\newcommand*{\pdflatex}{%
+        \typeout{pdflatex driver selected}%
+        \PassOptionsToPackage{pdftex}{graphicx}%
+        \PassOptionsToPackage{pdftex}{color}%
+        }
+
+\DeclareOption{twocolumn}{\twocolumntrue}
+\DeclareOption{draft}{%
+  \PassOptionsToPackage{draft}{graphicx}%
+  \ifpdflatex\pdflatex\else\dvips\fi
+  \drafttrue}
+\DeclareOption{final}{%
+  \PassOptionsToPackage{final}{graphicx}
+  \ifpdflatex\pdflatex\else\dvips\fi
+  \draftfalse}
+\DeclareOption{gallery}{\gallerytrue\onlylabelsfalse}
+
+\ExecuteOptions{final}
+\ProcessOptions
+
+\RequirePackage[latin1]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{textcomp,makeidx,pifont,ragged2e,nicefrac,fixltx2e,
+  amsmath,amssymb,amsthm,ifthen}
+\@ifpackageloaded{preview}{}{\RequirePackage{exscale}}
+\providecommand{\makeindex}{}
+\RequirePackage[T1,spaces,hyphens]{url}
+\RequirePackage{array,booktabs,relsize,soul}
+
+\ifpdflatex
+\newenvironment{psfrags}{}{}
+\def\pfa#1#2{}\def\pfr#1#2{}\def\pfc#1#2{}\def\pfcc#1#2{}
+\newcommand*{\cbox}[1]{}
+\else
+\RequirePackage{psfrag}
+\def\pfg@hideend{%
+    \Gin@PS@raw{/End PSfrag}%
+    \hskip-1cm%                     % This line is added
+    \vbox to\z@{\vss
+        \Gin@PS@raw{/Hide PSfrag}%
+        \hbox to\z@{\hss \raisebox{\depth}{%
+            \underline{PSfrag replacements}}}%
+        \Gin@PS@raw{/Unhide PSfrag}%
+        \count@=\z@\loop\ifnum\count@<\pfg@pcount
+            \expandafter\pfg@place\the\count@.%
+            \advance\count@ by\@ne\repeat}}
+\def\pfa#1#2{\psfrag{#1}{\figsize #2}}
+\def\pfr#1#2{\psfrag{#1}[Br][Br]{\figsize #2}}
+\def\pfc#1#2{\psfrag{#1}[B][B]{\figsize #2}}
+\def\pfcc#1#2{\psfrag{#1}[][]{\figsize #2}}
+\newcommand*{\cbox}[1]{{\fboxrule0pt\fboxsep0.5pt\hbox{%
+    \colorbox{white}{#1}}}}
+\fi
+
+\newcommand{\indexhook}{}
+\renewenvironment{theindex}
+               {\if@twocolumn
+                  \@restonecolfalse
+                \else
+                  \@restonecoltrue
+                \fi
+                \columnseprule \z@
+                \columnsep 35\p@
+                \newdimen\oldparskip\oldparskip\parskip
+                \newdimen\oldparindent\oldparindent\parindent
+                \twocolumn[\@ifundefined{chapter}{
+                              \section*{\indexname}}%
+                           {\@makeschapterhead{\indexname}}%
+                           \iftwocolumn\else {%
+                              \parindent\oldparindent
+                              \parskip\oldparskip\indexhook}\fi]%
+                {\iftwocolumn\indexhook\fi}
+                \@mkboth{\MakeUppercase\indexname}%
+                        {\MakeUppercase\indexname}%
+                \thispagestyle{plain}\parindent\z@
+                \parskip\z@ \@plus .3\p@\relax
+                \let\item\@idxitem\vspace*{1.5\baselineskip}}
+               {\if@restonecol\onecolumn\else\clearpage\fi}
+
+
+\newcommand*{\psfonts}{%
+  \usepackage{mathptmx}[2001/06/04]
+  \usepackage[scaled=.9]{helvet}[2001/06/04]
+  \renewcommand*{\ttdefault}{pcrv}
+  }
+\ifpdflatex
+  \psfonts
+\else \ifgallery\psfonts\fi
+\fi
+
+\RequirePackage{graphicx}
+\RequirePackage{color}
+
+\definecolor{gray}{gray}{0.5}
+\definecolor{lightgray}{gray}{0.75}
+
+\ifgallery
+\RequirePackage[a0paper,nohead,nofoot,margin=0cm]{geometry}
+\fi
+
+\newbox\aphorbox
+\newenvironment{aphorism}[1][6cm]{\hsize#1\parindent0pt\raggedleft
+   \itshape\global\setbox\aphorbox=\vtop to 3.5cm\bgroup}{\vfill\egroup}
+\newcommand{\aphorigin}[1]{\par\vskip1ex #1}
+
+\newskip\pnskip \pnskip0.7cm   % gap between page rectangle and
+                               % page number
+\RequirePackage{fancyhdr}
+\AtBeginDocument{\pagestyle{fancy}}
+\ifx\chaptermark\@undefined
+ \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+ \renewcommand{\subsectionmark}[1]{\markright{\thesubsection\ #1}}
+\else
+ \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+ \renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fi
+\fancyhf{}
+\fancyhead[RO]{\leavevmode
+ \nouppercase{\rightmark}%
+ \hbox to 0pt{\hskip\pnskip\thepage\hss}}   % outer right
+\fancyhead[LE]{\leavevmode
+ \hbox to 0pt{\hss\thepage\hskip\pnskip}%
+ \nouppercase{\leftmark}}                 % outer left
+\renewcommand{\headrulewidth}{0.6pt}
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+ \hbox{}
+ \thispagestyle{empty}
+ \newpage
+ \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\fancypagestyle{plain}{\fancyhf{}%
+ \fancyhead[RO]{\leavevmode\hbox to 0pt{\hss\vtop to 0pt{\vskip1.2cm
+    \box\aphorbox\vss}}%
+    \hbox to 0pt{\hskip\pnskip\thepage\hss}} % outer right
+ \fancyhead[LE]{\leavevmode\hbox to 0pt{\hss\thepage\hskip
+     \pnskip}} % outer left
+ \renewcommand{\headrulewidth}{0pt}  % was: {4pt}
+}
+
+\newcommand{\REF}[2]{%
+  \ifx#1\@empty
+    \ref{#2}%
+  \else
+    \ifpdflatex
+      \hyperref[#2]{#1~\ref*{#2}}%
+    \else #1~\ref{#2}\fi
+  \fi}
+
+\newcommand*{\VREF}[2]{%
+  \ifx#1\@empty
+    \vref{#2}%
+  \else
+    \ifpdflatex
+      \hyperref[#2]{#1~\ref*{#2}} \vpageref[]{#2}%
+    \else #1~\vref{#2}\fi
+  \fi}
+
+\newcommand*{\VEQNREF}[2]{%
+  \ifx#1\@empty
+    (\ref{#2}) \vpageref[]{#2}%
+  \else
+    \ifpdflatex
+      \hyperref[#2]{#1~(\ref*{#2})} \vpageref[]{#2}%
+    \else #1~(\ref{#2}) \vpageref[]{#2}\fi
+  \fi}
+
+\newcommand{\EQNREF}[2]{%
+  \ifx#1\@empty
+    (\ref{#2})%
+  \else
+    \ifpdflatex
+      \hyperref[#2]{#1~(\ref*{#2})}%
+    \else #1~(\ref{#2})\fi
+  \fi}
+
+\def\redefineautoref#1{%
+      \def\equationautorefname{#1}%
+      \def\footnoteautorefname{#1}%
+      \def\itemautorefname{#1}%
+      \def\figureautorefname{#1}%
+      \def\tableautorefname{#1}%
+      \def\partautorefname{#1}%
+      \def\appendixautorefname{#1}%
+      \def\chapterautorefname{#1}%
+      \def\sectionautorefname{#1}%
+      \def\subsectionautorefname{#1}%
+      \def\subsubsectionautorefname{#1}%
+      \def\paragraphautorefname{#1}%
+      \def\subparagraphautorefname{#1}%
+      \def\FancyVerbLineautorefname{#1}%
+      \def\theoremautorefname{#1}}
+
+\makeindex
+
+\providecommand*{\narrowcaps}{}
+\narrowcaps
+\newcommand*{\versaliae}[1]{{\smaller\MakeUppercase{\caps{#1}}}}
+
+\newcommand*{\unit}[2][\!]{\textrm{$\mathcode`\,="013B #1$\,#2}}
+
+\newcommand*{\indexletter}[1]{\textsf{\bfseries\large\hspace*{0.3em}#1}}
+
+\def^^ac{\ifmmode\neg\else\textlnot\fi}
+\def^^b0{\ifmmode^\circ\else\textdegree\fi}
+\def^^b1{\ifmmode\pm\else\textpm\fi}
+\def^^b2{\ensuremath{^2}}
+\def^^b3{\ensuremath{^3}}
+\def^^b5{\ifmmode\text{\textmu}\else\textmu\fi}
+\def^^b7{\ifmmode\cdot\else\textperiodcentered\fi}
+\def^^b9{\ensuremath{^1}}
+\def^^bc{\ifmmode\text{\textonequarter}\else\textonequarter\fi}
+\def^^d7{\ifmmode\times\else\texttimes\fi}
+\def^^f7{\ifmmode\div\else\textdiv\fi}
+
+\def\allowhyphens{\penalty\@M \hskip\z@skip}
+\def\ck{\penalty\@M\discretionary{k-}{}{c}k\allowhyphens}
+\def\CK{\penalty\@M\discretionary{K-}{}{C}K\allowhyphens}
+\def\dfk#1{\penalty\@M\discretionary{#1#1-}{}{#1}\allowhyphens #1}
+
+\newcommand*{\ForPDFs}{\onlylabelstrue
+  \renewcommand*{\PictureWithScale}[2]{\Picture{##2}}
+  \renewcommand*{\OverlayWithScale}[2]{\Overlay{##2}}
+  \renewcommand*{\DiagramWithScale}[2]{\Diagram{##2}}
+  }
+
+\newcommand*{\tbook}{{\fontseries{bx}\sffamily t}\textsf{book}}
+
+\AtBeginDocument{%
+  \ifx\citealp\@undefined
+    \let\citealp=\cite
+    \let\citep=\cite
+    \let\citet=\cite
+    \newif\citeindex
+  \fi
+}
+\newcommand*{\Picture}[1]{\includegraphics{#1}}
+\newcommand*{\PictureWithScale}[2]{\includegraphics[scale=#1]{#2}}
+\newcommand*{\Overlay}[1]{\begingroup \ifonlylabels\else
+     \vtop to 0pt{\vss
+      \hbox to 0pt{\includegraphics{#1}\hss}%
+     }%
+   \fi
+   \setbox\@tempboxa=\hbox{\includegraphics{#1}}%
+   \@tempdima=\wd\@tempboxa \@tempdimb=\ht\@tempboxa
+   \vbox to \@tempdimb{\vss\hbox to \@tempdima{%
+   \includegraphics{#1l}\hss}}%
+   \endgroup
+}
+\newcommand*{\OverlayWithScale}[2]{\begingroup
+   \ifonlylabels\else
+     \vtop to 0pt{%
+      \vss
+      \hbox to 0pt{\includegraphics[clip=true,scale=#1]{#2}\hss}%
+     }%
+   \fi
+   \setbox\@tempboxa=\hbox{\includegraphics[clip=true,scale=#1]{#2}}%
+   \@tempdima=\wd\@tempboxa \@tempdimb=\ht\@tempboxa
+   \vbox to \@tempdimb{\vss\hbox to \@tempdima{%
+   \includegraphics[scale=#1]{#2l}\hss}}%
+   \endgroup
+}
+\newcommand*{\Diagram}[1]{%
+      \small
+      \originalTeX
+      \let\D=\displaystyle
+      \input #1.pic
+}
+\newcommand*{\DiagramWithScale}[2]{%
+  \setbox\@tempboxa=\scalebox{#1}{%
+    \begingroup
+      \small
+      \originalTeX
+      \let\D=\displaystyle
+      \input #2.pic
+    \endgroup
+  }
+  \unhbox\@tempboxa
+}
+
+\ifpdflatex
+  \let\Diagram=\Picture
+  \let\DiagrammWithScale=\PictureWithScale
+\fi
+
+\begin{filecontents}{natbib.cfg}
+ \newcommand{\bibstyle@tbenl}%
+     {\bibpunct{(}{)}{;}{a}{}{,~}%
+      \gdef\NAT@biblabelnum##1{\textbf{##1}}}
+ \newcommand{\bibstyle@tbdel}%
+     {\bibpunct{(}{)}{;}{a}{}{,~}%
+      \gdef\NAT@biblabelnum##1{yxjcgk\textbf{##1}}}
+ \newcommand{\bibstyle@tbfrl}%
+     {\bibpunct{(}{)}{;}{a}{}{,~}%
+      \gdef\NAT@biblabelnum##1{\textbf{##1}}}
+ \newcommand{\bibstyle@tbitl}%
+     {\bibpunct{(}{)}{;}{a}{}{,~}%
+      \gdef\NAT@biblabelnum##1{\textbf{##1}}}
+\end{filecontents}
+
+\newbox\figurepreview
+\newif\ifcaption
+
+\newcommand*{\figurehook}{}
+
+\newenvironment{varfigure}{\global\captionfalse\begingroup
+  \def\caption##1{\gdef\capsave{##1}\global\captiontrue}
+  \global\setbox\figurepreview=\hbox\bgroup}{%
+  \egroup\endgroup\@tempdima\wd\figurepreview\advance\@tempdima\hfuzz
+  \ifdim\@tempdima>\hsize
+    \begin{figure*}\figurehook\global\def\figurehook{}%
+      \centerline{\unhbox\figurepreview}%
+      \ifcaption\caption{\capsave}\fi
+    \end{figure*}%
+  \else
+    \begin{figure}\figurehook\global\def\figurehook{}%
+      \centerline{\unhbox\figurepreview}%
+      \ifcaption\caption{\capsave}\fi
+    \end{figure}%
+  \fi
+}
+
+\newenvironment{vartable}{\global\captionfalse\begingroup
+  \def\caption##1{\gdef\capsave{##1}\global\captiontrue}
+  \global\setbox\figurepreview=\hbox\bgroup}{%
+  \egroup\endgroup\@tempdima\wd\figurepreview\advance\@tempdima\hfuzz
+  \ifdim\@tempdima>\hsize
+    \begin{table*}\figurehook\global\def\figurehook{}%
+      \hbox to \hsize{\hss\unhbox\figurepreview\hss}%
+      \ifcaption\caption{\capsave}\fi
+    \end{table*}%
+  \else
+    \begin{table}\figurehook\global\def\figurehook{}%
+      \hbox to \hsize{\hss\unhbox\figurepreview\hss}%
+      \ifcaption\caption{\capsave}\fi
+    \end{table}%
+  \fi
+}
+
+\def\@varverbatim{\trivlist \item\relax
+  \if@minipage\else\vskip\parskip\fi
+  \leftskip\@totalleftmargin\rightskip\z@skip
+  \parindent\z@\parfillskip\@flushglue\parskip\z@skip
+  \@@par
+  \@tempswafalse
+  \def\par{%
+    \if@tempswa
+      \leavevmode \null \@@par\penalty\interlinepenalty
+    \else
+      \@tempswatrue
+      \ifhmode\@@par\penalty\interlinepenalty\fi
+    \fi}%
+  \obeylines \verbatim@font \@noligs
+  \hyphenchar\font\m@ne
+  \everypar \expandafter{\the\everypar \unpenalty}%
+}
+
+\def\varverbatim{\@varverbatim \frenchspacing\@vobeyspaces}
+\def\endvarverbatim{\if@newlist \leavevmode\fi\endtrivlist}
+
+\newcommand*{\varverb}[1]{\mbox{\ttfamily\frenchspacing\obeyspaces{}#1}}
+
+\def\ifxlanguage#1{%
+  \expandafter\ifx\csname l@#1\endcsname\relax
+    \expandafter\@secondoftwo
+  \else
+    \bbl@afterfi{\ifnum\csname l@#1\endcsname=\language
+      \expandafter\@firstoftwo
+    \else
+      \expandafter\@secondoftwo
+    \fi}%
+  \fi}
+
+\newcommand*{\chooselanguage}{\ifxlanguage{english}{\English}{%
+                              \ifxlanguage{UKenglish}{\English}{%
+                              \ifxlanguage{USenglish}{\English}{%
+                              \ifxlanguage{german}{\German}{%
+                              \ifxlanguage{austrian}{\German}{%
+                              \ifxlanguage{ngerman}{\German}{%
+                              \ifxlanguage{naustrian}{\German}{%
+                              \ifxlanguage{french}{\French}{%
+                              \ifxlanguage{italian}{\Italian}{%
+                              \ifxlanguage{spanish}{\Spanish}{%
+                              \ifxlanguage{catalan}{\Catalan}{%
+                                }}}}}}}}}}}}
+
+\newcommand{\allrightsreserved}{\begingroup
+                  \def\English{All rights reserved.}%
+                  \def\German{Alle Rechte vorbehalten.}%
+                  \def\French{Touts droits r\'eserv\'es.}%
+                  \def\Italian{Tutti i diritti riservati.}%
+                  \def\Spanish{Todos los derechos reservados.}%
+                  \def\Catalan{Tots els drets reservats.}%
+                  \chooselanguage
+                  \endgroup}%
+\newcommand{\disclaimer}{\begingroup
+                  \def\English{This publication is designed to
+                    provide accurate information. However, the
+                    author takes no responsibility for remaining
+                    errors and their consequences.
+
+                    All rights reserved. This work may not be
+                    translated or copied in whole or in part
+                    without the written permission of the
+                    copyright holder. Use in connection with
+                    any form of information storage and
+                    retrieval, electronic adaption, computer
+                    software, or by similar or dissimilar
+                    methodology now known or hereafter
+                    developed is forbidden.\\
+                    The use of trademarks in this publication
+                    is not to be taken as a sign that such
+                    names may be used freely by anyone.}%
+                  \def\German{Text, Abbildungen und Tabellen
+                    wurden mit gr\"o\ss ter Sorgfalt erarbeitet.  Der
+                    Autor kann jedoch f\"ur eventuell verbliebene
+                    fehlerhafte Angaben und deren Folgen weder
+                    eine juristische noch irgendeine Haftung
+                    \"ubernehmen.
+
+                    Der vorliegende Text ist urheberrechtlich
+                    gesch\"utzt.  Alle Rechte vorbehalten.  Kein
+                    Teil dieser Arbeit darf ohne schriftliche
+                    Genehmigung des Autors in irgendeiner Form
+                    in eine f\"ur Maschinen, insbesondere
+                    Datenverarbeitungsanlagen, verwendbare
+                    Sprache \"ubertragen werden. Auch die Rechte
+                    der Wiedergabe durch Vortrag, Funk und
+                    Fernsehen sind
+                    vorbehalten.\\
+                    Alle genannten Warenzeichen sind
+                    eingetragene Warenzeichen der
+                    betreffenden Firmen.}%
+                  \def\French{\English{} [Not yet translated into
+                      French]}%
+                  \def\Italian{\English{} [Not yet translated into
+                      Italian]}%
+                  \def\Spanish{\English{} [Not yet translated into
+                      Spanish]}%
+                  \def\Catalan{\English{} [Not yet translated into
+                      Catalan]}%
+                  \chooselanguage
+                  \endgroup}%
+\newcommand{\dayofprint}{\begingroup
+                  \def\English{Day of print: }%
+                  \def\German{Tag des Druckes: }%
+                  \def\French{\English{} [Not yet translated into
+                      French]}%
+                  \def\Italian{\English{} [Not yet translated into
+                      Italian]}%
+                  \def\Spanish{D\`{\i} de impresi\'on: }%
+                  \def\Catalan{Dia d'impressi\'o: }%
+                  \chooselanguage
+                  \endgroup}%
+\newcommand{\typesetby}{\begingroup
+                  \def\English{Typeset by }%
+                  \def\German{Satz: }%
+                  \def\French{\English{} [Not yet translated into
+                      French]}%
+                  \def\Italian{\English{} [Not yet translated into
+                      Italian]}%
+                  \def\Spanish{redactado por }%
+                  \def\Catalan{redactat per }%
+                  \chooselanguage
+                  \endgroup}%
+\newcommand{\copyrightsymbol}{\begingroup
+                  \def\English{\textcopyright}%
+                  \def\German{\textcopyright}%
+                  \def\French{\textcopyright}%
+                  \def\Italian{\textcopyright}%
+                  \def\Spanish{\textcopyright}%
+                  \def\Catalan{\textcopyright}%
+                  \chooselanguage
+                  \endgroup}%
+
+\newcommand{\ReplacementCharacter}{{\relsize{-2}\fontseries{m}%
+                  \fontfamily{phv}\selectfont
+                  \hbox to 0pt{%
+                    \rotatebox{45}{\rule[-0.4142em]{1em}{1em}}\hss}%
+                  \hbox to 1.4142em{\hss\textcolor{white}{?}\hss}}}
+\DeclareRobustCommand{\replacechar}{\ifmmode\mathop{\hbox{%
+                  \ReplacementCharacter}}\else
+                  \ReplacementCharacter\fi}
+
+\RequirePackage{marvosym,wasysym}
+
+\newcommand*{\rotateright}[1]{\setbox\@tempboxa=\hbox{#1}%
+                  \raisebox{\wd\@tempboxa}{\rotatebox{-90}{#1}}}
+\newcommand*{\rotateleft}[1]{\rotatebox{90}{#1}}
+
+\newcommand{\MakeTitlePage}[9]{%
+ \pagenumbering{Roman}
+ \begin{titlepage}
+  \vspace*{1cm}
+  \begin{center}
+   \sffamily
+   \Huge\raggedright
+   \@author\\\vspace{0.4cm}
+   \ifpdflatex\fontseries{bx}\else\fontseries{sbc}\fi\selectfont
+    \def\smaller{}\color{gray}%
+    \@title
+  \end{center}
+  \vfill
+  \begin{center}
+    #9
+  \end{center}
+  \vfill
+  \begin{center}
+  #1
+  \end{center}%
+ \end{titlepage}\thispagestyle{empty}\iftwocolumn\onecolumn\fi
+ \vbox to \vsize{%
+  \parindent0pt
+ \textbf{#2:}\\[6pt]
+ \parbox{\hsize}{\large\@title}
+ \ifthenelse{\equal{#1}{}}{}{%
+    \\[\baselineskip]
+    #1}
+ \vfill
+ \allrightsreserved\\
+ \copyrightsymbol\ \ifthenelse{\equal{#3}{}}{\the\year\ }{#3 }%
+                   #8%
+                   \ifthenelse{\equal{#4}{}}{}{, #4}\\[\baselineskip]
+ \ifthenelse{\equal{#5}{}}{}{%
+    \typesetby #5\\}
+ \dayofprint\ifthenelse{\equal{#6}{}}{\today}{#6}
+ #7}
+ \iftwocolumn\twocolumn\fi
+
+ \setcounter{page}{1}
+
+ \dominitoc
+}
+
+
+%%
+%% End of file `tbook.sty'.
+

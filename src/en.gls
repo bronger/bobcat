@@ -1,0 +1,1696 @@
+.. -*- mode: text; language-code: en -*-
+.. Gummi LaTeX substitutions
+
+.. Es gibt folgende Modi: TEXT, MATH, SECTION, INDEX, BIBTEX
+.. 
+.. Sprachen werden nach RFC 4646 angegeben.  In den „Modus-Zeilen“ werden die
+.. einzelnen Items mit Whitespace oder Kommas getrennt (Kommas werden wie ein
+.. Leerzeichen behandelt).  Es *muß* auf jeden Fall genau ein Modus angegeben
+.. werden, und zwar ganz am Anfang.  Sprachen sind optional.  Wird keine
+.. Sprache angegeben, wird die Dateisprache angenommen.  Die Angaben in der
+.. Modus-Zeile sind nicht akkumulierend, d.h. sie *ersetzen* Angaben in
+.. vorangehenden Modus-Zeilen vollständig.
+
+
+TEXT
+
+0xa		\\\relax\
+
+
+$		\textdollar\
+
+
+		\hskip0pt
+
+
+0xa0		~
+¡		!`
+¢		\textcent\			textcomp
+£		\textsterling\			textcomp
+¤		\textcurrency\			textcomp
+¥		\textyen\			textcomp
+¦		\textbrokenbar\			textcomp
+§		\textsection\			textcomp
+¨		\textasciidieresis\		textcomp
+©		\textcopyright\			textcomp
+ª		\textordfeminine\		textcomp
+«		<<
+¬		\textlnot\			textcomp
+­		\penalty1000\-\allowhyphens\
+®		\textregistered\		textcomp
+¯		\textasciimacron\		textcomp
+°		\textdegree\			textcomp
+±		\textpm\			textcomp
+²		\texttwosuperior\		textcomp
+³		\textthreesuperior\		textcomp
+´		\textasciiacute\		textcomp
+µ		\textmu\			textcomp
+¶		\textparagraph\			textcomp
+·		\textperiodcentered\		textcomp
+¸		\c\\
+¹		\textonesuperior\		textcomp
+º		\textordmasculine\		textcomp
+»		>>
+¼		\textonequarter\		textcomp
+½		\textonehalf\			textcomp
+¾		\textthreequarters\		textcomp
+¿		?`
+
+
+×		\texttimes\			textcomp
+
+
+÷		\textdiv\			textcomp
+
+Ā		\={A}
+ā		\={a}
+Ă		\u{A}
+ă		\u{a}
+Ą		\k{A}
+ą		\k{a}
+Ć		\'{C}
+ć		\'{c}
+Ĉ		\^{C}
+ĉ		\^{c}
+Ċ		\.{C}
+ċ		\.{c}
+Č		\v{C}
+č		\v{c}
+Ď		\v{D}
+ď		\v{d}
+Đ		\DJ\
+đ		\dj\
+Ē		\={E}
+ē		\={e}
+Ĕ		\u{E}
+ĕ		\u{e}
+Ė		\.{E}
+ė		\.{e}
+Ę		\k{E}
+ę		\k{e}
+Ě		\v{E}
+ě		\v{e}
+Ĝ		\^{G}
+ĝ		\^{g}
+Ğ		\u{G}
+ğ		\u{g}
+Ġ		\.{G}
+ġ		\.{g}
+Ģ		\c{G}
+ģ		\c{g}
+Ĥ		\^{H}
+ĥ		\^{h}
+Ħ		{\fontencoding{LELA}\selectfont\char40}
+
+Ĩ		\~{I}
+ĩ		\~{\i}
+Ī		\={I}
+ī		\={\i}
+Ĭ		\u{I}
+ĭ		\u{\i}
+Į		\k{I}
+į		\k{i}
+İ		\.{I}
+ı		\i\
+Ĳ		IJ
+ĳ		ij
+Ĵ		\^{J}
+ĵ		\^{\j}
+Ķ		\c{K}
+ķ		\c{k}
+ĸ		{\fontencoding{LELA}\selectfont\char91}
+Ĺ		\'{L}
+ĺ		\'{l}
+Ļ		\c{L}
+ļ		\c{l}
+Ľ		\v{L}
+ľ		\v{l}
+Ŀ		{\fontencoding{LELA}\selectfont\char201}
+ŀ		{\fontencoding{LELA}\selectfont\char202}
+Ł		\L\
+ł		\l\
+Ń		\'{N}
+ń		\'{n}
+Ņ		\c{N}
+ņ		\c{n}
+Ň		\v{N}
+ň		\v{n}
+ŉ		'n
+Ŋ		\NG\
+ŋ		\ng\
+Ō		\={O}
+ō		\={o}
+Ŏ		\u{O}
+ŏ		\u{o}
+Ő		\H{O}
+ő		\H{o}
+Œ		\OE\
+œ		\oe\
+Ŕ		\'{R}
+ŕ		\'{r}
+Ŗ		\c{R}
+ŗ		\c{r}
+Ř		\v{R}
+ř		\v{r}
+Ś		\'{S}
+ś		\'{s}
+Ŝ		\^{S}
+ŝ		\^{s}
+Ş		\c{S}
+ş		\c{s}
+Š		\v{S}
+š		\v{s}
+Ţ		\c{T}
+ţ		\c{t}
+Ť		\v{T}
+ť		\v{t}
+Ŧ		{\fontencoding{LELA}\selectfont\char47}
+ŧ		{\fontencoding{LELA}\selectfont\char63}
+Ũ		\~{U}
+ũ		\~{u}
+Ū		\={U}
+ū		\={u}
+Ŭ		\u{U}
+ŭ		\u{u}
+Ů		\r{U}
+ů		\r{u}
+Ű		\H{U}
+ű		\H{u}
+Ų		\k{U}
+ų		\k{u}
+Ŵ		\^{W}
+ŵ		\^{w}
+Ŷ		\^{Y}
+ŷ		\^{y}
+Ÿ		\"{Y}
+Ź		\'{Z}
+ź		\'{z}
+Ż		\.{Z}
+ż		\.{z}
+Ž		\v{Z}
+ž		\v{z}
+
+
+ƒ		\textflorin\			textcomp
+
+ƕ		\texthvlig\
+
+ƞ		\textnrleg\
+
+
+ƺ		{\fontencoding{LELA}\selectfont\char195}
+
+ǂ		\textdoublepipe\
+
+
+ǵ		\'{g}
+
+
+ɘ		{\fontencoding{LEIP}\selectfont\char61}
+
+ɡ		g
+
+
+ɲ		\Elzltln\
+
+ɸ		\textphi\
+
+ɿ		{\fontencoding{LEIP}\selectfont\char202}
+
+
+ʞ		\textturnk\
+
+
+ʼ		'\
+
+
+ˇ		\textasciicaron\		textcomp
+
+
+˘		\textasciibreve\		textcomp
+˙		\textperiodcentered\		textcomp
+˚		\r\ \
+˛		\k\ \
+˜		\texttildelow\			textcomp
+˝		\H\ \
+
+˥		\tone{55}
+˦		\tone{44}
+˧		\tone{33}
+˨		\tone{22}
+˩		\tone{11}
+
+
+̀		\`\\
+́		\'\\
+̂		\^\\
+̃		\~\\
+̄		\=\\
+
+̆		\u\\
+̇		\.\\
+̈		\"\\
+
+̊		\r\\
+̋		\H\\
+̌		\v\\
+
+̏		\cyrchar\C\
+
+̑		{\fontencoding{LECO}\selectfont\char177}
+
+̘		{\fontencoding{LECO}\selectfont\char184}
+̙		{\fontencoding{LECO}\selectfont\char185}
+
+̢		\Elzrh\
+
+̧		\c\
+̨		\k\
+
+̫		{\fontencoding{LECO}\selectfont\char203}
+
+̯		{\fontencoding{LECO}\selectfont\char207}
+
+̲		\underline\
+
+̵		\Elzxl\
+̶		\Elzbar\
+̷		{\fontencoding{LECO}\selectfont\char215}
+
+̺		{\fontencoding{LECO}\selectfont\char218}
+̻		{\fontencoding{LECO}\selectfont\char219}
+̼		{\fontencoding{LECO}\selectfont\char220}
+̽		{\fontencoding{LECO}\selectfont\char221}
+
+
+͡		{\fontencoding{LECO}\selectfont\char225}
+
+
+Ё		\cyrchar\CYRYO\
+Ђ		\cyrchar\CYRDJE\
+Ѓ		\cyrchar{\'\CYRG}
+Є		\cyrchar\CYRIE\
+Ѕ		\cyrchar\CYRDZE\
+І		\cyrchar\CYRII\
+Ї		\cyrchar\CYRYI\
+Ј		\cyrchar\CYRJE\
+Љ		\cyrchar\CYRLJE\
+Њ		\cyrchar\CYRNJE\
+Ћ		\cyrchar\CYRTSHE\
+Ќ		\cyrchar{\'\CYRK}
+
+Ў		\cyrchar\CYRUSHRT\
+Џ		\cyrchar\CYRDZHE\
+А		\cyrchar\CYRA\
+Б		\cyrchar\CYRB\
+В		\cyrchar\CYRV\
+Г		\cyrchar\CYRG\
+Д		\cyrchar\CYRD\
+Е		\cyrchar\CYRE\
+Ж		\cyrchar\CYRZH\
+З		\cyrchar\CYRZ\
+И		\cyrchar\CYRI\
+Й		\cyrchar\CYRISHRT\
+К		\cyrchar\CYRK\
+Л		\cyrchar\CYRL\
+М		\cyrchar\CYRM\
+Н		\cyrchar\CYRN\
+О		\cyrchar\CYRO\
+П		\cyrchar\CYRP\
+Р		\cyrchar\CYRR\
+С		\cyrchar\CYRS\
+Т		\cyrchar\CYRT\
+У		\cyrchar\CYRU\
+Ф		\cyrchar\CYRF\
+Х		\cyrchar\CYRH\
+Ц		\cyrchar\CYRC\
+Ч		\cyrchar\CYRCH\
+Ш		\cyrchar\CYRSH\
+Щ		\cyrchar\CYRSHCH\
+Ъ		\cyrchar\CYRHRDSN\
+Ы		\cyrchar\CYRERY\
+Ь		\cyrchar\CYRSFTSN\
+Э		\cyrchar\CYREREV\
+Ю		\cyrchar\CYRYU\
+Я		\cyrchar\CYRYA\
+а		\cyrchar\cyra\
+б		\cyrchar\cyrb\
+в		\cyrchar\cyrv\
+г		\cyrchar\cyrg\
+д		\cyrchar\cyrd\
+е		\cyrchar\cyre\
+ж		\cyrchar\cyrzh\
+з		\cyrchar\cyrz\
+и		\cyrchar\cyri\
+й		\cyrchar\cyrishrt\
+к		\cyrchar\cyrk\
+л		\cyrchar\cyrl\
+м		\cyrchar\cyrm\
+н		\cyrchar\cyrn\
+о		\cyrchar\cyro\
+п		\cyrchar\cyrp\
+р		\cyrchar\cyrr\
+с		\cyrchar\cyrs\
+т		\cyrchar\cyrt\
+у		\cyrchar\cyru\
+ф		\cyrchar\cyrf\
+х		\cyrchar\cyrh\
+ц		\cyrchar\cyrc\
+ч		\cyrchar\cyrch\
+ш		\cyrchar\cyrsh\
+щ		\cyrchar\cyrshch\
+ъ		\cyrchar\cyrhrdsn\
+ы		\cyrchar\cyrery\
+ь		\cyrchar\cyrsftsn\
+э		\cyrchar\cyrerev\
+ю		\cyrchar\cyryu\
+я		\cyrchar\cyrya\
+
+ё		\cyrchar\cyryo\
+ђ		\cyrchar\cyrdje\
+ѓ		\cyrchar{\'\cyrg}
+є		\cyrchar\cyrie\
+ѕ		\cyrchar\cyrdze\
+і		\cyrchar\cyrii\
+ї		\cyrchar\cyryi\
+ј		\cyrchar\cyrje\
+љ		\cyrchar\cyrlje\
+њ		\cyrchar\cyrnje\
+ћ		\cyrchar\cyrtshe\
+ќ		\cyrchar{\'\cyrk}
+
+ў		\cyrchar\cyrushrt\
+џ		\cyrchar\cyrdzhe\
+Ѡ		\cyrchar\CYROMEGA\
+ѡ		\cyrchar\cyromega\
+Ѣ		\cyrchar\CYRYAT\
+
+Ѥ		\cyrchar\CYRIOTE\
+ѥ		\cyrchar\cyriote\
+Ѧ		\cyrchar\CYRLYUS\
+ѧ		\cyrchar\cyrlyus\
+Ѩ		\cyrchar\CYRIOTLYUS\
+ѩ		\cyrchar\cyriotlyus\
+Ѫ		\cyrchar\CYRBYUS\
+
+Ѭ		\cyrchar\CYRIOTBYUS\
+ѭ		\cyrchar\cyriotbyus\
+Ѯ		\cyrchar\CYRKSI\
+ѯ		\cyrchar\cyrksi\
+Ѱ		\cyrchar\CYRPSI\
+ѱ		\cyrchar\cyrpsi\
+Ѳ		\cyrchar\CYRFITA\
+
+Ѵ		\cyrchar\CYRIZH\
+
+Ѹ		\cyrchar\CYRUK\
+ѹ		\cyrchar\cyruk\
+Ѻ		\cyrchar\CYROMEGARND\
+ѻ		\cyrchar\cyromegarnd\
+Ѽ		\cyrchar\CYROMEGATITLO\
+ѽ		\cyrchar\cyromegatitlo\
+Ѿ		\cyrchar\CYROT\
+ѿ		\cyrchar\cyrot\
+Ҁ		\cyrchar\CYRKOPPA\
+ҁ		\cyrchar\cyrkoppa\
+҂		\cyrchar\cyrthousands\
+
+҈		\cyrchar\cyrhundredthousands\
+҉		\cyrchar\cyrmillions\
+
+Ҍ		\cyrchar\CYRSEMISFTSN\
+ҍ		\cyrchar\cyrsemisftsn\
+Ҏ		\cyrchar\CYRRTICK\
+ҏ		\cyrchar\cyrrtick\
+Ґ		\cyrchar\CYRGUP\
+ґ		\cyrchar\cyrgup\
+Ғ		\cyrchar\CYRGHCRS\
+ғ		\cyrchar\cyrghcrs\
+Ҕ		\cyrchar\CYRGHK\
+ҕ		\cyrchar\cyrghk\
+Җ		\cyrchar\CYRZHDSC\
+җ		\cyrchar\cyrzhdsc\
+Ҙ		\cyrchar\CYRZDSC\
+ҙ		\cyrchar\cyrzdsc\
+Қ		\cyrchar\CYRKDSC\
+қ		\cyrchar\cyrkdsc\
+Ҝ		\cyrchar\CYRKVCRS\
+ҝ		\cyrchar\cyrkvcrs\
+Ҟ		\cyrchar\CYRKHCRS\
+ҟ		\cyrchar\cyrkhcrs\
+Ҡ		\cyrchar\CYRKBEAK\
+ҡ		\cyrchar\cyrkbeak\
+Ң		\cyrchar\CYRNDSC\
+ң		\cyrchar\cyrndsc\
+Ҥ		\cyrchar\CYRNG\
+ҥ		\cyrchar\cyrng\
+Ҧ		\cyrchar\CYRPHK\
+ҧ		\cyrchar\cyrphk\
+Ҩ		\cyrchar\CYRABHHA\
+ҩ		\cyrchar\cyrabhha\
+Ҫ		\cyrchar\CYRSDSC\
+ҫ		\cyrchar\cyrsdsc\
+Ҭ		\cyrchar\CYRTDSC\
+ҭ		\cyrchar\cyrtdsc\
+Ү		\cyrchar\CYRY\
+ү		\cyrchar\cyry\
+Ұ		\cyrchar\CYRYHCRS\
+ұ		\cyrchar\cyryhcrs\
+Ҳ		\cyrchar\CYRHDSC\
+ҳ		\cyrchar\cyrhdsc\
+Ҵ		\cyrchar\CYRTETSE\
+ҵ		\cyrchar\cyrtetse\
+Ҷ		\cyrchar\CYRCHRDSC\
+ҷ		\cyrchar\cyrchrdsc\
+Ҹ		\cyrchar\CYRCHVCRS\
+ҹ		\cyrchar\cyrchvcrs\
+Һ		\cyrchar\CYRSHHA\
+һ		\cyrchar\cyrshha\
+Ҽ		\cyrchar\CYRABHCH\
+ҽ		\cyrchar\cyrabhch\
+Ҿ		\cyrchar\CYRABHCHDSC\
+ҿ		\cyrchar\cyrabhchdsc\
+Ӏ		\cyrchar\CYRpalochka\
+
+Ӄ		\cyrchar\CYRKHK\
+ӄ		\cyrchar\cyrkhk\
+
+Ӈ		\cyrchar\CYRNHK\
+ӈ		\cyrchar\cyrnhk\
+
+Ӌ		\cyrchar\CYRCHLDSC\
+ӌ		\cyrchar\cyrchldsc\
+
+Ӕ		\cyrchar\CYRAE\
+ӕ		\cyrchar\cyrae\
+
+Ә		\cyrchar\CYRSCHWA\
+ә		\cyrchar\cyrschwa\
+
+Ӡ		\cyrchar\CYRABHDZE\
+ӡ		\cyrchar\cyrabhdze\
+
+Ө		\cyrchar\CYROTLD\
+ө		\cyrchar\cyrotld\
+
+
+Ḍ		\d{D}
+ḍ		\d{d}
+
+
+Ḥ		\d{H}
+ḥ		\d{h}
+
+
+Ḷ		\d{L}
+ḷ		\d{l}
+Ḹ		\d{\={L}}
+ḹ		\d{\={l}}
+
+Ṁ		\.{M}
+ṁ		\.{m}
+Ṃ		\d{M}
+ṃ		\d{m}
+Ṅ		\.{N}
+ṅ		\.{n}
+Ṇ		\d{N}
+ṇ		\d{n}
+
+
+Ṛ		\d{R}
+ṛ		\d{r}
+Ṝ		\d{\={R}}
+ṝ		\d{\={r}}
+
+Ṣ		\d{S}
+ṣ		\d{s}
+
+Ṭ		\d{T}
+ṭ		\d{t}
+
+
+0x2000		\mbox{~}
+0x2001		\mbox{\quad}
+
+0x2003		\quad\
+0x2004		\hskip0.333em
+0x2005		\hskip0.25em
+0x2006		\hskip0.167em
+0x2007		\phantom8
+0x2008		\phantom,
+0x2009		\,
+0x200a		\hskip0.056em
+0x200b		\hskip-0.22em
+‌		\penalty1000\discretionary{-}{}{\kern.03em}\allowhyphens\
+‍		\noboundary\
+
+‐		\penalty1000-\hskip0pt
+‑		\leavevmode\hbox{-}
+
+–		\char21\
+—		\char22\
+―		\mbox{-}
+
+‘		\char96\
+’		\char39\
+‚		\char13\
+
+“		\char16\
+”		\char17\
+„		\char18\
+
+†		\textdagger\
+‡		\textdaggerdbl\
+•		\textbullet\
+
+‥		.\,.\,
+…		\dots\
+
+0x2028		\\\relax\
+
+0x202f		\,
+‰		\mbox{\textperthousand}
+
+‹		\char14\
+›		\char15\
+
+‾		\=\
+
+⁁		\^\
+
+⁄		\textfraction\
+
+
+0x205f		\hskip0.222em
+
+⁡		\
+
+⁣		\
+
+
+€		\texteuro\			textcomp
+
+
+℃		\textcelsius\			textcomp
+
+
+Ω		\textohm\			textcomp
+℧		\textmho\			textcomp
+
+Å		\AA\
+
+
+☇		\lightning\
+
+☉		\astrosun\
+☊		\ascnode\
+☋		\descnode\
+☌		\conjunction\
+☍		\opposition\
+
+☐		\Box\
+☑		\Checkedbox\
+☒		\Crossedbox\
+
+☙		\reflectbox{\ding{167}}
+☚		\reflectbox{\ding{42}}
+
+☜		\reflectbox{\ding{43}}
+☝		\reflectbox{\rotateleft{\ding{43}}
+
+☟		\rotateright{\ding{43}}
+
+☥		\Ankh\
+
+☯		\rotateright{\Yingyang}
+
+☹		\frownie\
+☺		\smiley\
+☻		\blacksmiley\
+☼		\sun\
+☽		\rightmoon\
+☾		\leftmoon\
+☿		\mercury\
+♀		\female\
+♁		\earth\
+♂		\male\
+♃		\jupiter\
+♄		\saturn\
+♅		\uranus\
+♆		\neptune\
+♇		\pluto\
+♈		\aries\
+♉		\taurus\
+♊		\gemini\
+♋		\cancer\
+♌		\leo\
+♍		\virgo\
+♎		\libra\
+♏		\scorpio\
+♐		\sagittarius\
+♑		\capricornus\
+♒		\aquarius\
+♓		\pisces\
+
+
+♩		\quaternote\
+♪		\eighthnote\			wasysym
+♫		\twonotes\
+
+
+❘		|
+
+
+�		\replacechar\
+
+
+.. ........................................................
+.. ........................................................
+
+MATH
+
+
+\		\backslash
+
+
+{		\{
+
+}		\}
+
+
+¨		\ddot
+
+¬		\neg
+
+¯		\bar
+°		^\circ
+±		\pm
+
+´		\acute
+
+·		\cdot
+
+
+×		\times
+
+
+Ā		\bar{A}
+ā		\bar{a}
+Ă		\breve{A}
+ă		\u{a}
+
+Ć		\acute{C}
+ć		\acute{c}
+Ĉ		\hat{C}
+ĉ		\hat{c}
+Ċ		\dot{C}
+ċ		\dot{c}
+Č		\check{C}
+č		\check{c}
+Ď		\check{D}
+ď		\check{d}
+
+Ē		\bar{E}
+ē		\bar{e}
+Ĕ		\breve{E}
+ĕ		\breve{e}
+Ė		\dot{E}
+ė		\dot{e}
+Ę		\k{E}
+
+Ě		\check{E}
+ě		\check{e}
+Ĝ		\hat{G}
+ĝ		\hat{g}
+Ğ		\breve{G}
+ğ		\breve{g}
+Ġ		\dot{G}
+ġ		\dot{g}
+Ģ		\mbox{\c{G}}
+ģ		\mbox{\c{g}}
+Ĥ		\hat{H}
+ĥ		\hat{h}
+
+ħ		\Elzxh
+Ĩ		\tilde{I}
+ĩ		\tilde{\imath}
+Ī		\bar{I}
+ī		\bar{\imath}
+Ĭ		\breve{I}
+ĭ		\breve{\imath}
+
+İ		\dot{I}
+ı		\imath
+
+Ĵ		\hat{J}
+ĵ		\hat{\jmath}
+Ķ		\mbox{\c{K}}
+ķ		\mbox{\c{k}}
+
+Ĺ		\acute{L}
+ĺ		\acute{l}
+Ļ		\mbox{\c{L}}
+ļ		\mbox{\c{l}}
+Ľ		\check{L}
+ľ		\check{l}
+
+Ń		\acute{N}
+ń		\acute{n}
+Ņ		\mbox{\c{N}}
+ņ		\mbox{\c{n}}
+Ň		\check{N}
+ň		\check{n}
+
+Ō		\bar{O}
+ō		\bar{o}
+Ŏ		\breve{O}
+ŏ		\breve{o}
+Ő		\mbox{\H{O}}
+ő		\mbox{\H{o}}
+
+Ŕ		\acute{R}
+ŕ		\acute{r}
+Ŗ		\mbox{\c{R}}
+ŗ		\mbox{\c{r}}
+Ř		\check{R}
+ř		\check{r}
+Ś		\acute{S}
+ś		\acute{s}
+Ŝ		\hat{S}
+ŝ		\hat{s}
+Ş		\mbox{\c{S}}
+ş		\mbox{\c{s}}
+Š		\check{S}
+š		\check{s}
+Ţ		\mbox{\c{T}}
+ţ		\mbox{\c{t}}
+Ť		\check{T}
+ť		\check{t}
+
+Ũ		\tilde{U}
+ũ		\tilde{u}
+Ū		\bar{U}
+ū		\bar{u}
+Ŭ		\breve{U}
+ŭ		\breve{u}
+Ů		\mathring{U}
+ů		\mathring{u}
+Ű		\mbox{\H{U}}
+ű		\mbox{\H{u}}
+Ų		\k{U}
+
+Ŵ		\hat{W}
+ŵ		\hat{w}
+Ŷ		\hat{Y}
+ŷ		\hat{y}
+Ÿ		\ddot{Y}
+Ź		\acute{Z}
+ź		\acute{z}
+Ż		\dot{Z}
+ż		\dot{z}
+Ž		\check{Z}
+ž		\check{z}
+
+
+ƪ		\eth
+
+
+ǵ		\acute{g}
+
+
+ɐ		\Elztrna
+
+ɒ		\Elztrnsa
+
+ɔ		\Elzopeno
+
+ɖ		\Elzrtld
+
+ə		\Elzschwa
+
+ɛ		\varepsilon
+
+ɣ		\Elzpgamma
+ɤ		\Elzpbgam
+ɥ		\Elztrnh
+
+ɬ		\Elzbtdl
+ɭ		\Elzrtll
+
+ɯ		\Elztrnm
+ɰ		\Elztrnmlr
+ɱ		\Elzltlmr
+
+ɳ		\Elzrtln
+
+ɷ		\Elzclomeg
+
+ɹ		\Elztrnr
+ɺ		\Elztrnrl
+ɻ		\Elzrttrnr
+ɼ		\Elzrl
+ɽ		\Elzrtlr
+ɾ		\Elzfhr
+
+ʂ		\Elzrtls
+ʃ		\Elzesh
+
+ʇ		\Elztrnt
+ʈ		\Elzrtlt
+
+ʊ		\Elzpupsil
+ʋ		\Elzpscrv
+ʌ		\Elzinvv
+ʍ		\Elzinvw
+ʎ		\Elztrny
+
+ʐ		\Elzrtlz
+
+ʒ		\Elzyogh
+
+ʔ		\Elzglst
+ʕ		\Elzreglst
+ʖ		\Elzinglst
+
+
+ʤ		\Elzdyogh
+
+ʧ		\Elztesh
+
+
+ˈ		\Elzverts
+
+ˌ		\Elzverti
+
+ː		\Elzlmrk
+ˑ		\Elzhlmrk
+˒		\Elzsbrhr
+˓		\Elzsblhr
+˔		\Elzrais
+˕		\Elzlow
+
+˘		\u\\
+˙		\dot\\
+˚		\mathring\\
+˛		\mbox{\k{}}
+
+˝		\mbox{\H{}}
+
+
+̀		\grave\\
+́		\acute\\
+̂		\hat\\
+̃		\tilde\\
+̄		\bar\\
+
+̆		\breve\\
+̇		\dot\\
+̈		\ddot\\
+
+̌		\check\\
+
+
+̡		\Elzpalh
+
+̪		\Elzsbbrg
+
+
+̸		\llap{\not\;}
+
+
+Γ		\Gamma
+Δ		\Delta
+
+Θ		\Theta
+
+Λ		\Lambda
+
+Ξ		\Xi
+
+Π		\Pi
+
+Σ		\Sigma
+
+Υ		\Upsilon
+Φ		\Phi
+
+Ψ		\Psi
+Ω		\Omega
+
+α		\alpha
+β		\beta
+γ		\gamma
+δ		\delta
+ε		\epsilon
+ζ		\zeta
+η		\eta
+θ		\theta
+ι		\iota
+κ		\kappa
+λ		\lambda
+μ		\mu
+ν		\nu
+ξ		\xi
+
+π		\pi
+ρ		\rho
+ς		\varsigma
+σ		\sigma
+τ		\tau
+υ		\upsilon
+φ		\varphi
+χ		\chi
+ψ		\psi
+ω		\omega
+
+ϑ		\vartheta
+ϒ		\Upsilon
+
+ϕ		\phi
+ϖ		\varpi
+
+Ϝ		\digamma
+ϝ		\digamma
+
+
+ϰ		\varkappa
+ϱ		\varrho
+
+϶		\backepsilon
+
+
+Ḹ		\bar{\d{L}}
+ḹ		\bar{\d{l}}
+
+Ṁ		\dot{M}
+ṁ		\dot{m}
+
+Ṅ		\dot{N}
+ṅ		\dot{n}
+
+
+Ṝ		\bar{\d{R}}
+ṝ		\bar{\d{r}}
+
+
+0x2002		\hskip0.3em
+
+
+‖		\Vert
+
+†		\dagger
+‡		\ddagger
+•		\bullet
+
+
+′		'
+″		''
+‴		'''
+‵		\backprime
+
+
+⁗		''''
+
+
+⁢		\*
+
+
+ℂ		\mathbb{C}
+
+ℋ		\mathcal{H}
+ℌ		\mathfrak{H}
+ℍ		\mathbb{H}
+ℎ		h
+ℏ		\hbar
+ℐ		\mathcal{I}
+ℑ		\mathfrak{I}
+ℒ		\mathcal{L}
+ℓ		\ell
+
+ℕ		\mathbb{N}
+
+℘		\wp
+ℙ		\mathbb{P}
+ℚ		\mathbb{Q}
+ℛ		\mathcal{R}
+ℜ		\mathfrak{R}
+ℝ		\mathbb{R}
+
+ℤ		\mathbb{Z}
+
+ℨ		\mathfrak{Z}
+
+ℬ		\mathcal{B}
+ℭ		\mathfrak{C}
+
+ℰ		\mathcal{E}
+ℱ		\mathcal{F}
+
+ℳ		\mathcal{M}
+ℴ		\mathcal{O}
+ℵ		\aleph
+ℶ		\beth
+ℷ		\gimel
+ℸ		\daleth
+
+
+ⅅ		\mathrm{D}
+ⅆ		\mathrm{d}
+ⅇ		\mathrm{e}
+ⅈ		\mathrm{i}
+
+
+←		\leftarrow
+↑		\uparrow
+→		\rightarrow
+↓		\downarrow
+↔		\leftrightarrow
+↕		\updownarrow
+↖		\nwarrow
+↗		\nearrow
+↘		\searrow
+↙		\swarrow
+↚		\not\leftarrow
+↛		\nrightarrow
+
+↝		\rightsquigarrow
+↞		\twoheadleftarrow
+
+↠		\twoheadrightarrow
+
+↢		\leftarrowtail
+↣		\rightarrowtail
+
+↦		\mapsto
+
+↩		\hookleftarrow
+↪		\hookrightarrow
+↫		\looparrowleft
+↬		\looparrowright
+↭		\leftrightsquigarrow
+↮		\nleftrightarrow
+
+↰		\Lsh
+↱		\Rsh
+
+↶		\curvearrowleft
+↷		\curvearrowright
+
+↺		\circlearrowleft
+↻		\circlearrowright
+↼		\leftharpoonup
+↽		\leftharpoondown
+↾		\upharpoonright
+↿		\upharpoonleft
+⇀		\rightharpoonup
+⇁		\rightharpoondown
+⇂		\downharpoonright
+⇃		\downharpoonleft
+⇄		\rightleftarrows
+
+⇆		\leftrightarrows
+⇇		\leftleftarrows
+⇈		\upuparrows
+⇉		\rightrightarrows
+⇊		\downdownarrows
+⇋		\leftrightharpoons
+⇌		\rightleftharpoons
+⇍		\nLeftarrow
+⇎		\nLeftrightarrow
+⇏		\nRightarrow
+⇐		\Leftarrow
+⇑		\Uparrow
+⇒		\Rightarrow
+⇓		\Downarrow
+⇔		\Leftrightarrow
+⇕		\Updownarrow
+
+⇚		\Lleftarrow
+⇛		\Rrightarrow
+
+
+∀		\forall
+∁		\complement
+∂		\partial
+∃		\exists
+∄		\nexists
+∅		\emptyset
+
+∇		\nabla
+∈		\in
+∉		\notin
+
+∋		\ni
+∌		\not\ni
+
+∏		\prod
+∐		\coprod
+∑		\sum
+−		-
+∓		\mp
+∔		\dotplus
+
+∖		\setminus
+∗		\ast
+∘		\circ
+
+√		\surd
+
+∝		\propto
+∞		\infty
+∟		\llcorner
+∠		\angle
+∡		\measuredangle
+∢		\sphericalangle
+∣		\mid
+∤		\nmid
+∥		\parallel
+∦		\nparallel
+∧		\wedge
+∨		\vee
+∩		\cap
+∪		\cup
+∫		\int
+
+∮		\oint
+
+∴		\therefore
+∵		\because
+∶		\mathbin:
+∷		\mathbin{::}
+∸		\mathbin{\dot-}
+
+∼		\sim
+∽		\backsim
+
+≀		\wr
+≁		\not\sim
+
+≃		\simeq
+≄		\not\simeq
+≅		\cong
+
+≇		\ncong
+≈		\approx
+≉		\not\approx
+≊		\approxeq
+
+≍		\asymp
+≎		\Bumpeq
+≏		\bumpeq
+≐		\doteq
+≑		\doteqdot
+≒		\fallingdotseq
+≓		\risingdotseq
+≔		\mathrel{:=}
+≕		\mathrel{=:}
+≖		\eqcirc
+≗		\circeq
+
+≙		\mathrel{\hat=}
+≚		\mathrel{\check=}
+≛		\stackrel\stars=
+≜		\triangleq
+
+≟		\stackrel?=
+≠		\ne
+≡		\equiv
+≢		\not\equiv
+
+≤		\le
+≥		\ge
+≦		\leqq
+≧		\geqq
+≨		\lneq
+≩		\gneq
+≪		\ll
+≫		\gg
+≬		\between
+≭		\not\asymp
+≮		\not<
+≯		\not>
+≰		\nleq
+≱		\ngeq
+≲		\lesssim
+≳		\gtrsim
+≴		\not\lesssim
+≵		\not\gtrsim
+≶		\lessgtr
+≷		\gtrless
+≸		\not\lessgtr
+≹		\not\gtrless
+≺		\prec
+≻		\succ
+≼		\preccurlyeq
+≽		\succcurlyeq
+≾		\precsim
+≿		\succsim
+⊀		\nprec
+⊁		\nsucc
+⊂		\subset
+⊃		\supset
+⊄		\not\subset
+⊅		\not\supset
+⊆		\subseteq
+⊇		\supseteq
+⊈		\nsubseteq
+⊉		\nsupseteq
+⊊		\subsetneq
+⊋		\supsetneq
+
+⊎		\biguplus
+⊏		\sqsubset
+⊐		\sqsupset
+⊑		\sqsubseteq
+⊒		\sqsupseteq
+⊓		\sqcap
+⊔		\sqcup
+⊕		\bigoplus
+⊖		\bigominus
+⊗		\bigotimes
+⊘		\oslash
+⊙		\bigodot
+⊚		\circledcirc
+⊛		\circledast
+
+⊝		\circleddash
+⊞		\boxplus
+⊟		\boxminus
+⊠		\boxtimes
+⊡		\boxdot
+⊢		\vdash
+⊣		\dashv
+⊤		\top
+⊥		\perp
+
+⊧		\models
+⊨		\vDash
+⊩		\Vdash
+⊪		\Vvdash
+
+⊬		\nvdash
+⊭		\nvDash
+⊮		\nVdash
+⊯		\nVDash
+
+⊲		\vartriangleleft
+⊳		\vartriangleright
+⊴		\trianglelefteq
+⊵		\trianglerighteq
+
+⊸		\multimap
+
+⊺		\intercal
+⊻		\veebar
+⊼		\barwedge
+
+⋀		\bigwedge
+⋁		\bigvee
+⋂		\bigcap
+⋃		\bigcup
+⋄		\diamond
+⋅		\cdot
+⋆		\star
+⋇		\divideontimes
+⋈		\bowtie
+⋉		\ltimes
+⋊		\rtimes
+⋋		\leftthreetimes
+⋌		\rightthreetimes
+⋍		\backsimeq
+⋎		\curlyvee
+⋏		\curlywedge
+⋐		\Subset
+⋑		\Supset
+⋒		\Cap
+⋓		\Cup
+⋔		\pitchfork
+
+⋖		\lessdot
+⋗		\gtrdot
+⋘		\lll
+⋙		\ggg
+⋚		\lesseqgtr
+⋛		\gtreqless
+
+⋞		\curlyeqprec
+⋟		\curlyeqsucc
+⋠		\not\curlyeqprec
+⋡		\not\curlyeqsucc
+⋢		\not\sqsubseteq
+⋣		\not\sqsupseteq
+
+⋦		\lnsim
+⋧		\gnsim
+⋨		\precnsim
+⋩		\succnsim
+⋪		\ntriangleleft
+⋫		\ntriangleright
+⋬		\ntrianglelefteq
+⋭		\ntrianglerighteq
+⋮		\vdots
+⋯		\cdots
+
+⋱		\ddots
+
+⋵		\dot\in
+
+⋷		\bar\in
+
+
+⌈		\lceil
+⌉		\rceil
+⌊		\lfloor
+⌋		\rfloor
+
+
+⌢		\frown
+⌣		\smile
+
+〈		\langle
+〉		\rangle
+
+
+□		\square
+
+
+◇		\Diamond
+
+◊		\lozenge
+
+
+☆		\star
+
+
+♠		\spadesuit
+♡		\heartsuit
+♢		\diamondsuit
+♣		\clubsuit
+
+♭		\flat
+♮		\natural
+♯		\sharp
+
+
+✓		\checkmark
+
+
+✠		\maltese
+
+
+✶		\ast
+
+
+⟵		\longleftarrow
+⟶		\longrightarrow
+⟷		\longleftrightarrow
+⟸		\Longleftarrow
+⟹		\Longrightarrow
+⟺		\Longleftrightarrow
+
+
+⨄		\biguplus
+
+⨆		\sqcup
+
+
+⩽		\leqslant
+⩾		\geqslant
+
+⪇		\lneq
+⪈		\gneq
+
+⪋		\lesseqgtr
+⪌		\gtreqless
+
+
+⪰		\succcurlyeq
+
+⪴		\precsim
+
+
+⫅		\subseteqq
+⫆		\supseteqq
+
+⫋		\subsetneq
+⫌		\supsetneq
+
+
+︷		\overbrace{}{}
+︸		\overbrace{}{}
+
+
+𝐀		\mathbf{A}
+𝐁		\mathbf{B}
+𝐂		\mathbf{C}
+𝐃		\mathbf{D}
+𝐄		\mathbf{E}
+𝐅		\mathbf{F}
+𝐆		\mathbf{G}
+𝐇		\mathbf{H}
+𝐈		\mathbf{I}
+𝐉		\mathbf{J}
+𝐊		\mathbf{K}
+𝐋		\mathbf{L}
+𝐌		\mathbf{M}
+𝐍		\mathbf{N}
+𝐎		\mathbf{O}
+𝐏		\mathbf{P}
+𝐐		\mathbf{Q}
+𝐑		\mathbf{R}
+𝐒		\mathbf{S}
+𝐓		\mathbf{T}
+𝐔		\mathbf{U}
+𝐕		\mathbf{V}
+𝐖		\mathbf{W}
+𝐗		\mathbf{X}
+𝐘		\mathbf{Y}
+𝐙		\mathbf{Z}
+𝐚		\mathbf{a}
+𝐛		\mathbf{b}
+𝐜		\mathbf{c}
+𝐝		\mathbf{d}
+𝐞		\mathbf{e}
+𝐟		\mathbf{f}
+𝐠		\mathbf{g}
+𝐡		\mathbf{h}
+𝐢		\mathbf{i}
+𝐣		\mathbf{j}
+𝐤		\mathbf{k}
+𝐥		\mathbf{l}
+𝐦		\mathbf{m}
+𝐧		\mathbf{n}
+𝐨		\mathbf{o}
+𝐩		\mathbf{p}
+𝐪		\mathbf{q}
+𝐫		\mathbf{r}
+𝐬		\mathbf{s}
+𝐭		\mathbf{t}
+𝐮		\mathbf{u}
+𝐯		\mathbf{v}
+𝐰		\mathbf{w}
+𝐱		\mathbf{x}
+𝐲		\mathbf{y}
+𝐳		\mathbf{z}
+𝐴		\mathit{A}
+𝐵		\mathit{B}
+𝐶		\mathit{C}
+𝐷		\mathit{D}
+𝐸		\mathit{E}
+𝐹		\mathit{F}
+𝐺		\mathit{G}
+𝐻		\mathit{H}
+𝐼		\mathit{I}
+𝐽		\mathit{J}
+𝐾		\mathit{K}
+𝐿		\mathit{L}
+𝑀		\mathit{M}
+𝑁		\mathit{N}
+𝑂		\mathit{O}
+𝑃		\mathit{P}
+𝑄		\mathit{Q}
+𝑅		\mathit{R}
+𝑆		\mathit{S}
+𝑇		\mathit{T}
+𝑈		\mathit{U}
+𝑉		\mathit{V}
+𝑊		\mathit{W}
+𝑋		\mathit{X}
+𝑌		\mathit{Y}
+𝑍		\mathit{Z}
+𝑎		\mathit{a}
+𝑏		\mathit{b}
+𝑐		\mathit{c}
+𝑑		\mathit{d}
+𝑒		\mathit{e}
+𝑓		\mathit{f}
+𝑔		\mathit{g}
+𝑕		\mathit{h}
+𝑖		\mathit{i}
+𝑗		\mathit{j}
+𝑘		\mathit{k}
+𝑙		\mathit{l}
+𝑚		\mathit{m}
+𝑛		\mathit{n}
+𝑜		\mathit{o}
+𝑝		\mathit{p}
+𝑞		\mathit{q}
+𝑟		\mathit{r}
+𝑠		\mathit{s}
+𝑡		\mathit{t}
+𝑢		\mathit{u}
+𝑣		\mathit{v}
+𝑤		\mathit{w}
+𝑥		\mathit{x}
+𝑦		\mathit{y}
+𝑧		\mathit{z}
+𝑨		\boldsymbol{A}
+𝑩		\boldsymbol{B}
+𝑪		\boldsymbol{C}
+𝑫		\boldsymbol{D}
+𝑬		\boldsymbol{E}
+𝑭		\boldsymbol{F}
+𝑮		\boldsymbol{G}
+𝑯		\boldsymbol{H}
+𝑰		\boldsymbol{I}
+𝑱		\boldsymbol{J}
+𝑲		\boldsymbol{K}
+𝑳		\boldsymbol{L}
+𝑴		\boldsymbol{M}
+𝑵		\boldsymbol{N}
+𝑶		\boldsymbol{O}
+𝑷		\boldsymbol{P}
+𝑸		\boldsymbol{Q}
+𝑹		\boldsymbol{R}
+𝑺		\boldsymbol{S}
+𝑻		\boldsymbol{T}
+𝑼		\boldsymbol{U}
+𝑽		\boldsymbol{V}
+𝑾		\boldsymbol{W}
+𝑿		\boldsymbol{X}
+𝒀		\boldsymbol{Y}
+𝒁		\boldsymbol{Z}
+𝒂		\boldsymbol{a}
+𝒃		\boldsymbol{b}
+𝒄		\boldsymbol{c}
+𝒅		\boldsymbol{d}
+𝒆		\boldsymbol{e}
+𝒇		\boldsymbol{f}
+𝒈		\boldsymbol{g}
+𝒉		\boldsymbol{h}
+𝒊		\boldsymbol{i}
+𝒋		\boldsymbol{j}
+𝒌		\boldsymbol{k}
+𝒍		\boldsymbol{l}
+𝒎		\boldsymbol{m}
+𝒏		\boldsymbol{n}
+𝒐		\boldsymbol{o}
+𝒑		\boldsymbol{p}
+𝒒		\boldsymbol{q}
+𝒓		\boldsymbol{r}
+𝒔		\boldsymbol{s}
+𝒕		\boldsymbol{t}
+𝒖		\boldsymbol{u}
+𝒗		\boldsymbol{v}
+𝒘		\boldsymbol{w}
+𝒙		\boldsymbol{x}
+𝒚		\boldsymbol{y}
+𝒛		\boldsymbol{z}
+𝒜		\mathcal{A}
+
+𝒞		\mathcal{C}
+𝒟		\mathcal{D}
+
+𝒢		\mathcal{G}
+
+𝒥		\mathcal{J}
+𝒦		\mathcal{K}
+
+𝒩		\mathcal{N}
+𝒪		\mathcal{O}
+𝒫		\mathcal{P}
+𝒬		\mathcal{Q}
+
+𝒮		\mathcal{S}
+𝒯		\mathcal{T}
+𝒰		\mathcal{U}
+𝒱		\mathcal{V}
+𝒲		\mathcal{W}
+𝒳		\mathcal{X}
+𝒴		\mathcal{Y}
+𝒵		\mathcal{Z}
+
+
+𝔄		\mathfrak{A}
+𝔅		\mathfrak{B}
+
+𝔇		\mathfrak{D}
+𝔈		\mathfrak{E}
+𝔉		\mathfrak{F}
+
+𝔍		\mathfrak{J}
+𝔎		\mathfrak{K}
+𝔏		\mathfrak{L}
+𝔐		\mathfrak{M}
+𝔑		\mathfrak{N}
+𝔒		\mathfrak{O}
+𝔓		\mathfrak{P}
+𝔔		\mathfrak{Q}
+
+𝔖		\mathfrak{S}
+𝔗		\mathfrak{T}
+𝔘		\mathfrak{U}
+𝔙		\mathfrak{V}
+𝔚		\mathfrak{W}
+𝔛		\mathfrak{X}
+𝔜		\mathfrak{Y}
+
+𝔞		\mathfrak{a}
+𝔟		\mathfrak{b}
+𝔠		\mathfrak{c}
+𝔡		\mathfrak{d}
+𝔢		\mathfrak{e}
+𝔣		\mathfrak{f}
+𝔤		\mathfrak{g}
+𝔥		\mathfrak{h}
+𝔦		\mathfrak{i}
+𝔧		\mathfrak{j}
+𝔨		\mathfrak{k}
+𝔩		\mathfrak{l}
+𝔪		\mathfrak{m}
+𝔫		\mathfrak{n}
+𝔬		\mathfrak{o}
+𝔭		\mathfrak{p}
+𝔮		\mathfrak{q}
+𝔯		\mathfrak{r}
+𝔰		\mathfrak{s}
+𝔱		\mathfrak{t}
+𝔲		\mathfrak{u}
+𝔳		\mathfrak{v}
+𝔴		\mathfrak{w}
+𝔵		\mathfrak{x}
+𝔶		\mathfrak{y}
+𝔷		\mathfrak{z}
+𝔸		\mathbb{A}
+𝔹		\mathbb{B}
+
+𝔻		\mathbb{D}
+𝔼		\mathbb{E}
+𝔽		\mathbb{F}
+𝔾		\mathbb{G}
+
+𝕀		\mathbb{I}
+𝕁		\mathbb{J}
+𝕂		\mathbb{K}
+𝕃		\mathbb{L}
+𝕄		\mathbb{M}
+
+𝕆		\mathbb{O}
+
+𝕊		\mathbb{S}
+𝕋		\mathbb{T}
+𝕌		\mathbb{U}
+𝕍		\mathbb{V}
+𝕎		\mathbb{W}
+𝕏		\mathbb{X}
+𝕐		\mathbb{Y}

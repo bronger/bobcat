@@ -1,0 +1,42 @@
+>>> "{a".decode("safefilename")
+Traceback (most recent call last):
+    ...
+UnicodeDecodeError: 'safefilename' codec can't decode byte 0x61 in position 1: open brace was never closed
+>>> "1(5g)2".decode("safefilename")
+Traceback (most recent call last):
+    ...
+UnicodeDecodeError: 'safefilename' codec can't decode bytes in position 1-4: invalid data between parentheses
+>>> "1(5g2".decode("safefilename")
+Traceback (most recent call last):
+    ...
+UnicodeDecodeError: 'safefilename' codec can't decode bytes in position 1-2: open parenthesis was never closed
+>>> "{H}allo".decode("safefilename")
+Traceback (most recent call last):
+    ...
+UnicodeDecodeError: 'safefilename' codec can't decode byte 0x48 in position 1: invalid character 'H' in braces sequence
+>>> "}allo".decode("safefilename")
+Traceback (most recent call last):
+    ...
+UnicodeDecodeError: 'safefilename' codec can't decode byte 0x7d in position 0: invalid character '}'
+>>> "{H}allo".decode("safefilename", "replace")
+u'??allo'
+>>> "{".decode("safefilename", "replace")
+u''
+>>> "{allo".decode("safefilename", "replace")
+u'ALLO'
+>>> "{Aallo".decode("safefilename", "replace")
+u'?allo'
+>>> "1(rt)2".decode("safefilename", "replace")
+u'1?2'
+>>> "1(rt2".decode("safefilename", "replace")
+u'1?rt2'
+>>> "{H}allo".decode("safefilename", "ignore")
+u'allo'
+>>> "{allo".decode("safefilename", "ignore")
+u'ALLO'
+>>> "{Aallo".decode("safefilename", "ignore")
+u'allo'
+>>> "1(rt)2".decode("safefilename", "ignore")
+u'12'
+>>> "1(rt2".decode("safefilename", "ignore")
+u'1rt2'
