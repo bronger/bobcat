@@ -41,8 +41,7 @@ most notably the Exception classes and the global settings.
 :type settings: SettingsDict
 """
 
-import re, sys, os.path, locale
-import safefilename
+import re, sys, os.path, logging
 
 modulepath = os.path.abspath(os.path.dirname(sys.argv[0]))
 if 'epydoc' in sys.modules:
@@ -145,7 +144,8 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
       - `LocalVariablesError`: if the line looks like a local variables line
         but has not a valid local variables line format
     """
-    local_variables_match = re.match(comment_marker+r"\s*-\*-\s*(?P<variables>.+)\s*-\*-\Z", first_line.rstrip().lower())
+    local_variables_match = re.match(comment_marker+r"\s*-\*-\s*(?P<variables>.+)\s*-\*-\Z",
+                                     first_line.rstrip().lower())
     if not local_variables_match:
         if force:
             raise LocalVariablesError(u"Malformed local variables line")
@@ -167,10 +167,12 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
                                       % key.decode("latin-1"))
         if "," in value:
             value = value.split(",")
-            for v in value:
-                if not valid_pattern.match(v):
+            # FixMe: Isn't it necessary to strip whitespace from all items in
+            # `value`?
+            for subvalue in value:
+                if not valid_pattern.match(subvalue):
                     raise LocalVariablesError(u"Malformed value '%s' local variables line"
-                                              % v.decode("latin-1"))
+                                              % subvalue.decode("latin-1"))
         elif not valid_pattern.match(value):
             raise LocalVariablesError(u"Malformed value '%s' local variables line"
                                       % value.decode("latin-1"))
@@ -205,8 +207,6 @@ class SettingError(Error):
         :type value: str, unicode, float, int, or bool
         """
         Error.__init__(self, "setting '%s = %s': %s" % (key, value, description))
-
-import logging
 
 class Setting(object):
     """One single Setting, this means, a key--value pair.  It is used in
@@ -356,6 +356,7 @@ class Setting(object):
               ...
             SettingError: setting 'key = []': cannot detect type of empty list
         """
+        # pylint: disable-msg=R0912
         assert source in ["user", "direct", "default"]
         if isinstance(value, list):
             if len(value) == 0:
@@ -363,14 +364,17 @@ class Setting(object):
             single_value = value[0]
         else:
             single_value = value
+        detected_type = None
         if isinstance(single_value, bool):
-            return "bool"
+            detected_type = "bool"
         elif isinstance(single_value, int):
-            return "int"
+            detected_type = "int"
         elif isinstance(single_value, float):
-            return "float"
+            detected_type = "float"
         elif isinstance(single_value, basestring):
-            if source == "user":
+            if source != "user":
+                detected_type = "unicode"
+            else:
                 # Test for special syntaxes: (…, …, …) and "…"
                 value = value.strip()
                 if value.startswith("(") and value.endswith(")"):
@@ -378,7 +382,7 @@ class Setting(object):
                 else:
                     single_value = value
                 if single_value.startswith('"') and single_value.endswith('"'):
-                    return "unicode"
+                    detected_type = "unicode"
                 else:
                     try:
                         int(single_value)
@@ -389,18 +393,17 @@ class Setting(object):
                             try:
                                 self.get_boolean(single_value)
                             except ValueError:
-                                return "unicode"
+                                detected_type = "unicode"
                             else:
-                                return "bool"
+                                detected_type = "bool"
                         else:
-                            return "float"
+                            detected_type = "float"
                     else:
-                        return "int"
-            else:
-                return "unicode"
+                        detected_type = "int"
         else:
             raise SettingError("invalid type '%s'" % type(single_value), self.key, single_value)
-        assert False, "This code position should never be reached"
+        assert detected_type in ["unicode", "bool", "int", "float"]
+        return detected_type
     def adjust_value_to_type(self, source):
         """Converts the current value of the setting to the type of this
         setting.  This type was either explicitly give or auto-detected.  In
@@ -452,6 +455,7 @@ class Setting(object):
 
         Examples for things that don't work:
         """
+        # pylint: disable-msg=R0912
         if self.value is None:
             # In this case, typecasting is delayed until the setting gets a
             # proper value
@@ -483,7 +487,8 @@ class Setting(object):
             else:
                 self.value = convert_single_value(self.value, self.type)
         elif isinstance(self.value, list):
-            self.value = [convert_single_value(single_value, self.type) for single_value in self.value]
+            self.value = [convert_single_value(single_value, self.type)
+                          for single_value in self.value]
         else:
             self.value = convert_single_value(self.value, self.type)
     def __init__(self, key, value, explicit_type=None, source="direct", docstring=None):
@@ -704,6 +709,7 @@ class SettingsDict(dict):
     absolute pathnames, with »~« working.
     """
     def __init__(self):
+        super(SettingsDict, self).__init__()
         self.predefined_variables = {}
         self.closed_sections = set()
         self.logger = logging.getLogger("gummi.settings")
@@ -927,33 +933,30 @@ class SettingsDict(dict):
 
         :rtype: list of str
         """
+        # pylint: disable-msg=R0912
         if isinstance(filenames, basestring):
             filenames = [filenames]
         read_files = []
         for filename in filenames:
             try:
                 payload = open(filename).read()
-            except IOError:
-                continue
-            try:
                 encoding = parse_local_variables(payload.splitlines()[0],
                                                  comment_marker="(#|;)").get("coding", "utf-8")
-            except IndexError:
-                encoding = "utf-8"
-            try:
                 payload_file = StringIO.StringIO(payload.decode(encoding))
             except UnicodeDecodeError:
                 warnings.warn(SettingWarning(u"invalid encoding in file %s; "
                                              u"skipped this file" % filename), stacklevel=2)
+                continue
+            except IOError:
                 continue
             config_parser = ConfigParser.SafeConfigParser()
             config_parser.optionxform = lambda s: s    # Make options case-sensitive
             config_parser.readfp(payload_file, filename)
             for section in config_parser.sections():
                 if section in forbidden_sections:
-                        warnings.warn(SettingWarning(u"section '%s' is forbidden in config "
-                                                     u"file; it was ignored" % section))
-                        continue
+                    warnings.warn(SettingWarning(u"section '%s' is forbidden in config "
+                                                 u"file; it was ignored" % section))
+                    continue
                 for option in config_parser.options(section):
                     key = section + "." + option
                     if "." in option:
@@ -961,20 +964,22 @@ class SettingsDict(dict):
                                                      u"option part; it was ignored" % key))
                         continue
                     try:
-                        value = config_parser.get(section, option, vars=self.predefined_variables).strip()
+                        value = config_parser.get(section, option,
+                                                  vars=self.predefined_variables).strip()
                         if section == "Paths":
                             value = os.path.abspath(os.path.expanduser(value))
                         if key in self:
                             super(SettingsDict, self).__getitem__(key).set_value(value, "user")
                         else:
                             self.test_for_closed_section(key, value)
-                            super(SettingsDict, self).__setitem__(key, Setting(key, value, source="user"))
-                    except ConfigParser.InterpolationMissingOptionError, e:
-                        warnings.warn(SettingWarning(u"setting '%s' misses predefined variable '%s'" %
-                                                    (key, e.reference)))
-                    except SettingError, e:
-                        warnings.warn(SettingWarning(u'file "%s": ' % filename + e.description),
-                                      stacklevel=2)
+                            super(SettingsDict, self).__setitem__(key, Setting(key, value,
+                                                                               source="user"))
+                    except ConfigParser.InterpolationMissingOptionError, error:
+                        warnings.warn(SettingWarning(u"setting '%s' misses predefined "
+                                                     u"variable '%s'" % (key, error.reference)))
+                    except SettingError, error:
+                        warnings.warn(SettingWarning(u'file "%s": ' % filename +
+                                                     error.description), stacklevel=2)
             read_files.append(filename)
         return read_files
     def __repr__(self):
@@ -1001,7 +1006,6 @@ settings.set_default("backend", None, "unicode", docstring="""
     "html".""")
 
 
-import logging
 def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
     """Start the logging facility if the caller whishes this.  Every module in
     Gummi can then write to the logfile by saying::
@@ -1024,14 +1028,17 @@ def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
     :type do_logging: bool
     :type level: int
     """
+    # pylint: disable-msg=C0111
     if do_logging and logfile_name:
         logging.basicConfig(level=level, filename=logfile_name, filemode="w",
                             datefmt='%a, %d %b %Y %H:%M:%S',
                             format="%(asctime)s %(name)s %(levelname)-8s %(message)s")
     else:
         class LogSink(object):
-            def write(self, *args, **kwargs): pass
-            def flush(self, *args, **kwargs): pass
+            def write(self, *args, **kwargs):
+                pass
+            def flush(self, *args, **kwargs):
+                pass
         logging.basicConfig(stream=LogSink())
 
 

@@ -62,6 +62,7 @@ class Emitter(object):
     def __init__(self):
         """Class contructor."""
         self.output = u""
+        self.settings = None
     def set_settings(self, settings):
         """Setting the settings for the output.  It is possible to set the
         settings by a mere assignment to `Emitter.settings` but this is
@@ -110,4 +111,4 @@ class Emitter(object):
         The method is not defined in this abstract base class, so it must be
         overridden in the derived class in the backend.  You may use
         `self.settings` in this method."""
-        assert False
+        raise NotImplementedError

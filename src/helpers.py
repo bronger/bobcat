@@ -34,7 +34,7 @@ instead."""
 from common import Error, modulepath
 import sys
 
-def print_tree(tree, line_columns=[0]):
+def print_tree(tree, line_columns=(0,)):
     """Print a nested list of strings as an ASCII tree to stdout.  Example:
 
     >>> print_tree([["Peter", ["Ian", ["Randy", ["Clara"]]]], "Paul", ["Mary", ["Arthur"]]])
@@ -72,7 +72,7 @@ def print_tree(tree, line_columns=[0]):
         print current_line
         if isinstance(item, list):
             print current_line[:-1] + "+---> " + item[0]
-            new_line_columns = line_columns + [line_columns[-1] + 6 + len(item[0]) // 2]
+            new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(item[0]) // 2]
             if i == len(tree) - 1:
                 del new_line_columns[-2]
             print_tree(item[1], new_line_columns)
@@ -98,18 +98,18 @@ def import_local_module(name):
     :rtype:
       module
     """
+    # pylint: disable-msg=C0103
     import imp
     try:
         return sys.modules[name]
     except KeyError:
-        pass
-    fp, pathname, description = imp.find_module(name, [modulepath])
-    try:
-        return imp.load_module(name, fp, pathname, description)
-    finally:
-        # Since we may exit via an exception, close fp explicitly.
-        if fp:
-            fp.close()
+        fp, pathname, description = imp.find_module(name, [modulepath])
+        try:
+            return imp.load_module(name, fp, pathname, description)
+        finally:
+            # Since we may exit via an exception, close fp explicitly.
+            if fp:
+                fp.close()
 
 if __name__ == "__main__":
     import doctest

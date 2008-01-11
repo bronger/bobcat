@@ -194,6 +194,7 @@ class Node(object):
 
         :rtype: int
         """
+        # pylint: disable-msg=R0201,W0613
         return position
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
@@ -212,7 +213,8 @@ class Node(object):
 
         :rtype: list
         """
-        return [str(self.__class__).split(".")[1][:-2], [child.tree_list() for child in self.children]]
+        return [str(self.__class__).split(".")[1][:-2], \
+                    [child.tree_list() for child in self.children]]
     def process(self):
         """Convert this node to backend output.  Typically, this routine will
         be overridden by backend functions so that the nodes emit code that
@@ -265,6 +267,7 @@ class Document(Node):
     :type packages: set of str
     :type node_types: dict
     """
+    node_types = {}
     def __init__(self):
         super(Document, self).__init__(None)
         self.__current_language = None
@@ -327,8 +330,10 @@ class Document(Node):
         self.emit.set_settings(settings)
         prefix = "process_"
         process_functions = [name for name in backend_module.__dict__ if name.startswith(prefix)]
+        assert self.node_types
         for function_name in process_functions:
-            self.node_types[function_name[len(prefix):]].process = backend_module.__dict__[function_name]
+            self.node_types[function_name[len(prefix):]].process = \
+                backend_module.__dict__[function_name]
         self.process()
         self.emit.do_final_processing()
     def __get_current_language(self):
@@ -451,7 +456,8 @@ def parse_blocks(parent, text, position):
                 continue
         else:
             block_end = next_block_start = length
-        equation_line_match = guarded_search(Section.equation_line_pattern, text, position, block_end)
+        equation_line_match = \
+            guarded_search(Section.equation_line_pattern, text, position, block_end)
         if equation_line_match:
             assert isinstance(parent, (Document, Section))
             # Current block is a heading, so do a look-ahead to get the nesting
@@ -490,7 +496,8 @@ class Section(Node):
     :type nesting_level: int
     """
     equation_line_pattern = re.compile(r"\n[ \t]*={4,}[ \t]*$", re.MULTILINE)
-    section_number_pattern = re.compile(r"[ \t]*(?P<numbers>((\d+|#)\.)*(\d+|#))(\.|[ \t\n])[ \t]*", re.MULTILINE)
+    section_number_pattern = re.compile(r"[ \t]*(?P<numbers>((\d+|#)\.)*(\d+|#))(\.|[ \t\n])[ \t]*",
+                                        re.MULTILINE)
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):

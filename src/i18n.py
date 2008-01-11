@@ -129,7 +129,7 @@ preferred_encoding = locale.getpreferredencoding()
 locale.setlocale(locale.LC_ALL, 'C')
 
 if os.name == 'nt':
-    ugettext = gettext.translation('gummi', modulepath + "/po", fallback=True).ugettext
+    ugettext = gettext.translation('gummi', common.modulepath + "/po", fallback=True).ugettext
 else:
     ugettext = gettext.translation('gummi', fallback=True).ugettext
 if 'epydoc' in sys.modules:
@@ -198,6 +198,7 @@ def translation(domain, language, strict):
 
     :rtype: gettext.GNUTranslations
     """
+    # pylint: disable-msg=C0103
     mofiles = find(domain, language, strict)
     if not mofiles:
         return gettext.NullTranslations()
@@ -207,6 +208,12 @@ def translation(domain, language, strict):
         t = _translations.get(key)
         if t is None:
             t = _translations.setdefault(key, gettext.GNUTranslations(open(mofile, 'rb')))
+        # FixMe: The following Pylint directive is necessary because otherwise,
+        # "result" is supposed to ne None, which doesn't have an "add_fallback"
+        # method.  Maybe Pylint (or rather astng) learns this someday.
+        #
+        # pylint: disable-msg=E1101
+        #
         # Copy the translation object to allow setting fallbacks and
         # output charset. All other instance data is shared with the
         # cached object.

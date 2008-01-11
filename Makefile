@@ -1,4 +1,4 @@
-.PHONY: homepage websources doctests
+.PHONY: homepage websources doctests pylint
 
 homepage:
 	rsync --rsh=ssh -avuz homepage/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/gummi/
@@ -13,3 +13,6 @@ doctests:
 	cd src; python latex_substitutions.py
 	cd src; python preprocessor.py
 	cd src; python safefilename.py
+
+pylint:
+	cd src; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log

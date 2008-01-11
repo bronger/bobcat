@@ -33,7 +33,8 @@
 
 The result should be test1.tex."""
 
-import os, sys, common, i18n
+import sys, common, i18n
+from common import FileError
 _ = i18n.ugettext
 
 import optparse

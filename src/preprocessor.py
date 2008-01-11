@@ -32,14 +32,14 @@
 Its main purpose is twofold: First, it converts characters sequences to single
 Unicode characters.  And secondly, it keeps track of the origins of the
 preprocessed text, so that in case of parsing errors the user can be told where
-exactly the error occured in teh source document.
+exactly the error occured in the source document.
 
 It achieves this by one fat unicode-like data type called `Excerpt`.
 """
 
 import re, os.path, codecs, string, sys, warnings
 import common
-from common import Error, FileError, LocalVariablesError
+from common import Error, FileError, LocalVariablesError, EncodingError
 
 class Excerpt(unicode):
     """Class for preprocessed Gummi source text. It behaves like a unicode string
@@ -67,6 +67,12 @@ class Excerpt(unicode):
       ``\\0x0207;`` or ``\\#8022;``.
     :type entity_pattern: re.pattern
     """
+    # FixMe: The following pylint directive is necessary because astng doesn't
+    # parse attribute settings in the __new__ classmethod.  If this changes or
+    # if a workaround is found, this directive should be removed in order to
+    # find real errors.
+    #
+    # pylint: disable-msg=E1101
     entity_pattern = re.compile(r"((0x(?P<hex>[0-9a-fA-F]+))|(#(?P<dec>[0-9]+)));")
     @classmethod
     def get_next_match(cls, original_text, substitutions, offset=0):
@@ -205,6 +211,7 @@ class Excerpt(unicode):
 
         :rtype: unicode
         """
+        # pylint: disable-msg=E0203
         if self.__escaped_text is None:
             text = list(unicode(self))
             for pos in self.escaped_positions:
@@ -627,25 +634,25 @@ class Excerpt(unicode):
         :rtype: Excerpt
         """
         if mode == "NONE":
-            instance = unicode.__new__(cls, excerpt)
+            self = unicode.__new__(cls, excerpt)
         elif mode == "PRE":
             preprocessed_text, original_positions, escaped_positions = \
                 cls.apply_pre_input_method(excerpt, url, pre_substitutions)
-            instance = unicode.__new__(cls, preprocessed_text)
-            instance.original_text = unicode(excerpt)
-            instance.original_positions = original_positions
-            instance.escaped_positions = escaped_positions
-            instance.post_substitutions = post_substitutions
+            self = unicode.__new__(cls, preprocessed_text)
+            self.original_text = unicode(excerpt)
+            self.original_positions = original_positions
+            self.escaped_positions = escaped_positions
+            self.post_substitutions = post_substitutions
         elif mode == "POST":
             postprocessed_text, original_positions, escaped_positions = \
                 cls.apply_post_input_method(excerpt)
-            instance = unicode.__new__(cls, postprocessed_text)
-            instance.original_positions = original_positions
-            instance.escaped_positions = escaped_positions
-            instance.original_text = excerpt.original_text
-            instance.post_substitutions = post_substitutions
-        instance.__escaped_text = None
-        return instance
+            self = unicode.__new__(cls, postprocessed_text)
+            self.original_positions = original_positions
+            self.escaped_positions = escaped_positions
+            self.original_text = excerpt.original_text
+            self.post_substitutions = post_substitutions
+        self.__escaped_text = None
+        return self
     def apply_postprocessing(self):
         """Applies the rules for post processing this the excerpt and returns
         the processed excerpt.  Note that this method can be called only once
