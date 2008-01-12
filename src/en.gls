@@ -1,15 +1,28 @@
 .. -*- mode: text; language-code: en -*-
 .. Gummi LaTeX substitutions
 
-.. Es gibt folgende Modi: TEXT, MATH, SECTION, INDEX, BIBTEX
+.. Languages are given according to RFC 4646.  The name of the gls file must be
+.. only the first tag of a language code, e.g. “en”, “de” etc.  So mostly, it
+.. is a two-letter name.  This name must be doubled in the local variables line
+.. (the very first line of the file).  The second line must be ".. Gummi LaTeX
+.. substitutions".
 .. 
-.. Sprachen werden nach RFC 4646 angegeben.  In den „Modus-Zeilen“ werden die
-.. einzelnen Items mit Whitespace oder Kommas getrennt (Kommas werden wie ein
-.. Leerzeichen behandelt).  Es *muß* auf jeden Fall genau ein Modus angegeben
-.. werden, und zwar ganz am Anfang.  Sprachen sind optional.  Wird keine
-.. Sprache angegeben, wird die Dateisprache angenommen.  Die Angaben in der
-.. Modus-Zeile sind nicht akkumulierend, d.h. sie *ersetzen* Angaben in
-.. vorangehenden Modus-Zeilen vollständig.
+.. In so-called “mode lines”, you give at least one mode, followed by zero or
+.. more (full) language codes.  All is separated by commas or whitespace.
+.. There are the following modi: TEXT, MATH, SECTION, INDEX, BIBTEX.  Before
+.. any substitution, there must be a mode line.  Mode lines doen't accumulate.
+.. Instead, each mode line replaces the last one completely.  If no language
+.. tags are given in mode lines, the file language is assumed.
+.. 
+.. Every substitution line consists of two or three columns, separated by tabs.
+.. In the first column, there is the unicode character to be replaced, either
+.. verbatim or in #32 or in 0x20 notation.  The second column is its LaTeX
+.. representation, and the optional third column is the package that must be
+.. loaded for this LaTeX substitution.
+.. 
+.. In TEXT sections, there is the convention that a replacement that eats up
+.. following whitespace must end in a backslash.  Additionally, combining
+.. diacritical marks end in a double backslash.
 
 
 TEXT
