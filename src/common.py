@@ -285,15 +285,15 @@ class Setting(object):
         same type (this is done by `adjust_value_to_type` anyway).
 
         For values that are taken from user-provided environment (which means
-        that `source` is ``"user"``), two special syntaxes are accepted:
+        that `source` is ``"conf file"``), two special syntaxes are accepted:
         parentheses and commatas make lists, so ``(1, 2, 3)`` is a list of
         three integers.  And secondly, double quotes make strings, so ``"1"``
         is a string and not an integer.  You may user the latter in the first.
 
         :Parameters:
           - `value`: the value the type of which should be auto-detected
-          - `source`: the source of the value.  It may be "user", "direct", or
-            "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file",
+            "direct", or "default".  See `__init__` for further details.
 
         :type value: unicode, str, int, float, or bool
         :type source: str
@@ -330,13 +330,13 @@ class Setting(object):
         Strings are only “unpacked” if they come from the user (configuration
         file, Gummi document):
         
-            >>> setting.detect_type("3.14", "user")
+            >>> setting.detect_type("3.14", "conf file")
             'float'
-            >>> setting.detect_type('"3.14"', "user")
+            >>> setting.detect_type('"3.14"', "conf file")
             'unicode'
-            >>> setting.detect_type("(1, 2, 3)", "user")
+            >>> setting.detect_type("(1, 2, 3)", "conf file")
             'int'
-            >>> setting.detect_type('("1", "2", "3")', "user")
+            >>> setting.detect_type('("1", "2", "3")', "conf file")
             'unicode'
 
         However, the following things fail deliberately:
@@ -349,7 +349,7 @@ class Setting(object):
             Traceback (most recent call last):
               ...
             SettingError: setting 'key = {}': invalid type '<type 'dict'>'
-            >>> setting.detect_type("(1, 2, 3]", "user")  # wrong closing parenthesis
+            >>> setting.detect_type("(1, 2, 3]", "conf file")  # wrong parenthesis
             'unicode'
             >>> setting.detect_type([], "direct")
             Traceback (most recent call last):
@@ -357,7 +357,7 @@ class Setting(object):
             SettingError: setting 'key = []': cannot detect type of empty list
         """
         # pylint: disable-msg=R0912
-        assert source in ["user", "direct", "default"]
+        assert source in ["conf file", "direct", "default"]
         if isinstance(value, list):
             if len(value) == 0:
                 raise SettingError("cannot detect type of empty list", self.key, value)
@@ -372,7 +372,7 @@ class Setting(object):
         elif isinstance(single_value, float):
             detected_type = "float"
         elif isinstance(single_value, basestring):
-            if source != "user":
+            if source != "conf file":
                 detected_type = "unicode"
             else:
                 # Test for special syntaxes: (…, …, …) and "…"
@@ -419,8 +419,8 @@ class Setting(object):
         whether both types are really compatible, and not just convertible.
 
         :Parameters:
-          - `source`: the source of the value.  It may be "user", "direct", or
-            "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file",
+            "direct", or "default".  See `__init__` for further details.
 
         :type source: str
 
@@ -467,7 +467,7 @@ class Setting(object):
             if type_ == "int":
                 return int(value)
             elif type_ == "unicode":
-                if source == "user" and value.startswith('"') and value.endswith('"'):
+                if source == "conf file" and value.startswith('"') and value.endswith('"'):
                     return unicode(value[1:-1])
                 else:
                     return unicode(value)
@@ -476,7 +476,7 @@ class Setting(object):
             elif type_ == "float":
                 return float(value)
 
-        if source == "user":
+        if source == "conf file":
             assert isinstance(self.value, basestring)
             self.value = self.value.strip()
             if "," in self.value and self.value.startswith("(") and self.value.endswith(")"):
@@ -505,11 +505,12 @@ class Setting(object):
             From this it follows that if `value` is ``None``, you *must* give
             an `explicit_type`.
           - `source`: the origin of this setting.  May be ``"direct"``,
-            ``"user"``, or ``"default"``.  If ``"direct"``, this setting was
-            created in the program code directly.  If ``"user"``, this setting
-            was read from a configuration file or a key/value list in the Gummi
-            source code.  If ``"default"``, the initial value is the default
-            value of this setting at the same time.  Default is ``"direct"``.
+            ``"conf file"``, or ``"default"``.  If ``"direct"``, this setting
+            was created in the program code directly.  If ``"conf file"``, this
+            setting was read from a configuration file or a key/value list in
+            the Gummi source code.  If ``"default"``, the initial value is the
+            default value of this setting at the same time.  Default is
+            ``"direct"``.
           - `docstring`: a describing docstring for this setting.
 
         :type key: unicode
@@ -542,7 +543,7 @@ class Setting(object):
             u"invalid setting key '%s', either section or option is empty" % key
         self.key, self.value, self.type, self.docstring, self.initial_source = \
             key, value, explicit_type, docstring, source
-        if self.initial_source == "user":
+        if self.initial_source == "conf file":
             assert isinstance(self.value, basestring)
             self.initial_value = self.value
         self.has_default = source == "default"
@@ -558,8 +559,8 @@ class Setting(object):
           - `value`: the value.  It must be of the type set in `self.type`,
             which cannot be changed after the initialisation.  It may be
             ``None``, though.
-          - `source`: the source of the value.  It may be "user", "direct", or
-            "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file",
+            "direct", or "default".  See `__init__` for further details.
           - `docstring`: a describing docstring for this setting.
 
         :type value: unicode, bool, float, int, list, or ``NoneType``
@@ -596,10 +597,10 @@ class Setting(object):
         And now for user-provided values:
 
             >>> setting = Setting("key", 1.2)
-            >>> setting.set_value("4", "user")
+            >>> setting.set_value("4", "conf file")
             >>> setting.value
             4.0
-            >>> setting.set_value("(1,2,3)", "user")
+            >>> setting.set_value("(1,2,3)", "conf file")
             >>> setting.value
             [1.0, 2.0, 3.0]
 
@@ -626,11 +627,11 @@ class Setting(object):
         set.  For this case, user-provided values are typecast to ``unicode``
         when setting the default (and *only* then):
 
-            >>> setting = Setting("key", "1", source="user")
+            >>> setting = Setting("key", "1", source="conf file")
             >>> setting.set_value("path/to/something", "default")
             >>> setting.value
             u'1'
-            >>> setting = Setting("key", "(1, 2, 3)", source="user")
+            >>> setting = Setting("key", "(1, 2, 3)", source="conf file")
             >>> setting.value
             [1, 2, 3]
             >>> setting.set_value("path/to/something", "default")
@@ -642,8 +643,8 @@ class Setting(object):
         if value is not None:
             new_type = self.detect_type(value, source)
             if new_type != self.type \
-                    and not (source == "user" and self.type == "unicode") \
-                    and not (source == "default" and self.initial_source == "user"
+                    and not (source == "conf file" and self.type == "unicode") \
+                    and not (source == "default" and self.initial_source == "conf file"
                              and new_type == "unicode") \
                     and not (source == "default" and self.type == "int" and new_type == "float") \
                     and not (source != "default" and self.type == "float" and new_type == "int"):
@@ -659,7 +660,7 @@ class Setting(object):
             self.has_default = True
             if self.type == "int" and new_type == "float":
                 self.type = new_type
-            elif self.initial_source == "user" and new_type == "unicode":
+            elif self.initial_source == "conf file" and new_type == "unicode":
                 self.type = new_type
         else:
             self.value = value
@@ -969,11 +970,12 @@ class SettingsDict(dict):
                         if section == "Paths":
                             value = os.path.abspath(os.path.expanduser(value))
                         if key in self:
-                            super(SettingsDict, self).__getitem__(key).set_value(value, "user")
+                            super(SettingsDict, self).__getitem__(key).set_value(value,
+                                                                                 "conf file")
                         else:
                             self.test_for_closed_section(key, value)
                             super(SettingsDict, self).__setitem__(key, Setting(key, value,
-                                                                               source="user"))
+                                                                               source="conf file"))
                     except ConfigParser.InterpolationMissingOptionError, error:
                         warnings.warn(SettingWarning(u"setting '%s' misses predefined "
                                                      u"variable '%s'" % (key, error.reference)))
