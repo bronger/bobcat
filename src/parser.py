@@ -51,10 +51,12 @@ by code injection from the backend module into the classes of the parser.
 :type inline_delimiter: re.pattern
 """
 
-import sys, codecs, cPickle, re, weakref, imp, os.path
-import common, preprocessor
-from common import Error, LocalVariablesError, FileError, EncodingError, settings
-import helpers
+import re, weakref, imp, os.path
+import common
+
+# safefilename is not really used here, but it must be included so that the
+# codec is registered.
+import safefilename
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.
@@ -258,6 +260,8 @@ class Document(Node):
       additional packages must be included.  Normally, it simply contains LaTeX
       package names, but maybe RTF or OpenDocument need further possible items
       in this set.
+    :ivar emit: `emitter.Emitter` object used for generating output.  Only
+      `Document` and `Text` need `emit` of all routines in this module.
     :cvar node_types: dict which maps `Node` type names to the actual classes.
 
     :type parent: weakref to Node
@@ -266,6 +270,7 @@ class Document(Node):
     :type languages: set
     :type packages: set of str
     :type node_types: dict
+    :type emit: emitter.Emitter
     """
     node_types = {}
     def __init__(self):
@@ -275,6 +280,7 @@ class Document(Node):
         self.root = weakref.ref(self)
         self.nesting_level = -2
         self.packages = set()
+        self.emit = None
     def parse(self, text, position=0):
         position = parse_blocks(self, text, position)
         self.language = self.language or "en"
@@ -299,12 +305,12 @@ class Document(Node):
         backend_name = settings["backend"]
         theme_path = os.path.normpath(os.path.join(common.modulepath, "..", "backends",
                                                    settings["theme"].encode("safefilename")))
-        file, pathname, description = imp.find_module(backend_name, [theme_path])
+        file_, pathname, description = imp.find_module(backend_name, [theme_path])
         try:
-            backend_module = imp.load_module(backend_name, file, pathname, description)
+            backend_module = imp.load_module(backend_name, file_, pathname, description)
         finally:
-            if file:
-                file.close()
+            if file_:
+                file_.close()
         return backend_module
     def generate_output(self):
         """Do everything needed for generating the final output of the
@@ -322,12 +328,12 @@ class Document(Node):
         # FixMe: Here, the settings from the metainfo in the document must be
         # added to `settings`.  For now, I just add the theme because it is
         # important and won't be given on the command line.
-        settings["theme"] = "Standard"
-        backend_module = self.find_backend(settings)
+        common.settings["theme"] = "Standard"
+        backend_module = self.find_backend(common.settings)
         # Bidirectional code injection.  Only `Document` and `Text` need `emit`
         # of all parser.py routines.
         self.emit = backend_module.emit
-        self.emit.set_settings(settings)
+        self.emit.set_settings(common.settings)
         prefix = "process_"
         process_functions = [name for name in backend_module.__dict__ if name.startswith(prefix)]
         assert self.node_types

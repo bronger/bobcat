@@ -33,10 +33,15 @@ Outside a formula, for example, it must be ``$\delta$``.  Thus, it is a helping
 module for the LaTeX backend.
 
 
-:var cached_language_substitutions: internal dictionary containing language
-  substitutions for languages already requested, so that they can be delivered
-  faster when requested again.  So the values of this dict are again dicts.
-:var substitutions: all LaTeX substitutions read so far
+:var cached_substitutions_with_fallbacks: internal dictionary containing
+  language substitutions for languages already requested, so that they can be
+  delivered faster when requested again.  So the values of this dict are again
+  dicts.
+:var cached_substitutions: all LaTeX substitutions read so far.  Its keys are
+  full language tags.  In contrast to `cached_substitutions_with_fallbacks`,
+  this dict contains substitions directly read from gls files, so without any
+  fallbacks.  `cached_substitutions_with_fallbacks` merges the substitions sets
+  for the complete fallback chain downto English.
 :var undangerous_characters: string containing all characters that can be
   copied into the LaTeX file safely under all circumstances, contexts and
   languages.
@@ -46,8 +51,8 @@ module for the LaTeX backend.
 :var combining_diacritical_marks: list of Unicode characters that are combining
   diacritical marks
 
-:type cached_language_substitutions: dict
-:type substitutions: dict
+:type cached_substitutions_with_fallbacks: dict
+:type cached_substitutions: dict
 :type undangerous_characters: str
 :type replacement_macro: str
 :type basic_substitutions: dict
@@ -56,8 +61,7 @@ module for the LaTeX backend.
 
 import re, os.path, codecs, string, sys
 import common
-from common import Error, FileError, LocalVariablesError
-import cPickle as pickle
+from common import Error, FileError
 
 class Substitution(object):
     """Basic LaTeX Unicode substitution.  This is just a container for the
@@ -106,7 +110,7 @@ class Substitution(object):
             Substitution.packages.add(self.package)
         return self.replacement
 
-# The following path variable will eventually be set by some sort of
+# FixMe: The following path variable will eventually be set by some sort of
 # configuration.
 latex_substitutions_path = common.modulepath
 
@@ -116,7 +120,7 @@ def read_latex_substitutions(language_code):
 
     :Parameters:
       - `language_code`: language code to be read.  This is the file name this
-        procedure will look for.  It is the first part of the language code
+        procedure will look for.  It is the *first* part of the language code
         according to :RFC:`4646`.  Mostly, it is two letters long.
 
     :type language_code: str
@@ -132,19 +136,25 @@ def read_latex_substitutions(language_code):
     language_code = language_code.lower()
     filename = os.path.join(latex_substitutions_path, language_code+".gls")
     local_variables = common.parse_local_variables(open(filename).readline(), force=True)
-    file_language_code = local_variables.get("language-code").lower()
+    file_language_code = local_variables.get("language-code")
+    if not file_language_code:
+        raise FileError("language code missing in first line", filename)
+    file_language_code = file_language_code.lower()
     if file_language_code != language_code:
         raise FileError("language code in first line doesn't match file name", filename)
     latex_substitutions_file = codecs.open(filename, encoding=local_variables.get("coding", "utf8"))
     latex_substitutions_file.readline()
-    if not re.match(r"\.\. Gummi LaTeX substitutions\Z", latex_substitutions_file.readline().rstrip()):
+    if not re.match(r"\.\. Gummi LaTeX substitutions\Z",
+                    latex_substitutions_file.readline().rstrip()):
         raise FileError("second line is invalid", filename)
     line_pattern = re.compile(r"((?P<character>.)|(#(?P<dec>\d+))|(0x(?P<hex>[0-9a-fA-F]+)))"
                               r"\t+(?P<replacement>[^\n\r\t]+)(\t+(?P<package>.*))?\Z")
-    surrogate_line_pattern = re.compile(r"(?P<characters>.[^\t])\t+(?P<replacement>[^\n\r\t]+)(\t+(?P<package>.*))?\Z")
+    surrogate_line_pattern = \
+        re.compile(r"(?P<characters>.[^\t])\t+(?P<replacement>[^\n\r\t]+)(\t+(?P<package>.*))?\Z")
     mode_line_pattern = re.compile(r"(?P<modes>(TEXT|MATH|SECTION|INDEX|BIBTEX)"
                                    r"([, \t]+(TEXT|MATH|SECTION|INDEX|BIBTEX))*)"
-                                   r"(?P<language_codes>(?:[, \t]+([a-z]{2,3}(?:-[a-zA-Z0-9]+){0,2}))*)\s*\Z")
+                                   r"(?P<language_codes>"
+                                   r"(?:[, \t]+([a-z]{2,3}(?:-[a-zA-Z0-9]+){0,2}))*)\s*\Z")
     modes = language_codes = None
     for i, line in enumerate(latex_substitutions_file):
         linenumber = i + 3
@@ -159,6 +169,8 @@ def read_latex_substitutions(language_code):
                 character = unichr(int(line_match.group("dec")))
             elif line_match.group("hex"):
                 character = unichr(int(line_match.group("hex"), 16))
+            if not language_codes:
+                raise FileError("mode line expected in line %d" % linenumber, filename)
             for language_code in language_codes:
                 if language_code not in substitutions:
                     substitutions[language_code] = {}
@@ -183,15 +195,15 @@ def read_latex_substitutions(language_code):
             modes = line_match.group("modes").replace(",", " ").split()
             language_codes = [code.lower() for code in
                               line_match.group("language_codes").replace(",", " ").split()]
-            for lc in language_codes:
-                if not lc.startswith(language_code):
+            for lang_code in language_codes:
+                if not lang_code.startswith(language_code):
                     raise Error("invalid language code")
             if not language_codes:
                 language_codes = [language_code]
     return substitutions
 
-cached_language_substitutions = {}
-substitutions = {}
+cached_substitutions_with_fallbacks = {}
+cached_substitutions = {}
 def build_language_substitutions(language_code):
     """Generate the replacement dictionary for one specific language,
     e.g. de-de-1996.  This routine uses fallbacks for languages with shorter
@@ -204,40 +216,46 @@ def build_language_substitutions(language_code):
     :type language_code: str
 
     :Return:
-      the dictinary of characters mapped to dictionaries of modes mapped to
+      the dictionary of characters mapped to dictionaries of modes mapped to
       LaTeX replacements for this language
 
     :rtype: dict
     """
     def get_main_code(language_code):
+        """Return only the first tag of a full language code."""
         dash_position = language_code.find("-")
         if dash_position == -1:
             return language_code
         return language_code[:dash_position]
 
     language_code = language_code.lower()
-    if language_code in cached_language_substitutions:
-        return cached_language_substitutions[language_code]
-    main_codes = [get_main_code(lc) for lc in substitutions]
+    if language_code in cached_substitutions_with_fallbacks:
+        return cached_substitutions_with_fallbacks[language_code]
+    main_codes = [get_main_code(lc) for lc in cached_substitutions]
     if "en" not in main_codes:
-        substitutions.update(read_latex_substitutions("en"))
+        cached_substitutions.update(read_latex_substitutions("en"))
+    assert "en" in [get_main_code(lc) for lc in cached_substitutions], "en.gls was invalid"
     main_code = get_main_code(language_code)
     if main_code not in main_codes and \
             os.path.isfile(os.path.join(latex_substitutions_path, main_code+".gls")):
-        substitutions.update(read_latex_substitutions(main_code))
+        cached_substitutions.update(read_latex_substitutions(main_code))
+        assert main_code in [get_main_code(lc) for lc in cached_substitutions], \
+            "file %s was invalid, it didn't contain pure '%s' substitutions" % \
+            (main_code+".gls", main_code)
     language_substitutions = {}
-    language_codes = [lc for lc in substitutions if language_code.startswith(lc)]
+    language_codes = [lc for lc in cached_substitutions if language_code.startswith(lc)]
     language_codes.sort()
     if "en" not in language_codes:
         language_codes = ["en"] + language_codes
-    for lc in language_codes:
-        language_substitutions.update(substitutions[lc])
-    cached_language_substitutions[language_code] = language_substitutions
+    for lang_code in language_codes:
+        language_substitutions.update(cached_substitutions[lang_code])
+    cached_substitutions_with_fallbacks[language_code] = language_substitutions
     return language_substitutions
 
 undangerous_characters = string.ascii_letters + string.digits + " \t\r\n"
 replacement_macro = ur"\replacecharacter{}"
-basic_substitutions = {'"': ur"\mbox{\char34}}", "\\": ur"\textbackslash{}", "_": ur"\textunderscore{}",
+basic_substitutions = {'"': ur"\mbox{\char34}}", "\\": ur"\textbackslash{}",
+                       "_": ur"\textunderscore{}",
                        "^": ur"\textasciicircum{}", "~": ur"\textasciitilde{}"}
 # FixMe: The combining diacritical marks CDM are not yet handled in this
 # module.  Eventually, the current character can be identified as a CDM by
@@ -249,8 +267,9 @@ basic_substitutions = {'"': ur"\mbox{\char34}}", "\\": ur"\textbackslash{}", "_"
 #
 # Mathematical accents must be processed in a case structure in the Python
 # source because there is no general approach.
-combining_diacritical_marks = [unichr(i) for i in range(0x300, 0x35c) + range(0x363, 0x37f) + range(0x20d0, 0x20ef)]
-del i
+combining_diacritical_marks = [unichr(codepoint) for codepoint in
+                               range(0x300, 0x35c) + range(0x363, 0x37f) + range(0x20d0, 0x20ef)]
+del codepoint
 
 def process_text(text, language, mode, packages=None):
     u"""Takes the unicode string `text` and converts it to a LaTeX string.
@@ -278,7 +297,10 @@ def process_text(text, language, mode, packages=None):
 
     :rtype: unicode
     """
+    # pylint: disable-msg=C0103
     def get_TEXT_substitution(substitutions, is_whitespace_following):
+        """Assume that you are in LaTeX's text mode (horizontal mode) and
+        generate a replacement for it."""
         if "TEXT" in substitutions:
             substitution = unicode(substitutions["TEXT"])
             if substitution[-1] == "\\" and not is_whitespace_following:
@@ -289,6 +311,8 @@ def process_text(text, language, mode, packages=None):
             substitution = replacement_macro
         return substitution
     def get_TEXT_escaping(character):
+        """Assume that you are in LaTeX's text mode (horizontal mode) and
+        generate a properly escaped character for it."""
         character = unicode(character)
         if character in "!?-'`<>":
             return character + "{}"
@@ -304,18 +328,19 @@ def process_text(text, language, mode, packages=None):
     Substitution.reset_packages(packages)
     language_substitutions = build_language_substitutions(language)
     processed_text = u""
-    for i, c in enumerate(text):
+    for i, char in enumerate(text):
         # For the sake of performance, I process the 26 Latin letters and the
         # digits first, without any futher conditional expressions
-        if c in undangerous_characters:
-            processed_text += c
+        if char in undangerous_characters:
+            processed_text += char
             continue
-        unicode_number = ord(c)
+        unicode_number = ord(char)
         # Now, if there is a substitution registered for this charaters and
         # this mode, use it.  Additionally, if there is a substitution
         # registeres for any mode for a characters above Latin-1, use it.
-        if c in language_substitutions and (unicode_number >= 256 or mode in language_substitutions[c]):
-            substitutions = language_substitutions[c]
+        if char in language_substitutions and \
+                (unicode_number >= 256 or mode in language_substitutions[char]):
+            substitutions = language_substitutions[char]
             is_whitespace_following = text[i+1:i+2] in " \t\r\n"
             if mode == "TEXT":
                 substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
@@ -337,7 +362,8 @@ def process_text(text, language, mode, packages=None):
                     substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
                 if substitution.startswith("$"):
                     substitution = u"??"
-                substitution = ur"\texorpdfstring{%s}{%s}" % (process_text(c, language, "TEXT"), substitution)
+                substitution = ur"\texorpdfstring{%s}{%s}" % (process_text(char, language, "TEXT"),
+                                                              substitution)
             elif mode == "INDEX":
                 if "INDEX" in substitutions:
                     substitution = unicode(substitutions["INDEX"])
@@ -359,24 +385,24 @@ def process_text(text, language, mode, packages=None):
         # characters of Latin-1 with a substitution in the wrong mode (or none
         # at all)
         if mode == "TEXT" or mode == "SECTION":
-            processed_text += get_TEXT_escaping(c)
+            processed_text += get_TEXT_escaping(char)
         elif mode == "MATH":
-            if c in "$%&{}#":
-                processed_text += "\\" + c
-            elif c in r'"\_^~':
-                processed_text += basic_substitutions[c]
-            elif 32 <= unicode_number <= 127 or c in "\t\r\n" or 161 <= unicode_number <= 255:
-                processed_text += c
+            if char in "$%&{}#":
+                processed_text += "\\" + char
+            elif char in r'"\_^~':
+                processed_text += basic_substitutions[char]
+            elif 32 <= unicode_number <= 127 or char in "\t\r\n" or 161 <= unicode_number <= 255:
+                processed_text += char
             else:
                 processed_text += replacement_macro
         elif mode == "INDEX":
             # FixMe: At least the exclamation mark must be escaped somehow;
             # maybe other characters doesn't work so easily, too.
-            processed_text += get_TEXT_escaping(c)
+            processed_text += get_TEXT_escaping(char)
         elif mode == "BIBTEX":
             # FixMe: At least the double quotes must be escaped somehow; maybe
             # other characters doesn't work so easily, too.
-            processed_text += get_TEXT_escaping(c)
+            processed_text += get_TEXT_escaping(char)
     return processed_text
 
 if __name__ == "__main__":

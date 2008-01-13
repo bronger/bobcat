@@ -37,9 +37,9 @@ exactly the error occured in the source document.
 It achieves this by one fat unicode-like data type called `Excerpt`.
 """
 
-import re, os.path, codecs, string, sys, warnings
+import re, os.path, codecs, string, warnings
 import common
-from common import Error, FileError, LocalVariablesError, EncodingError
+from common import FileError, EncodingError
 
 class Excerpt(unicode):
     """Class for preprocessed Gummi source text. It behaves like a unicode string
@@ -183,19 +183,36 @@ class Excerpt(unicode):
         """
         # Note that self.escaped_positions must be sorted!
         if isinstance(position, (list, tuple)):
-            a, b = position
+            start, end = position
             for i in self.escaped_positions:
-                if a <= i < b:
+                if start <= i < end:
                     return True
             return False
         else:
             return position in self.escaped_positions
     def next_escaped_position(self, offset):
+        """Yields the index for the first character that is escaped in the
+        Excerpt, starting from `offset`.  If none was found, it returns the
+        length of the Excerpt.
+
+        :Parameters:
+          - `offset`: starting offset of the search for the next escaped
+            characters.  Must be a character position within the Excerpt.
+
+        :type offset: int
+
+        :Return:
+          The index of the first character after `offset` that is escaped.  If
+          none was found, it returns the length of the Excerpt.
+
+        :rtype: int
+        """
         length = len(self)
-        if offset >= length:
+        if not 0 <= offset < length:
             raise IndexError("invalid value %d for "
-                        "offset in next_escaped_position near line %d of file %s" %
-                        (offset, self.original_positions[0].linenumber, self.original_positions[0].url))
+                             "offset in next_escaped_position near line %d of file %s" %
+                             (offset, self.original_positions[0].linenumber,
+                              self.original_positions[0].url))
         next_positions = [position for position in self.escaped_positions if position >= offset]
         if next_positions:
             return sorted(next_positions)[0]
@@ -211,7 +228,7 @@ class Excerpt(unicode):
 
         :rtype: unicode
         """
-        # pylint: disable-msg=E0203
+        # pylint: disable-msg=E0203, W0201
         if self.__escaped_text is None:
             text = list(unicode(self))
             for pos in self.escaped_positions:
@@ -243,7 +260,8 @@ class Excerpt(unicode):
         if not 0 <= position <= length:
             raise IndexError("invalid value %d for "
                         "position in original_position near line %d of file %s" %
-                        (position, self.original_positions[0].linenumber, self.original_positions[0].url))
+                        (position, self.original_positions[0].linenumber,
+                         self.original_positions[0].url))
         if length == 0:
             return None
         closest_position = max([pos for pos in self.original_positions if pos <= position])
@@ -319,6 +337,10 @@ class Excerpt(unicode):
             points to the next character in `original_text` to be processed.
             Thus, this is a mere synchronisation between `original_text` and
             `preprocessed_text`.
+
+            If you pass 0 for `number_of_characters`, you can use this function
+            for just adding a `PositionMarker` without dropping anything.  This
+            is used in `resync_at_linestart`.
             """
             s.position += number_of_characters
             # Now re-sync
@@ -326,6 +348,8 @@ class Excerpt(unicode):
                 Excerpt.PositionMarker(url, s.linenumber,
                                        s.position - s.last_linestart, s.position)
         def escape_next_character():
+            """Mark the next character that is to be added to the processed
+            text as being escaped."""
             escaped_positions.add(len(s.processed_text))
         def copy_character(char=None):
             """Beware: It is only allowed that `char` is one single
@@ -338,6 +362,9 @@ class Excerpt(unicode):
             s.processed_text.append(char)
             s.position += 1
         def resync_at_linestart():
+            """For the sake of performance, it is tried to keep the distance
+            between two `PositionMarkers` small.  In particular, a re-sync is
+            done at each start of a new line.  This is done here."""
             s.linenumber += 1
             s.last_linestart = s.position
             comment_match = comment_line_pattern.match(original_text, s.position)
@@ -478,7 +505,8 @@ class Excerpt(unicode):
         length_first_part = len(self)
         length_first_part_original = len(self.original_text)
         concatenation.original_positions.update\
-            ([(pos + length_first_part, other.original_positions[pos].transpose(length_first_part_original))
+            ([(pos + length_first_part,
+               other.original_positions[pos].transpose(length_first_part_original))
               for pos in other.original_positions if pos > 0])
         first_mark_in_second_excerpt = other.original_positions[0]
         if self.original_position(length_first_part) != first_mark_in_second_excerpt:
@@ -495,7 +523,8 @@ class Excerpt(unicode):
         character = Excerpt(character, mode="NONE")
         character.post_substitutions = self.post_substitutions
         marker = self.original_positions.get(key, self.original_position(key))
-        character.original_text = self.original_text[marker.index:self.original_position(key+1).index]
+        character.original_text = \
+            self.original_text[marker.index:self.original_position(key+1).index]
         marker.index = 0
         character.original_positions = {0: marker}
         if key in self.escaped_positions:
@@ -508,18 +537,19 @@ class Excerpt(unicode):
         i = max(min(i, length), 0)
         j = max(min(j, length), i)
         text = super(Excerpt, self).__getslice__(i, j)
-        slice = Excerpt(text, mode="NONE")
-        slice.post_substitutions = self.post_substitutions
+        slice_ = Excerpt(text, mode="NONE")
+        slice_.post_substitutions = self.post_substitutions
         start_marker = self.original_position(i)
         offset = start_marker.index
-        slice.original_text = self.original_text[start_marker.index:self.original_position(j).index]
-        slice.original_positions = \
+        slice_.original_text = \
+            self.original_text[start_marker.index:self.original_position(j).index]
+        slice_.original_positions = \
             dict([(pos - i, self.original_positions[pos].transpose(-offset))
                   for pos in self.original_positions if i <= pos < j])
-        if 0 not in slice.original_positions:
-            slice.original_positions[0] = start_marker.transpose(-offset)
-        slice.escaped_positions = set([pos - i for pos in self.escaped_positions if i <= pos < j])
-        return slice
+        if 0 not in slice_.original_positions:
+            slice_.original_positions[0] = start_marker.transpose(-offset)
+        slice_.escaped_positions = set([pos - i for pos in self.escaped_positions if i <= pos < j])
+        return slice_
     @classmethod
     def apply_post_input_method(cls, excerpt):
         """This class method transforms an excerpt into a terminally processed text by
@@ -761,9 +791,9 @@ def process_text(text, filepath, input_method):
     :rtype: Excerpt
     """
     def sort_and_filter_substitutions(substitutions):
-        # Next, sort and filter the list of substitutions: Reverse order, and
-        # remove duplicates.  Additionally, complile the regular expressions to
-        # match objects.
+        """Sort and filter the list of substitutions: Reverse order, and remove
+        duplicates.  Additionally, complile the regular expressions to match
+        objects."""
         hitherto_matches = set()
         sorted_substitutions = []
         for i in range(len(substitutions)):
@@ -789,16 +819,16 @@ def process_text(text, filepath, input_method):
     # Now, apply it to the contents
     return Excerpt(text, "PRE", filepath, pre_substitutions, post_substitutions)
 
-def detect_header_data(file):
+def detect_header_data(gummi_file):
     """Detect the local variables of the given text file and the Gummi format
     version according to its first two lines.  This is very similar to the
     method used for Python source files.  There is no default encoding, the
     default input method is "minimal".
 
     :Parameters:
-      - `file`: source file, with the file pointer set to the start
+      - `gummi_file`: source file, with the file pointer set to the start
 
-    :type file: string
+    :type gummi_file: string
 
     :Return:
       - encoding of the file.  If none was found, it returns None.
@@ -808,12 +838,12 @@ def detect_header_data(file):
 
     :rtype: string, string, string
     """
-    first_line = file.readline()
+    first_line = gummi_file.readline()
     local_variables = common.parse_local_variables(first_line)
     if local_variables != None:
         coding = local_variables.get("coding")
         input_method = local_variables.get("input-method", "minimal")
-        second_line = file.readline()
+        second_line = gummi_file.readline()
     else:
         coding, input_method = None, "minimal"
         second_line = first_line
@@ -822,7 +852,7 @@ def detect_header_data(file):
         if gummi_version_match:
             gummi_version = gummi_version_match.group(1)
         else:
-            raise FileError("Gummi version line was invalid", file.name)
+            raise FileError("Gummi version line was invalid", gummi_file.name)
     else:
         warnings.warn("No Gummi version was specified.  I assume 1.0.")
         gummi_version = "1.0"
@@ -865,10 +895,10 @@ def load_file(filename):
             lines = []
             # Test for Latin-1
             for line in open(filename):
-                for c in line:
+                for char in line:
                     # Cheap heuristics: the characters 0x80...0x9f almost never
                     # occur in Latin-1.
-                    if 0x80 <= ord(c) <= 0x9f:
+                    if 0x80 <= ord(char) <= 0x9f:
                         break
                 else:
                     lines.append(line.decode("latin-1"))
@@ -879,10 +909,11 @@ def load_file(filename):
             if not encoding:
                 # Test for cp1252
                 try:
-                    return codecs.open(filename, encoding="cp1252").readlines(), "cp1252", gummi_version
+                    return codecs.open(filename, encoding="cp1252").readlines(), "cp1252", \
+                        gummi_version
                 except UnicodeDecodeError:
-                    raise EncodingError("Couldn't auto-detect file encoding.  Please specify explicitly.",
-                                        filename)
+                    raise EncodingError("Couldn't auto-detect file encoding.  "
+                                        "Please specify explicitly.", filename)
     text = process_text(u"".join(lines), filename, input_method)
     return text, encoding, gummi_version
 

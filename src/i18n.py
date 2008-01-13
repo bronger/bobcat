@@ -209,7 +209,7 @@ def translation(domain, language, strict):
         if t is None:
             t = _translations.setdefault(key, gettext.GNUTranslations(open(mofile, 'rb')))
         # FixMe: The following Pylint directive is necessary because otherwise,
-        # "result" is supposed to ne None, which doesn't have an "add_fallback"
+        # "result" is supposed to be None, which doesn't have an "add_fallback"
         # method.  Maybe Pylint (or rather astng) learns this someday.
         #
         # pylint: disable-msg=E1101
