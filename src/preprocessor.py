@@ -39,7 +39,7 @@ It achieves this by one fat unicode-like data type called `Excerpt`.
 
 import re, os.path, codecs, string, warnings
 import common
-from common import FileError, EncodingError
+from common import FileError, EncodingError, PositionMarker
 
 class Excerpt(unicode):
     """Class for preprocessed Gummi source text. It behaves like a unicode string
@@ -115,57 +115,6 @@ class Excerpt(unicode):
         if not best_match or not best_match.group():
             return len(original_text), 0, None
         return best_match.start(), best_match.end() - best_match.start(), replacement
-    class PositionMarker(object):
-        """A mere container for a position in the original unicode string.
-
-        This would be a struct in C and a record in Pascal.
-
-        :ivar url: URL of the file from which this position comes
-        :ivar linenumber: linenumber (starting with 1) of the line from which
-          this position comes
-        :ivar column: column (starting with 0) within the file where this
-          position is found
-        :ivar index: index within original_text of the Excerpt this
-          PositionMarker belongs to where this position is found
-
-        :type url: str
-        :type linenumber: int
-        :type column: int
-        :type index: int
-        """
-        def __init__(self, url, linenumber, column, index):
-            self.url = url
-            self.linenumber = linenumber
-            self.column = column
-            self.index = index
-        def __repr__(self):
-            return 'Excerpt.PositionMarker("%s", %d, %d, %d)' % \
-                (self.url, self.linenumber, self.column, self.index)
-        def __cmp__(self, other):
-            """The `index` must not be included in the decision whether two PositionMarkers
-            are the same."""
-            return cmp((self.url, self.linenumber, self.column),
-                       (other.url, other.linenumber, other.column))
-        def transpose(self, offset):
-            """Return a new PositionMarker instance in order to get rid of side
-            effect problems, by forcing making a *copy*.  Additionally, index
-            is adjusted by `offset`, which is used in the slicing, indexing and
-            concatenation routines of Excerpt.
-
-            :Parameters:
-              - `offset`: the offset that is added to the index attribute of
-                the generated PositionMarker instance.  May be positive or
-                negative or zero.
-
-            :type offset: int
-
-            :Return:
-              a newly created PositionMarker instance
-
-            :rtype: PositionMarker
-            """
-            return Excerpt.PositionMarker(self.url, self.linenumber, self.column,
-                                          self.index+offset)
     def is_escaped(self, position):
         """Return True, if the character at position is escaped.
 
@@ -345,8 +294,7 @@ class Excerpt(unicode):
             s.position += number_of_characters
             # Now re-sync
             original_positions[len(s.processed_text)] = \
-                Excerpt.PositionMarker(url, s.linenumber,
-                                       s.position - s.last_linestart, s.position)
+                PositionMarker(url, s.linenumber, s.position - s.last_linestart, s.position)
         def escape_next_character():
             """Mark the next character that is to be added to the processed
             text as being escaped."""

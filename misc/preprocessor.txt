@@ -9,7 +9,7 @@
 >>> text.original_text
 u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 1, 24, 24), 1: Excerpt.PositionMarker("test2.rsl", 2, 12, 37), 2: Excerpt.PositionMarker("test2.rsl", 3, 4, 42), 3: Excerpt.PositionMarker("test2.rsl", 4, 0, 43), 4: Excerpt.PositionMarker("test2.rsl", 5, 0, 44), 5: Excerpt.PositionMarker("test2.rsl", 5, 6, 50), 6: Excerpt.PositionMarker("test2.rsl", 6, 0, 51), 9: Excerpt.PositionMarker("test2.rsl", 6, 8, 59), 13: Excerpt.PositionMarker("test2.rsl", 6, 13, 64), 19: Excerpt.PositionMarker("test2.rsl", 6, 20, 71), 20: Excerpt.PositionMarker("test2.rsl", 6, 22, 73), 25: Excerpt.PositionMarker("test2.rsl", 6, 33, 84), 28: Excerpt.PositionMarker("test2.rsl", 7, 0, 87), 29: Excerpt.PositionMarker("test2.rsl", 7, 3, 90), 30: Excerpt.PositionMarker("test2.rsl", 7, 9, 96), 32: Excerpt.PositionMarker("test2.rsl", 7, 13, 100), 33: Excerpt.PositionMarker("test2.rsl", 7, 19, 106), 34: Excerpt.PositionMarker("test2.rsl", 8, 0, 107), 35: Excerpt.PositionMarker("test2.rsl", 8, 6, 113), 39: Excerpt.PositionMarker("test2.rsl", 9, 0, 117), 40: Excerpt.PositionMarker("test2.rsl", 9, 6, 123), 41: Excerpt.PositionMarker("test2.rsl", 10, 0, 124)}
+{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 12, 37), 2: PositionMarker("test2.rsl", 3, 4, 42), 3: PositionMarker("test2.rsl", 4, 0, 43), 4: PositionMarker("test2.rsl", 5, 0, 44), 5: PositionMarker("test2.rsl", 5, 6, 50), 6: PositionMarker("test2.rsl", 6, 0, 51), 9: PositionMarker("test2.rsl", 6, 8, 59), 13: PositionMarker("test2.rsl", 6, 13, 64), 19: PositionMarker("test2.rsl", 6, 20, 71), 20: PositionMarker("test2.rsl", 6, 22, 73), 25: PositionMarker("test2.rsl", 6, 33, 84), 28: PositionMarker("test2.rsl", 7, 0, 87), 29: PositionMarker("test2.rsl", 7, 3, 90), 30: PositionMarker("test2.rsl", 7, 9, 96), 32: PositionMarker("test2.rsl", 7, 13, 100), 33: PositionMarker("test2.rsl", 7, 19, 106), 34: PositionMarker("test2.rsl", 8, 0, 107), 35: PositionMarker("test2.rsl", 8, 6, 113), 39: PositionMarker("test2.rsl", 9, 0, 117), 40: PositionMarker("test2.rsl", 9, 6, 123), 41: PositionMarker("test2.rsl", 10, 0, 124)}
 >>> text.escaped_positions
 set([32, 6, 12, 18, 25, 29])
 >>> text[-100:-10]
@@ -20,7 +20,7 @@ u''
 >>> text.original_text
 u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 1, 24, 24), 1: Excerpt.PositionMarker("test2.rsl", 2, 12, 37), 2: Excerpt.PositionMarker("test2.rsl", 3, 4, 42), 3: Excerpt.PositionMarker("test2.rsl", 4, 0, 43), 4: Excerpt.PositionMarker("test2.rsl", 5, 0, 44), 5: Excerpt.PositionMarker("test2.rsl", 5, 6, 50), 6: Excerpt.PositionMarker("test2.rsl", 6, 0, 51), 32: Excerpt.PositionMarker("test2.rsl", 7, 19, 106), 9: Excerpt.PositionMarker("test2.rsl", 6, 8, 59), 39: Excerpt.PositionMarker("test2.rsl", 9, 6, 123), 13: Excerpt.PositionMarker("test2.rsl", 6, 13, 64), 34: Excerpt.PositionMarker("test2.rsl", 8, 6, 113), 19: Excerpt.PositionMarker("test2.rsl", 6, 20, 71), 20: Excerpt.PositionMarker("test2.rsl", 6, 22, 73), 25: Excerpt.PositionMarker("test2.rsl", 6, 33, 84), 33: Excerpt.PositionMarker("test2.rsl", 8, 0, 107), 38: Excerpt.PositionMarker("test2.rsl", 9, 0, 117), 28: Excerpt.PositionMarker("test2.rsl", 7, 0, 87), 29: Excerpt.PositionMarker("test2.rsl", 7, 3, 90), 30: Excerpt.PositionMarker("test2.rsl", 7, 9, 96), 31: Excerpt.PositionMarker("test2.rsl", 7, 13, 100)}
+{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 12, 37), 2: PositionMarker("test2.rsl", 3, 4, 42), 3: PositionMarker("test2.rsl", 4, 0, 43), 4: PositionMarker("test2.rsl", 5, 0, 44), 5: PositionMarker("test2.rsl", 5, 6, 50), 6: PositionMarker("test2.rsl", 6, 0, 51), 32: PositionMarker("test2.rsl", 7, 19, 106), 9: PositionMarker("test2.rsl", 6, 8, 59), 39: PositionMarker("test2.rsl", 9, 6, 123), 13: PositionMarker("test2.rsl", 6, 13, 64), 34: PositionMarker("test2.rsl", 8, 6, 113), 19: PositionMarker("test2.rsl", 6, 20, 71), 20: PositionMarker("test2.rsl", 6, 22, 73), 25: PositionMarker("test2.rsl", 6, 33, 84), 33: PositionMarker("test2.rsl", 8, 0, 107), 38: PositionMarker("test2.rsl", 9, 0, 117), 28: PositionMarker("test2.rsl", 7, 0, 87), 29: PositionMarker("test2.rsl", 7, 3, 90), 30: PositionMarker("test2.rsl", 7, 9, 96), 31: PositionMarker("test2.rsl", 7, 13, 100)}
 >>> text.escaped_positions
 set([6, 12, 18, 25, 29, 31])
 >>> text = text[4:21]
@@ -29,7 +29,7 @@ u'\u03b2\nkfdsjh[K2005]\\5'
 >>> text.original_text
 u'\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\5'
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 5, 0, 0), 1: Excerpt.PositionMarker("test2.rsl", 5, 6, 6), 2: Excerpt.PositionMarker("test2.rsl", 6, 0, 7), 5: Excerpt.PositionMarker("test2.rsl", 6, 8, 15), 9: Excerpt.PositionMarker("test2.rsl", 6, 13, 20), 15: Excerpt.PositionMarker("test2.rsl", 6, 20, 27), 16: Excerpt.PositionMarker("test2.rsl", 6, 22, 29)}
+{0: PositionMarker("test2.rsl", 5, 0, 0), 1: PositionMarker("test2.rsl", 5, 6, 6), 2: PositionMarker("test2.rsl", 6, 0, 7), 5: PositionMarker("test2.rsl", 6, 8, 15), 9: PositionMarker("test2.rsl", 6, 13, 20), 15: PositionMarker("test2.rsl", 6, 20, 27), 16: PositionMarker("test2.rsl", 6, 22, 29)}
 >>> text.escaped_positions
 set([8, 2, 14])
 >>> text = text[:10] + text[10:]
@@ -38,7 +38,7 @@ u'\u03b2\nkfdsjh[K2005]\\5'
 >>> text.original_text
 u'\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\5'
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 5, 0, 0), 1: Excerpt.PositionMarker("test2.rsl", 5, 6, 6), 2: Excerpt.PositionMarker("test2.rsl", 6, 0, 7), 5: Excerpt.PositionMarker("test2.rsl", 6, 8, 15), 9: Excerpt.PositionMarker("test2.rsl", 6, 13, 20), 15: Excerpt.PositionMarker("test2.rsl", 6, 20, 27), 16: Excerpt.PositionMarker("test2.rsl", 6, 22, 29)}
+{0: PositionMarker("test2.rsl", 5, 0, 0), 1: PositionMarker("test2.rsl", 5, 6, 6), 2: PositionMarker("test2.rsl", 6, 0, 7), 5: PositionMarker("test2.rsl", 6, 8, 15), 9: PositionMarker("test2.rsl", 6, 13, 20), 15: PositionMarker("test2.rsl", 6, 20, 27), 16: PositionMarker("test2.rsl", 6, 22, 29)}
 >>> text.escaped_positions
 set([8, 2, 14])
 >>> text = text[6]
@@ -47,7 +47,7 @@ u'j'
 >>> text.original_text
 u'j'
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 6, 9, 0)}
+{0: PositionMarker("test2.rsl", 6, 9, 0)}
 >>> text.escaped_positions
 set([])
 >>> text = text[10:]
@@ -56,7 +56,7 @@ u''
 >>> text.original_text
 u''
 >>> text.original_positions
-{0: Excerpt.PositionMarker("test2.rsl", 6, 10, 0)}
+{0: PositionMarker("test2.rsl", 6, 10, 0)}
 >>> text.escaped_positions
 set([])
 >>> text[3]

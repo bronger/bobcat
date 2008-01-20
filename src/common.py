@@ -47,6 +47,65 @@ modulepath = os.path.abspath(os.path.dirname(sys.argv[0]))
 if 'epydoc' in sys.modules:
     modulepath = os.path.abspath("src/")
 
+class PositionMarker(object):
+    """A mere container for a position in a original document, which is a
+    unicode string.  Its main purpose is for generating expressive error
+    messages with the exact position in the source document where the error was
+    detected.  It is used primarily in `preprocessor.Excerpt` in order to keep
+    track of the origins of the different party of excerpts, after applying
+    input methods and slicing and such.
+
+    This would be a struct in C and a record in Pascal.
+
+    :ivar url: URL of the file from which this position comes
+    :ivar linenumber: linenumber (starting with 1) of the line from which
+      this position comes
+    :ivar column: column (starting with 0) within the file where this
+      position is found
+    :ivar index: index within original_text of the Excerpt this
+      PositionMarker belongs to where this position is found
+
+    :type url: str
+    :type linenumber: int
+    :type column: int
+    :type index: int
+    """
+    def __init__(self, url, linenumber, column, index):
+        self.url = url
+        self.linenumber = linenumber
+        self.column = column
+        self.index = index
+    def __repr__(self):
+        return 'PositionMarker("%s", %d, %d, %d)' % \
+            (self.url, self.linenumber, self.column, self.index)
+    def __str__(self):
+        return 'file "%s", line %d, column %d' % (self.url, self.linenumber, self.column+1)
+    def __cmp__(self, other):
+        """The `index` must not be included in the decision whether two PositionMarkers
+        are the same."""
+        return cmp((self.url, self.linenumber, self.column),
+                   (other.url, other.linenumber, other.column))
+    def transpose(self, offset):
+        """Return a new PositionMarker instance in order to get rid of side
+        effect problems, by forcing making a *copy*.  Additionally, index
+        is adjusted by `offset`, which is used in the slicing, indexing and
+        concatenation routines of `preprocessor.Excerpt`.
+
+        :Parameters:
+          - `offset`: the offset that is added to the index attribute of
+            the generated PositionMarker instance.  May be positive or
+            negative or zero.
+
+        :type offset: int
+
+        :Return:
+          a newly created PositionMarker instance
+
+        :rtype: PositionMarker
+        """
+        return PositionMarker(self.url, self.linenumber, self.column,
+                                      self.index+offset)
+
 class Error(Exception):
     """Standard error class.
     """
@@ -78,30 +137,44 @@ class LocalVariablesError(Error):
 class FileError(Error):
     """Error class for errors in a Gummi file.
     """
-    def __init__(self, description, filename):
+    def __init__(self, description, position_marker):
         """
         :Parameters:
           - `description`: error message
-          - `filename`: Gummi file name
+          - `position_marker`: the exact position where the error occured
 
         :type description: string
-        :type filename: string
+        :type position_marker: PositionMarker
         """
-        Error.__init__(self, filename  + ": " + description)
+        Error.__init__(self, str(position_marker) + ": " + description)
 
 class EncodingError(FileError):
     """Error class for encoding errors in a Gummi file.
     """
-    def __init__(self, description, filename):
+    def __init__(self, description, position_marker):
         """
         :Parameters:
           - `description`: error message
-          - `filename`: Gummi file name
+          - `position_marker`: the exact position where the error occured
 
         :type description: string
-        :type filename: string
+        :type position_marker: PositionMarker
         """
-        FileError.__init__(self, description, filename)
+        FileError.__init__(self, description, position_marker)
+
+class KeyValueError(FileError):
+    """Error class for errors in key/value lists in a Gummi file.
+    """
+    def __init__(self, description, position_marker):
+        """
+        :Parameters:
+          - `description`: error message
+          - `position_marker`: the exact position where the error occured
+
+        :type description: string
+        :type position_marker: PositionMarker
+        """
+        Error.__init__(self, str(position_marker) + ": " + description)
 
 def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
     r"""Treats first_line as a line with local variables and extracts the
@@ -507,10 +580,9 @@ class Setting(object):
           - `source`: the origin of this setting.  May be ``"direct"``,
             ``"conf file"``, or ``"default"``.  If ``"direct"``, this setting
             was created in the program code directly.  If ``"conf file"``, this
-            setting was read from a configuration file or a key/value list in
-            the Gummi source code.  If ``"default"``, the initial value is the
-            default value of this setting at the same time.  Default is
-            ``"direct"``.
+            setting was read from a configuration file.  If ``"default"``, the
+            initial value is the default value of this setting at the same
+            time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
 
         :type key: unicode
@@ -538,6 +610,11 @@ class Setting(object):
 
         for more examples, see `set_value`.
         """
+        # FixMe: It may be an interesting alternative to move the code for
+        # parsing the special syntaxes in configuration files (i.e. "…" and (…,
+        # …, …)) to the code that actually reads the configuration files.
+        # Then, the source parameter could be abandoned in favour of a simple
+        # "default" parameter that may be True or False.
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
@@ -903,7 +980,24 @@ class SettingsDict(dict):
                               stacklevel=2)
                 assert key not in self
     def parse_keyvalue_list(self, excerpt):
-        pass
+        """
+            >>> import preprocessor
+            >>> excerpt = preprocessor.Excerpt("a=b", "PRE", "myfile.rsl", {}, {})
+            >>> settings = SettingsDict()
+            >>> settings.parse_keyvalue_list(excerpt)
+        
+        """
+        # FixMe: Not at all finished.
+        separator_pattern = re.compile("[=:]")
+        escaped_text = excerpt.escaped_text().rstrip()
+        current_position = 0
+        while current_position < len(escaped_text):
+            next_separator = separator_pattern.search(escaped_text, current_position)
+            if not next_separator:
+                raise KeyValueError("key %s: key delimiter missing" %
+                                    excerpt[current_position:].apply_postprocessing().strip(),
+                                    excerpt.original_position(current_position))
+            current_position += 1
     def load_from_files(self, filenames, forbidden_sections=frozenset()):
         """Reads Windows-like INI files.  Inspired by
         <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65334>.  The
