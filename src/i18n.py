@@ -114,6 +114,11 @@ other modules will use this with::
 :type ugettext: instancemethod
 """
 
+# FixMe: Possibly it is better to do the fall-back to English (rather than the
+# languages in-between) on a per-word basis rather than the per-language basis
+# in "strict" mode.  I don't yet know, however, whether this is feasible with
+# the gettext architecture.
+
 import common, gettext, locale, copy, os.path, sys
 
 locale.setlocale(locale.LC_ALL, '')
