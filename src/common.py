@@ -980,13 +980,6 @@ class SettingsDict(dict):
                               stacklevel=2)
                 assert key not in self
     def parse_keyvalue_list(self, excerpt):
-        """
-            >>> import preprocessor
-            >>> excerpt = preprocessor.Excerpt("a=b", "PRE", "myfile.rsl", {}, {})
-            >>> settings = SettingsDict()
-            >>> settings.parse_keyvalue_list(excerpt)
-        
-        """
         # FixMe: Not at all finished.
         separator_pattern = re.compile("[=:]")
         escaped_text = excerpt.escaped_text().rstrip()
