@@ -181,6 +181,11 @@ class Node(object):
         representation of the current node.  Construct the current node and in
         particular its children according to that representation.
 
+        This is some sort of second ``__init__`` method.  In particular, its
+        signature differs from class to class.  However, doing it here rather
+        than in the official constructor gives more flexibility to the result
+        values.  Additionally, it makes the source more legible.
+
         :Parameters:
           - `text`: source document
           - `position`: starting position of the parsing
@@ -389,7 +394,7 @@ class Text(Node):
         `preprocessor.Excerpt.apply_postprocessing`."""
         self.root().emit(self.text.apply_postprocessing())
 
-inline_delimiter = re.compile(r"[_]")
+inline_delimiter = re.compile(ur"[_`]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
 def parse_inline(parent, text, position, end):
     """Parse the source for inline elements like emphasize or footnode and add
     those elements to the current parental node.
@@ -417,11 +422,16 @@ def parse_inline(parent, text, position, end):
         if delimiter_match:
             textnode = Text(parent)
             position = textnode.parse(text, position, delimiter_match.start())
-            position = delimiter_match.end()
             delimiter = delimiter_match.group()
             if delimiter == "_":
-                emphasize = Emphasize(parent)
-                position = emphasize.parse(text, position, end)
+                if isinstance(parent, Emphasize):
+                    return position
+                else:
+                    emphasize = Emphasize(parent)
+                    position = emphasize.parse(text, position+1, end)
+            elif delimiter.startswith("<"):
+                hyperlink = Hyperlink(parent)
+                position = hyperlink.parse(text, position, delimiter_match.end())
         else:
             textnode = Text(parent)
             position = textnode.parse(text, position, end)
@@ -545,7 +555,7 @@ class Section(Node):
           - `text`: the source code
           - `position`: the starting position of the heading in the source
 
-        :type text: `preprocessor.Excerpt`
+         :type text: `preprocessor.Excerpt`
         :type position: int
 
         :Return:
@@ -568,9 +578,25 @@ class Emphasize(Node):
     def __init__(self, parent):
         super(Emphasize, self).__init__(parent)
     def parse(self, text, position, end):
-        end_of_emphasize = guarded_find("_", text, position, end)
-        position = parse_inline(self, text, position, end_of_emphasize)
-        return end_of_emphasize + 1
+        position = parse_inline(self, text, position, end)
+        assert text[position] == "_"
+        return position + 1
+
+class Hyperlink(Node):
+    """Class for hyperlinks aka weblinks.
+
+    :ivar url: the URL of this hyperlink
+
+    :type url: unicode
+    """
+    def __init__(self, parent):
+        super(Hyperlink, self).__init__(parent)
+    def parse(self, text, position, end):
+        if text[position] == "<" and text[end-1] == ">":
+            self.url = unicode(text)[position+1:end-1]
+        else:
+            raise NotImplementedError("Only URL-only hyperlinks are implemented so far")
+        return end
 
 import copy, inspect
 _globals = copy.copy(globals())
