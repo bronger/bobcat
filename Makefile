@@ -1,6 +1,6 @@
-.PHONY: homepage websources doctests pylint
+.PHONY: web-sf websources doctests pylint
 
-homepage:
+web-sf:
 	rsync --rsh=ssh -avuz homepage/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/gummi/
 
 websources:
