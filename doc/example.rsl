@@ -25,7 +25,9 @@ sign line _above_ the heading.
 Cross references are put in backquotes.  I refer to the next chapter like this:
 See chapter `Inline markup`, or see chapter `Inline-…` if this is unambiguous,
 or see → chapter `Inline-Markup` so that the word “chapter” becomes part of the
-hyperlink, too.
+hyperlink, too.  Internally, only the first 80 characters of whatever are
+stored as a label.  This may lead to ambiguities but only in quite pathological
+cases.
 
 The heading number can be chosen freely.  The Gummi compiler or editor can
 adjust them to the print output if the author desires this.  This “writeback”
