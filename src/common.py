@@ -120,7 +120,7 @@ class Error(Exception):
             # FixMe: The following must be made OS-dependent
             description = description.encode("utf-8")
         self.description = description
-        Exception.__init__(self, description)
+        super(Error, self).__init__(description)
 
 class LocalVariablesError(Error):
     """Error class for malformed lines with the local variables.
@@ -132,7 +132,7 @@ class LocalVariablesError(Error):
 
         :type description: string
         """
-        Error.__init__(self, description)
+        super(LocalVariablesError, self).__init__(description)
 
 class FileError(Error):
     """Error class for errors in a Gummi file.
@@ -146,7 +146,7 @@ class FileError(Error):
         :type description: string
         :type position_marker: PositionMarker
         """
-        Error.__init__(self, str(position_marker) + ": " + description)
+        super(FileError, self).__init__(str(position_marker) + ": " + description)
 
 class EncodingError(FileError):
     """Error class for encoding errors in a Gummi file.
@@ -160,7 +160,7 @@ class EncodingError(FileError):
         :type description: string
         :type position_marker: PositionMarker
         """
-        FileError.__init__(self, description, position_marker)
+        super(EncodingError, self).__init__(description, position_marker)
 
 class KeyValueError(FileError):
     """Error class for errors in key/value lists in a Gummi file.
@@ -174,7 +174,7 @@ class KeyValueError(FileError):
         :type description: string
         :type position_marker: PositionMarker
         """
-        Error.__init__(self, str(position_marker) + ": " + description)
+        super(KeyValueError, self).__init__(str(position_marker) + ": " + description)
 
 def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
     r"""Treats first_line as a line with local variables and extracts the
@@ -279,7 +279,7 @@ class SettingError(Error):
         :type key: string
         :type value: str, unicode, float, int, or bool
         """
-        Error.__init__(self, "setting '%s = %s': %s" % (key, value, description))
+        super(SettingError, self).__init__("setting '%s = %s': %s" % (key, value, description))
 
 class Setting(object):
     """One single Setting, this means, a key--value pair.  It is used in
