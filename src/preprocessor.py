@@ -221,6 +221,8 @@ class Excerpt(unicode):
     def split(self, split_characters=None):
         """Splits the Excerpt like Python's split() string method does.  If no
         argument is given, it splits at whitespace (just as the string method).
+        Important note: Escaped characters are not regarded as split
+        characters.
 
         :Parameters:
           - `split_characters`: a string containing all characters that divide
