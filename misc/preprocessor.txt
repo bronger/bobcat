@@ -63,3 +63,20 @@ set([])
 Traceback (most recent call last):
   ...
 IndexError: string index out of range
+>>> #
+>>> #  Now, test the split() method
+>>> #
+>>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\na, b, c,")
+>>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> text = text[2:]
+>>> parts = text.split(",")
+>>> parts
+[u'a', u' b', u' c', u'']
+>>> parts[0].original_position()
+PositionMarker("test2.rsl", 3, 0, 0)
+>>> parts = text.split()
+>>> parts
+[u'a,', u'b,', u'c,']
+>>> parts[1].original_position()
+PositionMarker("test2.rsl", 3, 3, 0)
+>>> os.remove("test2.rsl")

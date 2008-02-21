@@ -184,7 +184,7 @@ class Excerpt(unicode):
                 text[pos] = u"\u0000"
             self.__escaped_text = u"".join(text)
         return self.__escaped_text
-    def original_position(self, position):
+    def original_position(self, position=0):
         """Maps a position within the excerpt to the position in the original
         file.
 
@@ -218,6 +218,34 @@ class Excerpt(unicode):
         closest_marker = self.original_positions[closest_position].transpose(offset)
         closest_marker.column += offset
         return closest_marker
+    def split(self, split_characters=None):
+        """Splits the Excerpt like Python's split() string method does.  If no
+        argument is given, it splits at whitespace (just as the string method).
+
+        :Parameters:
+          - `split_characters`: a string containing all characters that divide
+            the parts that should be created
+
+        :type split_characters: unicode
+
+        :Return:
+          a list with all parts in which the Excerpt was split up
+
+        :rtype: list of `Excerpt`
+        """
+        parts = []
+        characters = split_characters if split_characters is not None else u" \t\v\n\r"
+        for match in re.finditer(u"[^" + re.escape(characters) + "]*",
+                                 self.escaped_text(), re.UNICODE):
+            start, end = match.span()
+            if start == end:
+                # Match was empty; then it is ignored, unless at the beginning
+                # and the end.
+                if split_characters is None or \
+                        (start != 0 and start != len(self.escaped_text())):
+                    continue
+            parts.append(self[start:end])
+        return parts
     class Status(object):
         """A mere container for some immutable data structures used in the pre-
         and postprocessing.
