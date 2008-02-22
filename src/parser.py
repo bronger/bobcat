@@ -58,92 +58,244 @@ import common
 # codec is registered.
 import safefilename
 
-class Label(unicode):
-    """
-        >>> label1 = Label(" Hello  there")
-        >>> label1
-        u'Hello there'
-        >>> label2 = Label("Hello", fuzzy=True)
-        >>> label3 = Label("Hello")
-        >>> label1 == label2
-        True
-        >>> label2 == label3
-        True
-        >>> label1 == label3
-        False
-    """
-    def __new__(cls, label, fuzzy=False):
-        self = unicode.__new__(cls, u" ".join(label.split())[:80])
-        self.__fuzzy = fuzzy
-        return self
+class Label(object):
+    def __init__(self, labels, is_section=True, is_include=False):
+        assert isinstance(labels, (list, tuple))
+        normalized_labels = set()
+        for label in labels:
+            normalized_labels.add(u" ".join(label.split())[:80])
+        self.__labels = frozenset(normalized_labels)
+        self.__is_include = is_include
+        self.__is_section = is_section
     def __eq__(self, other):
-        if not self.__fuzzy and other.__fuzzy:
-            return self.startswith(other)
-        elif self.__fuzzy and not other.__fuzzy:
-            return other.startswith(self)
-        elif self.__fuzzy and other.__fuzzy:
-            raise TypeError, "cannot compare labels if both are fuzzy"
-        elif not self.__fuzzy and not other.__fuzzy:
-            return super(Label, self).__eq__(other)
+        return self.__labels == other.__labels
     def __ne__(self, other):
         return not self.__eq__(other)
     def __hash__(self):
-        if self.__fuzzy:
-            # Note that labels can never end in " " themselves
-            return hash(unicode(self) + " ")
-        else:
-            return super(Label, self).__hash__()
+        return hash(self.__labels)
+    is_section = property(lambda self: self.__is_section)
+    is_include = property(lambda self: self.__is_include)
+
+class LabelLookupError(common.Error):
+    """Error for missing or ambiguous labels.
+
+    :ivar label: the label which caused the error
+
+    :type label: `preprocessor.Excerpt`
+    """
+    def __init__(self, description, label):
+        super(LabelLookupError, self).__init__(description)
+        self.label = label
+
+class LabelNotFoundError(LabelLookupError):
+    """This is raised if no fitting label was found at all during a
+    cross-reference lookup.
+    """
+    def __init__(self, description, label):
+        super(LabelNotFoundError, self).__init__(description, label)
+
+class LabelPathAmbiguousError(LabelLookupError):
+    """This is raised if there are two paths that could have been meant with a
+    label lookup.  The difference to the `LabelAmbiguousError` is that here,
+    the ambiguity can be solved by changing (mostly expanding) the path used in
+    the cross reference.  In case of a `LabelAmbiguousError` however, you have
+    to change labels in order to make them resolvable.
+
+    :ivar possible_paths: all paths that could have been meant by the lookup.
+
+    :type possible_paths: set of tuple of `Label`
+    """
+    def __init__(self, description, label, possible_paths):
+        super(LabelPathAmbiguousError, self).__init__(description, label)
+        self.possible_paths = possible_paths
+
+class LabelAmbiguousError(LabelLookupError):
+    """This is raised if two elements could be meant with a cross-reference
+    lookup because they share exactly the same absolute label path.  The only
+    remedy is to change one of their labels.
+
+    :ivar elements: the elements that could be meant
+
+    :type elements: set of `Node`
+    """
+    def __init__(self, description, label, elements):
+        super(LabelAmbiguousError, self).__init__(description, label)
+        self.elements = elements
 
 class CrossReferencesDict(object):
+    """Dictionary mapping labels to AST elements.  It is supposed to be used
+    for labels from the Big Namespace (sections, captions, environments, and
+    formulae).  Normally, the keys are of type `Label`, but they may be tuples
+    of such, containing also the labels of the parent sections: ``("Section",
+    "Subsection")``.
+
+    The values are normally elements of the AST.  If case of ambiguities, they
+    are lists of those.  Eventually, this will lead to errors if such a label
+    is really used in the document but for a proper error message all elements
+    with that label must be known, so they are collected here.
+
+    :ivar elements_by_labelpath: maps absolute label paths to document
+      elements.  If the mapping is not unique, it maps to a set of elements.
+
+    :type elements_by_labelpath: dict mapping tuple to `Node`
     """
+    elements_by_labelpath = {}
+    def register(self, label_path, value):
+        """Register one referencable AST element with the dictionary.
 
-    :ivar elements_by_label: Dictionary mapping labels to AST elements.  The
-      keys normally are unicode strings.  They are the lables,
-      whitespace-normalised and truncated to 80 characters if necessary.  In
-      case of sections or environements, the keys may be tuples of unicodes,
-      containing also the labels of the parent sections: ``("Section",
-      "Subsection")``.
+        Note that the label_path is a tuple.  The reason for this is the
+        following: In order to avoid ambiguities, the user may give a reference
+        with an arrow: "``Measurements → Results``".  This points to the
+        section "Results" in the parent section/chapter "Measurements".  This
+        is represented as the tuple ``("Measurements", "Results")`` (of course
+        with `Label`'s rather than ``string``'s).
 
-      The values are normally elements of the AST.  If case of ambiguities,
-      they are lists of those.  Eventually, this will lead to errors if such a
-      label is really used in the document but for a proper error message all
-      elements with that label must be known, so they are collected here.
+        Instead of strings, it can also contain frozensets of strings in case
+        there are multiple labels (implicit/explicit) for one element.
 
-    :type elements_by_label: dict mapping tuples of unicodes or unicodes to
-      Nodes
-    """
-    elements_by_label = {}
-    def register_single_key(self, key, value):
-        """
         :Parameters:
-          - `key`: The label(s) that should be added to the dict.  Its items
-            must be normalised, i.e. with normalised whitespace and no longer
-            than 80 characters.
-          - `value`: the node to which the label belong
+          - `label_path`: The *absolute* label path that should be added to the
+            dict.
+          - `value`: the node to which the label belongs
 
-        :type key: tuple of strings
+        :type label_path: tuple
         :type value: Node
-        """
-        assert isinstance(key, tuple)
-        for string in key:
-            assert key == u" ".join(key.split())[:80], "label '%s' is not normalized" % key
-        if key in self:
-            if isinstance(self[key], list):
-                self.elements_by_label[key].append(value)
-            else:
-                self.elements_by_label[key] = [self[key], value]
-        else:
-            self.elements_by_label[key] = value
-    def register(self, key, value):
-        assert isinstance(value, Node)
-        if isinstance(key, (list, tuple)):
-            for i in range(len(key)):
-                self.register_single_key(tuple(key[i:]), value)
-        else:
-            self.register_single_key((key,), value)
-    def lookup(self, key, fuzzy=False):
-        pass
         
+        """
+        assert isinstance(label_path, tuple)
+        assert isinstance(value, Node)
+        if label_path in elements_by_labelpath:
+            if isinstance(elements_by_labelpath[label_path], set):
+                elements_by_labelpath[label_path].add(value)
+            else:
+                # I create a set because one element can have two labels which
+                # would be totally okay and unambiguous.  Labels to elements
+                # needn't be injective.  Instead, there may be an explicit and
+                # and implicit label.
+                elements_by_labelpath[label_path] = set([elements_by_labelpath[label_path], value])
+        else:
+            elements_by_labelpath[label_path] = value
+        for label in label_path[-1]:
+            if label in paths_by_last_label:
+                paths_by_last_label[label].add(label_path)
+            else:
+                paths_by_last_label[label] = set([label_path])
+    @staticmethod
+    def construct_path_tuple(label_path):
+        assert isinstance(label_path, preprocessor.Excerpt)
+        path = []
+        for part in label_path.split(u"→"):
+            characters = list(unicode(part))
+            # FixMe: The current implementation treats all occurances of \u0000
+            # as ellipses, too.
+            for position in (i.start() for i in re.finditer(u"…", part.escaped_text())):
+                characters[position] = u"\u0000"
+            part = u"".join(characters)
+            # Note that the following pruning may remove a trailing "…".  But
+            # this is intended behaviour.
+            part = u" ".join(part.split())[:80]
+            i = 0
+            part_with_wildcards = u""
+            while i < len(part):
+                j = part.find(u"\u0000", i)
+                if j == -1:
+                    part_with_wildcards += part[i:]
+                    break
+                else:
+                    part_with_wildcards += part[i:j] + u".+"
+                    i = j
+            path.append[re.compile(part_with_wildcards + u"$", re.UNICODE)]
+        return tuple(path)
+    @staticmethod
+    def matches_one_label(regular_expression, labels):
+        for label in labels:
+            if regular_expression.match(label):
+                return True
+        return False
+    @staticmethod
+    def path_in_current_document(path):
+        for label in path:
+            if label.is_include:
+                return False
+        return True
+    def extract_element(self, found_path, original_label_path):
+        element = self.elements_by_labelpath[found_path]
+        if isinstance(element, set):
+            raise LabelAmbiguousError(u"very same label was given multiple times",
+                                      label_path, element)
+        return element
+    def lookup(self, label_path, current_label_path):
+        """In order to match against this, the cross references dictionary
+        stores all possible tuples (including the label itself as a one-item
+        tuple).
+        
+        :Parameters:
+          - `label_path`: The relative or absolute or sparse label path that
+            should be looked up.
+          - `current_label_path`: the absolute path of the element which
+            requests the lookup.
+
+        :type label_path: `preprocessor.Excerpt`
+        :type current_label_path: tuple of frozenset of unicode
+        
+        :Return:
+          The AST element the label is pointing two.
+
+        :rtype: `Node`
+
+        :Exceptions:
+          - `LabelNotFoundError`: raised if the label was not found at all.
+          - `LabelPathAmbiguousError`: raised if there are two label paths that
+            could be meant by the given `key`.
+          - `LabelAmbiguousError`: raised if two elements share exactly the
+            same label (namely the one requested) so that it cannot be
+            resolved.
+        """
+        path_candidates = set()
+        reversed_path_tuple = reversed(self.construct_path_tuple(label_path))
+        for path in self.elements_by_labelpath:
+            i = len(path) - 1
+            for regular_expression in reversed_path_tuple:
+                if i < 0:
+                    break
+                if self.matches_one_label(regular_expression, path[i]):
+                    i -= 1
+                    continue
+                else:
+                    i -= 1
+            else:
+                path_candidates.add(path)
+        if not path_candidates:
+            raise LabelNotFoundError(u"label was not found", label_path)
+        elif len(path_candidates) == 1:
+            return self.extract_element(path_candidates[0], label_path)
+        else:
+            # Okay, there was more than one path that fitted.  We try to reduce
+            # the set by giving higher priority to paths in the same section
+            # and the same document.
+            #
+            # First, prune the current label path to the deepest section
+            while current_label_path and not current_label_path[-1].is_section:
+                current_label_path = current_label_path[:-1]
+            paths_in_current_section = [path for path in path_candidates
+                                        if path[:-1] == current_label_path]
+            if len(paths_in_current_section) == 1:
+                return self.extract_element(paths_in_current_section[0], label_path)
+            elif len(paths_in_current_section) > 1:
+                raise LabelPathAmbiguousError(u"more than one label path in the local "
+                                              u"section is possible",
+                                              label_path, paths_in_current_section)
+            else:
+                # Since no path candidate was found in the current section, we
+                # make a second try to narrow the list of possible candidates
+                # by taking out all that are in child documents.
+                paths_in_current_document = [path for path in path_candidates
+                                             if self.path_in_current_document(path)]
+                if len(paths_in_current_document) == 1:
+                    return self.extract_element(paths_in_current_document[0], label_path)
+                else:
+                    raise LabelPathAmbiguousError(u"more than one label path is possible",
+                                                  label_path, path_candidates)
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.
@@ -642,7 +794,7 @@ class Section(Node):
           - `text`: the source code
           - `position`: the starting position of the heading in the source
 
-         :type text: `preprocessor.Excerpt`
+        :type text: `preprocessor.Excerpt`
         :type position: int
 
         :Return:
