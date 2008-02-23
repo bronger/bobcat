@@ -253,9 +253,10 @@ class CrossReferencesDict(object):
             for position in (i.start() for i in re.finditer(u"…", part.escaped_text())):
                 characters[position] = u"\u0000"
             part = u"".join(characters)
-            # Note that the following pruning may remove a trailing "…".  But
-            # this is intended behaviour.
-            part = u" ".join(part.split())[:80]
+            # Note that sparse paths are not truncated after 80 characters
+            # because they won't clutter up memory because they are always
+            # explicitly given.
+            part = u" ".join(part.split())
             i = 0
             part_with_wildcards = u""
             while i < len(part):
