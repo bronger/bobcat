@@ -59,7 +59,27 @@ import common
 import safefilename
 
 class Label(object):
+    """Labels that are given to elements of a document.  A sequence of labels
+    form a path to an element.  Note that (incomplete) paths given by the user
+    to point to another part of the document don't consist of Labels but of
+    strings (or rather, regular expressions).
+    """
     def __init__(self, labels, is_section=True, is_include=False):
+        """
+        :Parameters:
+          - `labels`: sequence of label names, all associated with the same
+            element.  Mostly, its length is one or two, depending on whether an
+            explicit label was given, too.  (The other one which is given
+            always is the implicit label.)
+          - `is_section`: denotes whether this label belongs to a sectioning
+            element
+          - `is_include`: denotes whether this label belongs to a document
+            element which was inserted into the main document.
+
+        :type labels: list or tuple of unicode
+        :type is_section: bool
+        :type is_include: bool
+        """
         assert isinstance(labels, (list, tuple))
         normalized_labels = set()
         for label in labels:
@@ -67,14 +87,44 @@ class Label(object):
         self.__labels = frozenset(normalized_labels)
         self.__is_include = is_include
         self.__is_section = is_section
+    def __contains__(self, item):
+        """
+        :Parameters:
+          - `item`: the regular expression that represents the requested
+            label.
+
+        :type item: re.pattern
+
+        :Return:
+          whether `item` matches one of the alternative names of this label
+
+        :rtype: bool
+        """
+        for label in self.__labels:
+            if item.match(label):
+                return True
+        return False
     def __eq__(self, other):
         return self.__labels == other.__labels
     def __ne__(self, other):
         return not self.__eq__(other)
     def __hash__(self):
+        """Note that labels that only differ in `is_section` or `is_include`
+        are not considered different because the author cannot distinguish
+        between them, so it must be regarded as a label clash."""
         return hash(self.__labels)
-    is_section = property(lambda self: self.__is_section)
-    is_include = property(lambda self: self.__is_include)
+    is_section = property(lambda self: self.__is_section,
+                          doc="""whether this label belongs to a sectioning
+    element.
+
+    :type: bool
+    """)
+    is_include = property(lambda self: self.__is_include,
+                          doc="""whether this label belongs to a document
+    element which was inserted into the main document.
+
+    :type: bool
+    """)
 
 class LabelLookupError(common.Error):
     """Error for missing or ambiguous labels.
@@ -130,8 +180,8 @@ class CrossReferencesDict(object):
     "Subsection")``.
 
     The values are normally elements of the AST.  If case of ambiguities, they
-    are lists of those.  Eventually, this will lead to errors if such a label
-    is really used in the document but for a proper error message all elements
+    are sets of those.  Eventually, this will lead to errors if such a label is
+    really used in the document but for a proper error message all elements
     with that label must be known, so they are collected here.
 
     :ivar elements_by_labelpath: maps absolute label paths to document
@@ -150,15 +200,12 @@ class CrossReferencesDict(object):
         is represented as the tuple ``("Measurements", "Results")`` (of course
         with `Label`'s rather than ``string``'s).
 
-        Instead of strings, it can also contain frozensets of strings in case
-        there are multiple labels (implicit/explicit) for one element.
-
         :Parameters:
           - `label_path`: The *absolute* label path that should be added to the
             dict.
           - `value`: the node to which the label belongs
 
-        :type label_path: tuple
+        :type label_path: tuple of `Label`
         :type value: Node
         
         """
@@ -182,6 +229,21 @@ class CrossReferencesDict(object):
                 paths_by_last_label[label] = set([label_path])
     @staticmethod
     def construct_path_tuple(label_path):
+        """Parse a label path taken directly from the document and create a
+        tuple of regular expressions from it.
+
+        :Parameters:
+          - `label_path`: the sparse label path given by the author in the
+            document, possibly using the arrow and ellipsis notation.
+
+        :type label_path: `preprocessor.Excerpt`
+
+        :Return:
+          a tuple containing the regular expression that can be used to match
+          against the known absolute paths
+
+        :rtype: tuple of re.pattern
+        """
         assert isinstance(label_path, preprocessor.Excerpt)
         path = []
         for part in label_path.split(u"→"):
@@ -207,27 +269,52 @@ class CrossReferencesDict(object):
             path.append[re.compile(part_with_wildcards + u"$", re.UNICODE)]
         return tuple(path)
     @staticmethod
-    def matches_one_label(regular_expression, labels):
-        for label in labels:
-            if regular_expression.match(label):
-                return True
-        return False
-    @staticmethod
     def path_in_current_document(path):
+        """Test whether the given path lies completely in the main document or
+        not.
+
+        :Parameters:
+          - `path`: an absolte label path
+
+        :type path: tuple of `Label`
+
+        :Return:
+          ``True`` if `path` points to an element in the main document, or
+          ``False`` if it points to an element of a child document
+
+        :rtype: bool
+        """
         for label in path:
             if label.is_include:
                 return False
         return True
     def extract_element(self, found_path, original_label_path):
+        """Returns the finally found element.  The reason why this is
+        encapsulated into a function is that the possible error situation of
+        two label paths pointing to the same element must be handled.
+
+        :Parameters:
+          - `found_path`: absolute label path that was found during the lookup
+            process
+          - `original_label_path`: The document source code snippet with the
+            path the author gave.  This is only used for generating an error
+            message if necessary.
+
+        :type found_path: tuple of `Label`
+        :type original_label_path: preprocessor.Excerpt
+
+        :Return:
+          the element to which `found_path` points
+
+        :rtype: Node
+        """
         element = self.elements_by_labelpath[found_path]
         if isinstance(element, set):
             raise LabelAmbiguousError(u"very same label was given multiple times",
-                                      label_path, element)
+                                      original_label_path, element)
         return element
     def lookup(self, label_path, current_label_path):
-        """In order to match against this, the cross references dictionary
-        stores all possible tuples (including the label itself as a one-item
-        tuple).
+        """Returns the element that the given label path points to.
         
         :Parameters:
           - `label_path`: The relative or absolute or sparse label path that
@@ -236,17 +323,17 @@ class CrossReferencesDict(object):
             requests the lookup.
 
         :type label_path: `preprocessor.Excerpt`
-        :type current_label_path: tuple of frozenset of unicode
+        :type current_label_path: tuple of `Label`
         
         :Return:
-          The AST element the label is pointing two.
+          The AST element the label is pointing to.
 
         :rtype: `Node`
 
         :Exceptions:
           - `LabelNotFoundError`: raised if the label was not found at all.
           - `LabelPathAmbiguousError`: raised if there are two label paths that
-            could be meant by the given `key`.
+            could be meant by the given key.
           - `LabelAmbiguousError`: raised if two elements share exactly the
             same label (namely the one requested) so that it cannot be
             resolved.
@@ -258,7 +345,7 @@ class CrossReferencesDict(object):
             for regular_expression in reversed_path_tuple:
                 if i < 0:
                     break
-                if self.matches_one_label(regular_expression, path[i]):
+                if regular_expression in path[i]:
                     i -= 1
                     continue
                 else:
