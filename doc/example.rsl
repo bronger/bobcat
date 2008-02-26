@@ -55,7 +55,8 @@ brackets, the protocol prefix may be omitted.
 
 The same footnote mark may occur multiple times.  They will be processed in
 order of appearance.  This means that you could mark all your footnotes with \*
-(not very wise, tough).
+(not very wise, tough).  Footnote and reference to footnote must be in the same
+section.  The reference must come first.
 
 With hyperlinks, you have two possibilities: `IBM's homepage` and the separated
 definition as above, or → Homepage of IBM <www.ibm.com>.  Instead of angle
