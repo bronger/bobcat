@@ -37,6 +37,42 @@ Note that nothing is parsed here.  This module just resolves the references and
 makes the connection between referencing document element and referred element.
 """
 
+import common
+
+class ReferencingNode(object):
+    """An abstract base class for AST elements that want to refer to other AST
+    elements.  This is intended to be for cross references, citations, and text
+    blocks.  Note that ``ReferencingNode`` is not derived from `parser.Node`.
+    So such element classes must have *two* parents, `parser.Node` and
+    ``ReferencingNode`` (in this order).
+
+    Actually, the only purpose of this class is to make clear that elements
+    that want to use CrossReferencesDict must have a method called
+    `resolve_cross_references`.
+    """
+    def resolve_cross_references(self, cross_references_manager):
+        """This method is called by `CrossReferencingDict.close()` if the
+        element has registered itself for callback.  Usually, it will call
+        `cross_references_manager.lookup` here for finding the element(s) it is
+        refering to.
+
+        In this method, all errors must be handled, too, for example if a label
+        path could not be found.
+
+        :Parameters:
+          - `cross_references_manager`: the cross references manager that is
+            responsible for the element's cross referencing, i.e. for ordinary
+            cross references, citations, or text blocks.
+
+        :type cross_references_manager: `CrossReferencesDict`
+        """
+        raise NotImplementedError
+
+class XRef(object):
+    def __init__(self, label_path, referencing_element):
+        self.label_path, self.referencing_element = label_path, referencing_element
+        self.referenced_element = None
+
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
     form a path to an element.  Note that (incomplete) paths given by the user
@@ -151,7 +187,11 @@ class LabelAmbiguousError(LabelLookupError):
         super(LabelAmbiguousError, self).__init__(description, label)
         self.elements = elements
 
-class CrossReferencesDict(object):
+class ReferencesManager(object):
+    def close(self):
+        raise NotImplementedError
+
+class CrossReferencesDict(ReferencesManager):
     """Dictionary mapping labels to AST elements.  It is supposed to be used
     for labels from the Big Namespace (sections, captions, environments, and
     formulae).  Normally, the keys are of type `Label`, but they may be tuples
@@ -165,10 +205,14 @@ class CrossReferencesDict(object):
 
     :ivar elements_by_labelpath: maps absolute label paths to document
       elements.  If the mapping is not unique, it maps to a set of elements.
+    :ivar requesters: all document elements that want to be called back when
+      this CrossReferencesDict is finished.
 
     :type elements_by_labelpath: dict mapping tuple to `Node`
+    :type requesters: set of `ReferencingNode`
     """
     elements_by_labelpath = {}
+    requesters = set()
     def register(self, label_path, value):
         """Register one referencable AST element with the dictionary.
 
@@ -363,4 +407,19 @@ class CrossReferencesDict(object):
                 else:
                     raise LabelPathAmbiguousError(u"more than one label path is possible",
                                                   label_path, path_candidates)
+    def register_requester(self, element):
+        """Register an AST element for getting a callback when the cross
+        references are completely collected so that lookups can be performed.
+        See `ReferencingNode` for more information.
 
+        :Parameters:
+          - `element`: the element that wants to be called back.
+
+        :type element: ReferencingNode
+        """
+        self.requesters.add(element)
+    def close(self):
+        for requester in self.requesters:
+            requester.resolve_cross_references(self)
+        self.elements_by_labelpath.clear()
+        self.requesters.clear()
