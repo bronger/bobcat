@@ -111,16 +111,30 @@ title:      LaTeX –
 publisher:  WhatEver, Heidelberg
 year:       2006
 
-.. It is separated with empty lines at the top and the bottom.  The names
-.. “author”, “title” etc can be English or the current document language.
-.. “label” is optional.
+.. It is separated with empty lines at the top and the bottom.  The fist line
+.. is the label in brackets, and only this.  If a paragraph consists only of
+.. citation labels in backets, this is equivalent to LaTeX's ```\nocite```.
+.. The names “author”, “title” etc can be English or the current document
+.. language.  “label” is optional.
 
-.. There are short forms with (unescaped) semicolons as separators (short and
-.. long form can be combined):
+.. Instead of the label in brackets, you can also use the “reference::”
+.. directive for starting a reference.  Whether on a line of its own or not is
+.. unimportant; however, each key/value pair must be on a line of its own.  One
+.. can use this feature to write the most important item (e. g. the titel or
+.. the authors) in the first line.
 
-[Müller]  article:
-Die Expansion subterraner Knollengewächse; Peter Müller; Journal of
-Agriculture; 2006
+.. As a second possibility, there is the short form which cannot be combined
+.. with the long form.  It uses “//” instead of line breaks.  If Gummi detects
+.. only one unescaped “//”, it assumes the short form:
+
+[Meier 2004]
+reference:: title: Die Expansion subterraner Knollengewächse // author: Peter
+Müller // journal: Journal of Agriculture // year: 2006 // publisher: WhatEver,
+Heidelberg
+
+.. Within the pre-defined environment ```references::```, you can use both
+.. constructs, however, the label in backets as well as the ```reference::```
+.. directive can be dropped both if desired.
 
 
 2. Lists
