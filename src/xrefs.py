@@ -39,40 +39,6 @@ makes the connection between referencing document element and referred element.
 
 import common
 
-class ReferencingNode(object):
-    """An abstract base class for AST elements that want to refer to other AST
-    elements.  This is intended to be for cross references, citations, and text
-    blocks.  Note that ``ReferencingNode`` is not derived from `parser.Node`.
-    So such element classes must have *two* parents, `parser.Node` and
-    ``ReferencingNode`` (in this order).
-
-    Actually, the only purpose of this class is to make clear that elements
-    that want to use CrossReferencesDict must have a method called
-    `resolve_cross_references`.
-    """
-    def resolve_cross_references(self, cross_references_manager):
-        """This method is called by `CrossReferencingDict.close()` if the
-        element has registered itself for callback.  Usually, it will call
-        `cross_references_manager.lookup` here for finding the element(s) it is
-        refering to.
-
-        In this method, all errors must be handled, too, for example if a label
-        path could not be found.
-
-        :Parameters:
-          - `cross_references_manager`: the cross references manager that is
-            responsible for the element's cross referencing, i.e. for ordinary
-            cross references, citations, or text blocks.
-
-        :type cross_references_manager: `CrossReferencesDict`
-        """
-        raise NotImplementedError
-
-class XRef(object):
-    def __init__(self, label_path, referencing_element):
-        self.label_path, self.referencing_element = label_path, referencing_element
-        self.referenced_element = None
-
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
     form a path to an element.  Note that (incomplete) paths given by the user
@@ -187,26 +153,63 @@ class LabelAmbiguousError(LabelLookupError):
         super(LabelAmbiguousError, self).__init__(description, label)
         self.elements = elements
 
-class ReferencesManager(object):
-    def close(self):
+class ReferencingNode(object):
+    """An abstract base class for AST elements that want to refer to other AST
+    elements.  This is intended to be for cross references, citations, and text
+    blocks.  Note that ``ReferencingNode`` is not derived from `parser.Node`.
+    So such element classes must have *two* parents, `parser.Node` and
+    ``ReferencingNode`` (in this order).
+
+    Actually, the only purpose of this class is to make clear that elements
+    that want to use CrossReferencesManager must have a method called
+    `resolve_cross_references`.
+    """
+    def resolve_cross_references(self, cross_references_manager):
+        """This method is called by `CrossReferencesManager.close()` if the
+        element has registered itself for callback.  Usually, it will call
+        ``cross_references_manager.lookup`` here for finding the element(s) it
+        is refering to.
+
+        In this method, all errors must be handled, too, for example if a label
+        path could not be found.
+
+        :Parameters:
+          - `cross_references_manager`: the cross references manager that is
+            responsible for the element's cross referencing, i.e. for ordinary
+            cross references, citations, or text blocks.
+
+        :type cross_references_manager: `CrossReferencesManager`
+        """
         raise NotImplementedError
 
-class CrossReferencesDict(ReferencesManager):
-    """Dictionary mapping labels to AST elements.  It is supposed to be used
-    for labels from the Big Namespace (sections, captions, environments, and
-    formulae).  Normally, the keys are of type `Label`, but they may be tuples
-    of such, containing also the labels of the parent sections: ``("Section",
-    "Subsection")``.
+class ReferencesManager(object):
+    """Abstact base class for all classes that manage cross references.  This
+    includes all types of cross references managers: ordinary cross references,
+    citations, text blocks, but also footnotes and delayed weblinks.
+    """
+    def close(self):
+        """Called when the document is completely parsed.  It ensures that all
+        references have been resolved, and errors have been properly handled.
 
-    The values are normally elements of the AST.  If case of ambiguities, they
-    are sets of those.  Eventually, this will lead to errors if such a label is
-    really used in the document but for a proper error message all elements
-    with that label must be known, so they are collected here.
+        After this method was called, the references manager is in an undefined
+        state and cannot be used for further lookups anymore.
+        """
+        raise NotImplementedError
+
+class CrossReferencesManager(ReferencesManager):
+    """References manager mapping label paths to AST elements.  It is supposed
+    to be used for labels from the Big Namespace (sections, captions,
+    environments, and formulae) as well as citations and text blocks.
+
+    The values are elements of the AST.  If case of ambiguities, they are sets
+    of those.  Eventually, this will lead to errors if such a label is really
+    used in the document but for a proper error message all elements with that
+    label must be known, so they are collected here.
 
     :ivar elements_by_labelpath: maps absolute label paths to document
       elements.  If the mapping is not unique, it maps to a set of elements.
     :ivar requesters: all document elements that want to be called back when
-      this CrossReferencesDict is finished.
+      this CrossReferencesManager is finished.
 
     :type elements_by_labelpath: dict mapping tuple to `Node`
     :type requesters: set of `ReferencingNode`
@@ -313,9 +316,10 @@ class CrossReferencesDict(ReferencesManager):
                 return False
         return True
     def extract_element(self, found_path, original_label_path):
-        """Returns the finally found element.  The reason why this is
-        encapsulated into a function is that the possible error situation of
-        two label paths pointing to the same element must be handled.
+        """Internal method that returns the finally found element.  The reason
+        why this is encapsulated into a function is that the possible error
+        situation of two label paths pointing to the same element must be
+        handled.
 
         :Parameters:
           - `found_path`: absolute label path that was found during the lookup
@@ -417,9 +421,66 @@ class CrossReferencesDict(ReferencesManager):
 
         :type element: ReferencingNode
         """
+        assert element not in self.requesters
         self.requesters.add(element)
     def close(self):
         for requester in self.requesters:
             requester.resolve_cross_references(self)
         self.elements_by_labelpath.clear()
         self.requesters.clear()
+
+class MarksBasedNode(object):
+    referenced_element = None
+    def handle_resolving_failure(self, label_error):
+        raise NotImplementedError
+
+class SpuriousFootnoteMarkError(common.Error):
+    def __init__(self, mark, footnote):
+        super(SpuriousFootnoteMarkError, self).__init__("no reference to this footnote found")
+        self.mark, self.footnote = mark, footnote
+
+class FootnotesManager(ReferencesManager):
+    requesters_by_mark = {}
+    def register_requester(self, mark, element):
+        assert isinstance(element, MarksBasedNode)
+        self.requesters_by_mark.get(mark, []).append(element)
+    def register(self, mark, element):
+        try:
+            self.requesters_by_mark[mark].pop(0).referenced_element = element
+        except KeyError, IndexError:
+            raise SpuriousFootnoteMarkError(mark, element)
+    def start_new_section(self):
+        for mark, requester_list in self.requesters_by_mark.iteritems():
+            for element in requester_list:
+                element.handle_resolving_failure(
+                    LabelNotFoundError("no footnote with this mark found", mark))
+        self.requesters_by_mark.clear()
+    def close(self):
+        self.start_new_section()
+
+class DelayedWeblinksManager(ReferencesManager):
+    requesters_by_label = {}
+    current_definition_by_label = {}
+    unserved_requesters = set()
+    def register_requester(self, label, element):
+        assert isinstance(element, MarksBasedNode)
+        self.requesters_by_label.get(label, []).append(element)
+        if label in current_definition_by_label:
+            element.referenced_element = current_definition_by_label[label]
+        else:
+            self.unserved_requesters.add(element)
+    def register(self, label, element):
+        current_definition_by_label[label] = element
+        requesters = self.requesters_by_label.pop(label, [])
+        for requester in requesters:
+            requester.referenced_element = element
+            self.unserved_requesters.discard(requester)
+    def close(self):
+        for label, requester_list in self.requesters_by_label.iteritems():
+            for element in requester_list:
+                if element in unserved_requesters:
+                    element.handle_resolving_failure(
+                        LabelNotFoundError("no delayed weblink with this label found", label))
+        self.requesters_by_label.clear()
+        self.current_definition_by_label.clear()
+        self.unserved_requesters.clear()
