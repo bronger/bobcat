@@ -38,6 +38,7 @@ makes the connection between referencing document element and referred element.
 """
 
 import common
+import parser  # at the moment, only used in assertions
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
@@ -429,57 +430,175 @@ class CrossReferencesManager(ReferencesManager):
         self.elements_by_labelpath.clear()
         self.requesters.clear()
 
-class MarksBasedNode(object):
+class MarkBasedNode(object):
+    """Abstract common base class for footnotes and delayed weblinks.  Note
+    that ``MarkBasedNode`` is not derived from `parser.Node`.  So such element
+    classes must have *two* parents, `parser.Node` and ``MarkBasedNode`` (in
+    this order).
+
+    :ivar referenced_element: The element that the current element points to.
+      This can be the footnote or the delayed weblink.  It is ``None`` as long
+      as the reference has not been resolved yet.
+
+    :type referenced_element: `parser.Node`
+    """
+    # FixMe: Maybe the label/mark should be made an instance variable, too.
+    # Then, it wouldn't be necessary anymore to give it as an explicit
+    # parameter everywhere in the classes of this module.  Maybe this class can
+    # be given up completely in favour of the main node classes for footnotes
+    # and delayed weblinks.
     referenced_element = None
     def handle_resolving_failure(self, label_error):
+        """Called by the responsible ``ReferencedManager`` if the reference
+        could not be resolved.
+
+        :Parameters:
+          - `label_error`: exception with the exact error
+
+        :type label_error: `LabelNotFoundError`
+        """
         raise NotImplementedError
 
 class SpuriousFootnoteMarkError(common.Error):
+    """Error for odd footnotes that are never used.
+
+    :ivar mark: the footnote mark that was never used
+    :ivar footnote: the footnote element that was never used
+
+    :type mark: unicode
+    :type footnote: `parser.Footnote`
+    """
     def __init__(self, mark, footnote):
         super(SpuriousFootnoteMarkError, self).__init__("no reference to this footnote found")
         self.mark, self.footnote = mark, footnote
 
 class FootnotesManager(ReferencesManager):
+    """References manager for footnotes.  Footnotes can register themselves
+    here, and Footnote references can do so, too.  The goal is to create a link
+    from the reference to the footnote.
+
+    :ivar requesters_by_mark: all requesters waiting to be linked to
+      footnotes.  The keys are the footnote marks.  They are mapped to lists of
+      the respective requesters.
+
+    :type requesters_by_mark: dict mapping unicode to list of
+      `parser.FootnoteReference`
+    """
     requesters_by_mark = {}
     def register_requester(self, mark, element):
-        assert isinstance(element, MarksBasedNode)
+        """Adds a footnote references to the waiting queue to be linked to its
+        footnote.
+
+        :Parameters:
+          - `mark`: the footnote mark
+          - `element`: the footnote reference that looks for its footnote
+
+        :type mark: unicode
+        :type element: `parser.FootnoteReference`
+        """
+        assert isinstance(element, MarkBasedNode)
+        assert isinstance(delayed_weblink_reference, parser.FootnoteReference)
         self.requesters_by_mark.get(mark, []).append(element)
-    def register(self, mark, element):
+        # In these lists, every element must occur only once
+        assert sorted(set(self.requesters_by_mark[mark])) == sorted(self.requesters_by_mark[mark])
+    def register(self, mark, footnote):
+        """Registers a footnote with this manager.  This means that the
+        footnote reference that references to this footnote is linked to it.
+
+        :Parameters:
+          - `mark`: the footnote mark
+          - `footnote`: the footnote element
+
+        :type mark: unicode
+        :type footnote: `parser.Footnote`
+        """
         try:
-            self.requesters_by_mark[mark].pop(0).referenced_element = element
+            self.requesters_by_mark[mark].pop(0).referenced_element = footnote
         except KeyError, IndexError:
-            raise SpuriousFootnoteMarkError(mark, element)
+            raise SpuriousFootnoteMarkError(mark, footnote)
     def start_new_section(self):
+        """Resets the footnotes manager because a new section was started.
+        Remember that footnotes can be referenced only in the current section.
+        Therefore, it is necessary to clear everything at the start of a new
+        section.  However, before this happens, all footnote references that
+        could not be linked to a footnote must be notified.
+
+        :Exceptions:
+          - `LabelNotFoundError`: if a footnote reference could not be
+            resolved.
+        """
         for mark, requester_list in self.requesters_by_mark.iteritems():
             for element in requester_list:
                 element.handle_resolving_failure(
                     LabelNotFoundError("no footnote with this mark found", mark))
         self.requesters_by_mark.clear()
     def close(self):
+        # Alias for `start_new_section`.
         self.start_new_section()
 
 class DelayedWeblinksManager(ReferencesManager):
+    """References manager for delayed weblinks.  It creates links from delayed
+    weblinks references to the delayed weblinks themselves.
+
+    :ivar requesters_by_label: all delayed weblinks references.  The keys are
+      the labels which are mapped to sets of delayed weblinks references.
+    :ivar current_definition_by_label: all currently known labels, mapped to
+      their most recent delayed weblinks
+    :ivar unserved_requesters: delayed weblinks referenced which havn't yet
+      gotten a link to a delayed weblink.
+
+    :type requesters_by_label: dict mapping unicode to set of
+      `parser.DelayedWeblinkReference`
+    :type current_definition_by_label: dict mapping unicode to
+      `parser.DelayedWeblink`
+    :type unserved_requesters: set of `parser.DelayedWeblinkReference`
+    """
     requesters_by_label = {}
     current_definition_by_label = {}
     unserved_requesters = set()
-    def register_requester(self, label, element):
-        assert isinstance(element, MarksBasedNode)
-        self.requesters_by_label.get(label, []).append(element)
+    def register_requester(self, label, delayed_weblink_reference):
+        """Adds a delayed weblink reference to the waiting queue to be linked
+        to its delayed weblink.  If there is already a definition for this
+        label, it is written to the delayed weblink reference.
+
+        :Parameters:
+          - `label`: the whitespace-normalized contents of the delayed
+            weblink which serves as a label
+          - `delayed_weblink_reference`: the delayed weblink reference itself
+
+        :type label: unicode
+        :type delayed_weblink_reference: `parser.DelayedWeblinkReference`
+        """
+        assert isinstance(delayed_weblink_reference, MarkBasedNode)
+        assert isinstance(delayed_weblink_reference, parser.DelayedWeblinkReference)
+        self.requesters_by_label.get(label, set()).add(delayed_weblink_reference)
         if label in current_definition_by_label:
-            element.referenced_element = current_definition_by_label[label]
+            delayed_weblink_reference.referenced_element = current_definition_by_label[label]
         else:
-            self.unserved_requesters.add(element)
-    def register(self, label, element):
-        current_definition_by_label[label] = element
-        requesters = self.requesters_by_label.pop(label, [])
+            self.unserved_requesters.add(delayed_weblink_reference)
+    def register(self, label, delayed_weblink):
+        """Registers a delayed weblink with this manager.  This means that all
+        dangling delayed weblinks references that uses this label are
+        resolved.
+
+        :Parameters:
+          - `label`: the whitespace-normalized contents of the delayed
+            weblink which serves as a label
+          - `delayed_weblink`: the delayed weblink itself
+
+        :type label: unicode
+        :type delayed_weblink: `parser.DelayedWeblink`
+        """
+        current_definition_by_label[label] = delayed_weblink
+        requesters = self.requesters_by_label.pop(label, set())
         for requester in requesters:
-            requester.referenced_element = element
+            requester.referenced_element = delayed_weblink
             self.unserved_requesters.discard(requester)
     def close(self):
-        for label, requester_list in self.requesters_by_label.iteritems():
-            for element in requester_list:
-                if element in unserved_requesters:
-                    element.handle_resolving_failure(
+        for label, requesters in self.requesters_by_label.iteritems():
+            for requester in requesters:
+                if requester in unserved_requesters:
+                    requester.handle_resolving_failure(
                         LabelNotFoundError("no delayed weblink with this label found", label))
         self.requesters_by_label.clear()
         self.current_definition_by_label.clear()
