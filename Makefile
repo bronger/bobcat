@@ -20,6 +20,7 @@ src-doc-svn:
 
 doctests:
 	cd src; python common.py
+	cd src; python parser.py
 	cd src; python helpers.py
 	cd src; python i18n.py
 	cd src; python latex_substitutions.py

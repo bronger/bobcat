@@ -114,13 +114,11 @@ class Error(Exception):
         :Parameters:
           - `description`: error message
 
-        :type description: string
+        :type description: unicode
         """
-        if isinstance(description, unicode):
-            # FixMe: The following must be made OS-dependent
-            description = description.encode("utf-8")
         self.description = description
-        super(Error, self).__init__(description)
+        # FixMe: The following must be made OS-dependent
+        Exception.__init__(self, description.encode("utf-8"))
 
 class LocalVariablesError(Error):
     """Error class for malformed lines with the local variables.
@@ -130,7 +128,7 @@ class LocalVariablesError(Error):
         :Parameters:
           - `description`: error message
 
-        :type description: string
+        :type description: unicode
         """
         super(LocalVariablesError, self).__init__(description)
 
@@ -143,7 +141,7 @@ class FileError(Error):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
         super(FileError, self).__init__(str(position_marker) + ": " + description)
@@ -157,7 +155,7 @@ class EncodingError(FileError):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
         super(EncodingError, self).__init__(description, position_marker)
@@ -171,7 +169,7 @@ class KeyValueError(FileError):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
         super(KeyValueError, self).__init__(str(position_marker) + ": " + description)

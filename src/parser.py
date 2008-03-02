@@ -52,98 +52,11 @@ by code injection from the backend module into the classes of the parser.
 """
 
 import re, weakref, imp, os.path
-import common
+import common, xref
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
 import safefilename
-
-class Label(unicode):
-    """
-        >>> label1 = Label(" Hello  there")
-        >>> label1
-        u'Hello there'
-        >>> label2 = Label("Hello", fuzzy=True)
-        >>> label3 = Label("Hello")
-        >>> label1 == label2
-        True
-        >>> label2 == label3
-        True
-        >>> label1 == label3
-        False
-    """
-    def __new__(cls, label, fuzzy=False):
-        self = unicode.__new__(cls, u" ".join(label.split())[:80])
-        self.__fuzzy = fuzzy
-        return self
-    def __eq__(self, other):
-        if not self.__fuzzy and other.__fuzzy:
-            return self.startswith(other)
-        elif self.__fuzzy and not other.__fuzzy:
-            return other.startswith(self)
-        elif self.__fuzzy and other.__fuzzy:
-            raise TypeError, "cannot compare labels if both are fuzzy"
-        elif not self.__fuzzy and not other.__fuzzy:
-            return super(Label, self).__eq__(other)
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    def __hash__(self):
-        if self.__fuzzy:
-            # Note that labels can never end in " " themselves
-            return hash(unicode(self) + " ")
-        else:
-            return super(Label, self).__hash__()
-
-class CrossReferencesDict(object):
-    """
-
-    :ivar elements_by_label: Dictionary mapping labels to AST elements.  The
-      keys normally are unicode strings.  They are the lables,
-      whitespace-normalised and truncated to 80 characters if necessary.  In
-      case of sections or environements, the keys may be tuples of unicodes,
-      containing also the labels of the parent sections: ``("Section",
-      "Subsection")``.
-
-      The values are normally elements of the AST.  If case of ambiguities,
-      they are lists of those.  Eventually, this will lead to errors if such a
-      label is really used in the document but for a proper error message all
-      elements with that label must be known, so they are collected here.
-
-    :type elements_by_label: dict mapping tuples of unicodes or unicodes to
-      Nodes
-    """
-    elements_by_label = {}
-    def register_single_key(self, key, value):
-        """
-        :Parameters:
-          - `key`: The label(s) that should be added to the dict.  Its items
-            must be normalised, i.e. with normalised whitespace and no longer
-            than 80 characters.
-          - `value`: the node to which the label belong
-
-        :type key: tuple of strings
-        :type value: Node
-        """
-        assert isinstance(key, tuple)
-        for string in key:
-            assert key == u" ".join(key.split())[:80], "label '%s' is not normalized" % key
-        if key in self:
-            if isinstance(self[key], list):
-                self.elements_by_label[key].append(value)
-            else:
-                self.elements_by_label[key] = [self[key], value]
-        else:
-            self.elements_by_label[key] = value
-    def register(self, key, value):
-        assert isinstance(value, Node)
-        if isinstance(key, (list, tuple)):
-            for i in range(len(key)):
-                self.register_single_key(tuple(key[i:]), value)
-        else:
-            self.register_single_key((key,), value)
-    def lookup(self, key, fuzzy=False):
-        pass
-        
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.
@@ -642,7 +555,7 @@ class Section(Node):
           - `text`: the source code
           - `position`: the starting position of the heading in the source
 
-         :type text: `preprocessor.Excerpt`
+        :type text: `preprocessor.Excerpt`
         :type position: int
 
         :Return:
