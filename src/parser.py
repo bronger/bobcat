@@ -644,6 +644,18 @@ class Hyperlink(Node):
             raise NotImplementedError("Only URL-only hyperlinks are implemented so far")
         return end
 
+class Footnote(Node):
+    pass
+
+class FootnoteReference(Node, xrefs.MarkBasedNode):
+    pass
+
+class DelayedWeblink(Node):
+    pass
+
+class DelayedWeblinkReference(Node, xrefs.MarkBasedNode):
+    pass
+
 import copy, inspect
 _globals = copy.copy(globals())
 Document.node_types = dict([(cls.__name__.lower(), cls) for cls in _globals.values()
