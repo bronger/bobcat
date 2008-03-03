@@ -149,14 +149,22 @@ class Node(object):
     :ivar language: the :RFC:`4646` language tag for this node.  Always in
       lowercase.
 
-    :ivar position: the absolute position of this node in the document
+    :ivar __text: The original text from which this node was created (parsed).
+      Only needed for calculating `__position`, see the `position` property.
+    :ivar __start_index: The index within `__text` where this node starts.
+      Only needed for calculating `__position`, see the `position` property.
+    :ivar __position: cache for the original position of this node in the
+      source file, see the `position` property.
 
     :type parent: weakref to Node
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
-    :type position: `common.PositionMarker`
+    :type __text: `prepocessor.Excerpt`
+    :type __start_index: int
+    :type __position: `common.PositionMarker`
     """
+    __position = None
     def __init__(self, parent):
         """It will also be called by all derived classes.
 
@@ -189,6 +197,9 @@ class Node(object):
         than in the official constructor gives more flexibility to the result
         values.  Additionally, it makes the source more legible.
 
+        Derived classes must call this parse method at the beginning of their
+        parse method.  They may safely throw away the result value.
+
         :Parameters:
           - `text`: source document
           - `position`: starting position of the parsing
@@ -205,8 +216,32 @@ class Node(object):
         :rtype: int
         """
         # pylint: disable-msg=R0201,W0613
-        self.position = text.original_position(position)
+        self.__text, self.__start_index = text, position
         return position
+    def __get_position(self):
+        """Returns the starting position of this element.  In some situations,
+        for example when a parse error must be reported, it is necessary to
+        have the position of the element in the original source files.
+        However, calculating the position is rather costly and should only be
+        done if it is really needed.
+
+        Therefore, the position is calculated in this private method and cached
+        in ``self.__position``.  To get this working, it is necessary that the
+        ``parse`` method stored the original text and starting position in two
+        private instance variables that are used here for the calculation.
+
+        :Return:
+          the original position in the source file
+
+        :rtype: `common.PositionMarker`
+        """
+        if not self.__position:
+            self.__position = self.__text.original_position(self.__start_index)
+        return self.__position
+    position = property(__get_position, doc="""Starting position of this
+        document element in the original source file.
+
+        :type: `common.PositionMarker`""")
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
         `helpers.print_tree()` instead."""
@@ -291,7 +326,7 @@ class Document(Node):
         self.packages = set()
         self.emit = None
     def parse(self, text, position=0):
-        position = super(Document, self).parse(text, position)
+        super(Document, self).parse(text, position)
         position = parse_blocks(self, text, position)
         self.language = self.language or "en"
         return position
@@ -391,7 +426,7 @@ class Text(Node):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
         """Just copy a slice of the source code into `text`."""
-        position = super(Text, self).parse(text, position)
+        super(Text, self).parse(text, position)
         self.text = text[position:end]
         return end
     def process(self):
@@ -501,7 +536,7 @@ class Heading(Node):
     def __init__(self, parent):
         super(Heading, self).__init__(parent)
     def parse(self, text, position, end):
-        position = super(Heading, self).parse(text, position)
+        super(Heading, self).parse(text, position)
         position = parse_inline(self, text, position, end)
         return position
 
@@ -524,7 +559,7 @@ class Section(Node):
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):
-        position = super(Section, self).parse(text, position)
+        super(Section, self).parse(text, position)
         section_number_match, self.nesting_level = self.parse_section_number(text, position)
         position = section_number_match.end()
         heading = Heading(self)
@@ -579,7 +614,7 @@ class Paragraph(Node):
     def __init__(self, parent):
         super(Paragraph, self).__init__(parent)
     def parse(self, text, position, end):
-        position = super(Paragraph, self).parse(text, position)
+        super(Paragraph, self).parse(text, position)
         return parse_inline(self, text, position, end)
 
 class Emphasize(Node):
@@ -587,7 +622,7 @@ class Emphasize(Node):
     def __init__(self, parent):
         super(Emphasize, self).__init__(parent)
     def parse(self, text, position, end):
-        position = super(Emphasize, self).parse(text, position)
+        super(Emphasize, self).parse(text, position)
         position = parse_inline(self, text, position, end)
         assert text[position] == "_"
         return position + 1
@@ -602,7 +637,7 @@ class Hyperlink(Node):
     def __init__(self, parent):
         super(Hyperlink, self).__init__(parent)
     def parse(self, text, position, end):
-        position = super(Hyperlink, self).parse(text, position)
+        super(Hyperlink, self).parse(text, position)
         if text[position] == "<" and text[end-1] == ">":
             self.url = unicode(text)[position+1:end-1]
         else:
