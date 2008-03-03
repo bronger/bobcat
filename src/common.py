@@ -1128,7 +1128,51 @@ def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
                 pass
         logging.basicConfig(stream=LogSink())
 
+class ParseError(object):
+    """An instance of this class contains one parsing error or warning.  At the
+    same time, the class holds the list with all errors and warnings.
 
+    :cvar parse_errors: all errors and warnings during the last parsing run.
+      This variable is to be used by external modules that are interested in
+      the result of the parsing process.
+    :cvar logger: logger instance for parser messages
+
+    :type parse_errors: list of `ParseError`
+    :type logger: logging.Logger
+    """
+    parse_errors = []
+    logger = logging.getLogger("gummi.parser")
+    def __init__(self, provoking_element, exception, type, position_marker):
+        self.provoking_element, self.exception, self.type, self.position_marker = \
+            provoking_element, exception, type, position_marker
+    @classmethod
+    def add_error(cls, provoking_element, exception, type="error", position_marker=None):
+        """Adds en error or warning to the list of errors and warnings.  It
+        also writes it to the log file.
+
+        :Parameters:
+          - `provoking_element`: the document element in which the error has
+            occured
+          - `exception`: the exception which describes the issue
+          - `type`: it ``"error"``, it is an error; if ``"warning"``, it is a
+            warning
+          - `position_marker`: if given, it denotes the exact position in the
+            document where the error occured
+
+        :type provoking_element: `parser.Node`
+        :type exception: `Error`
+        :type type: str
+        :type position_marker: `PositionMarker`
+        """
+        assert isinstance(exception, Error)
+        position = position_marker or provoking_element.position
+        cls.parse_errors.append(ParseError(provoking_element, exception, type, position))
+        assert type in ["error", "warning"]
+        message = u"%s: %s" % (position_marker, exception)
+        if type == "error":
+            cls.logger.error(message)
+        else:
+            cls.logger.warning(message)
 
 if __name__ == "__main__":
     import doctest

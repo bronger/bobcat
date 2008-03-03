@@ -52,7 +52,7 @@ by code injection from the backend module into the classes of the parser.
 """
 
 import re, weakref, imp, os.path
-import common, xref
+import common, xrefs
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
@@ -149,10 +149,13 @@ class Node(object):
     :ivar language: the :RFC:`4646` language tag for this node.  Always in
       lowercase.
 
+    :ivar position: the absolute position of this node in the document
+
     :type parent: weakref to Node
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
+    :type position: `common.PositionMarker`
     """
     def __init__(self, parent):
         """It will also be called by all derived classes.
@@ -190,7 +193,7 @@ class Node(object):
           - `text`: source document
           - `position`: starting position of the parsing
 
-        :type text: preprocessor.Excerpt
+        :type text: `preprocessor.Excerpt`
         :type position: int
 
         :Return:
@@ -202,6 +205,7 @@ class Node(object):
         :rtype: int
         """
         # pylint: disable-msg=R0201,W0613
+        self.position = text.original_position(position)
         return position
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
@@ -287,6 +291,7 @@ class Document(Node):
         self.packages = set()
         self.emit = None
     def parse(self, text, position=0):
+        position = super(Document, self).parse(text, position)
         position = parse_blocks(self, text, position)
         self.language = self.language or "en"
         return position
@@ -386,6 +391,7 @@ class Text(Node):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
         """Just copy a slice of the source code into `text`."""
+        position = super(Text, self).parse(text, position)
         self.text = text[position:end]
         return end
     def process(self):
@@ -495,6 +501,7 @@ class Heading(Node):
     def __init__(self, parent):
         super(Heading, self).__init__(parent)
     def parse(self, text, position, end):
+        position = super(Heading, self).parse(text, position)
         position = parse_inline(self, text, position, end)
         return position
 
@@ -517,6 +524,7 @@ class Section(Node):
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):
+        position = super(Section, self).parse(text, position)
         section_number_match, self.nesting_level = self.parse_section_number(text, position)
         position = section_number_match.end()
         heading = Heading(self)
@@ -571,6 +579,7 @@ class Paragraph(Node):
     def __init__(self, parent):
         super(Paragraph, self).__init__(parent)
     def parse(self, text, position, end):
+        position = super(Paragraph, self).parse(text, position)
         return parse_inline(self, text, position, end)
 
 class Emphasize(Node):
@@ -578,6 +587,7 @@ class Emphasize(Node):
     def __init__(self, parent):
         super(Emphasize, self).__init__(parent)
     def parse(self, text, position, end):
+        position = super(Emphasize, self).parse(text, position)
         position = parse_inline(self, text, position, end)
         assert text[position] == "_"
         return position + 1
@@ -592,6 +602,7 @@ class Hyperlink(Node):
     def __init__(self, parent):
         super(Hyperlink, self).__init__(parent)
     def parse(self, text, position, end):
+        position = super(Hyperlink, self).parse(text, position)
         if text[position] == "<" and text[end-1] == ">":
             self.url = unicode(text)[position+1:end-1]
         else:
