@@ -72,7 +72,7 @@ the protocol prefix is mandatory.
 .. → is used also for distinguishing between links to sections with same
 .. headings: `Results → Silicon samples`.  Thus, in case two sections are
 .. called “Silicon samples” but only one has a parent section called “Results”,
-.. this is the way to go.
+.. this is the way to go.  This also works for explicitly given labels.
 
 In this ↑paragraph you see how index entries are realised.
 
@@ -513,7 +513,8 @@ Theorem #.#, `Pythagoras`:: Pythagorean theorem
 The label may be implicit by the heading of the environment, or the explicit
 label.  There are no namespaces for labels.  In case that in a section, some
 environments have the same heading and they are referred to, this is an error.
-Therefore, you must use explicit labels.
+The same is true if a section contains an environment _and_ a subsection with
+the same implicit label.  Then, you must use explicit labels.
 
 If a backend doesn't know about a certain environment, it must use a standard
 formatting for it, i.e. some sort of highlighted heading, printing of the

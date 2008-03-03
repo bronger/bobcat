@@ -38,7 +38,6 @@ makes the connection between referencing document element and referred element.
 """
 
 import common
-import parser  # at the moment, only used in assertions
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
@@ -497,6 +496,7 @@ class FootnotesManager(ReferencesManager):
         :type element: `parser.FootnoteReference`
         """
         assert isinstance(element, MarkBasedNode)
+        import parser
         assert isinstance(delayed_weblink_reference, parser.FootnoteReference)
         self.requesters_by_mark.get(mark, []).append(element)
         # In these lists, every element must occur only once
@@ -570,6 +570,7 @@ class DelayedWeblinksManager(ReferencesManager):
         :type delayed_weblink_reference: `parser.DelayedWeblinkReference`
         """
         assert isinstance(delayed_weblink_reference, MarkBasedNode)
+        import parser
         assert isinstance(delayed_weblink_reference, parser.DelayedWeblinkReference)
         self.requesters_by_label.get(label, set()).add(delayed_weblink_reference)
         if label in current_definition_by_label:

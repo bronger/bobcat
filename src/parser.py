@@ -52,7 +52,7 @@ by code injection from the backend module into the classes of the parser.
 """
 
 import re, weakref, imp, os.path
-import common, xref
+import common, xrefs
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
@@ -597,6 +597,18 @@ class Hyperlink(Node):
         else:
             raise NotImplementedError("Only URL-only hyperlinks are implemented so far")
         return end
+
+class Footnote(Node):
+    pass
+
+class FootnoteReference(Node, xrefs.MarkBasedNode):
+    pass
+
+class DelayedWeblink(Node):
+    pass
+
+class DelayedWeblinkReference(Node, xrefs.MarkBasedNode):
+    pass
 
 import copy, inspect
 _globals = copy.copy(globals())
