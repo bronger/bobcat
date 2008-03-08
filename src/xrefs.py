@@ -275,7 +275,8 @@ class CrossReferencesManager(ReferencesManager):
         for part in label_path.split(u"→"):
             characters = list(unicode(part))
             # FixMe: The current implementation treats all occurances of \u0000
-            # as ellipses, too.
+            # as ellipses, too.  This means that there must not be any NULL
+            # character in Gummi input source files.
             for position in (i.start() for i in re.finditer(u"…", part.escaped_text())):
                 characters[position] = u"\u0000"
             part = u"".join(characters)
