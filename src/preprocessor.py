@@ -130,7 +130,6 @@ class Excerpt(unicode):
 
         :rtype: boolean
         """
-        # Note that self.escaped_positions must be sorted!
         if isinstance(position, (list, tuple)):
             start, end = position
             for i in self.escaped_positions:
@@ -182,6 +181,8 @@ class Excerpt(unicode):
             text = list(unicode(self))
             for pos in self.escaped_positions:
                 text[pos] = u"\u0000"
+            for start, end in self.code_snippets_intervals:
+                text[start:end] = (end-start) * u"\u0000"
             self.__escaped_text = u"".join(text)
         return self.__escaped_text
     def original_position(self, position=0):
@@ -500,6 +501,9 @@ class Excerpt(unicode):
                 first_mark_in_second_excerpt.transpose(length_first_part_original)
         concatenation.escaped_positions = self.escaped_positions | \
             set([pos + length_first_part for pos in other.escaped_positions])
+        concatenation.code_snippets_intervals = self.code_snippets_intervals + \
+            [(start + length_first_part, end + length_first_part)
+             for start, end in other.code_snippets_intervals]
         return concatenation
     def __getitem__(self, key):
         if key < 0:
@@ -516,6 +520,13 @@ class Excerpt(unicode):
             character.escaped_positions = set([0])
         else:
             character.escaped_positions = set()
+        character.code_snippets_intervals = []
+        for start, end in self.code_snippets_intervals:
+            if start <= key < end:
+                character.code_snippets_intervals = [(0, 1)]
+                break
+            if key < start:
+                break
         return character
     def __getslice__(self, i, j):
         length = len(self)
@@ -534,6 +545,14 @@ class Excerpt(unicode):
         if 0 not in slice_.original_positions:
             slice_.original_positions[0] = start_marker.transpose(-offset)
         slice_.escaped_positions = set([pos - i for pos in self.escaped_positions if i <= pos < j])
+        slice_.code_snippets_intervals = \
+            [(start - i, end - i) for start, end in self.code_snippets_intervals
+             if start < j or i < end]
+        if slice_.code_snippets_intervals:
+            slice_.code_snippets_intervals[0] = (max(slice_.code_snippets_intervals[0][0], 0),
+                                                 slice_.code_snippets_intervals[0][1])
+            slice_.code_snippets_intervals[-1] = (slice_.code_snippets_intervals[0][0],
+                                                  min(slice_.code_snippets_intervals[0][1], j))
         return slice_
     @classmethod
     def apply_post_input_method(cls, excerpt):
