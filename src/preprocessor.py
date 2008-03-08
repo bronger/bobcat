@@ -138,34 +138,6 @@ class Excerpt(unicode):
             return False
         else:
             return position in self.escaped_positions
-    def next_escaped_position(self, offset):
-        """Yields the index for the first character that is escaped in the
-        Excerpt, starting from `offset`.  If none was found, it returns the
-        length of the Excerpt.
-
-        :Parameters:
-          - `offset`: starting offset of the search for the next escaped
-            characters.  Must be a character position within the Excerpt.
-
-        :type offset: int
-
-        :Return:
-          The index of the first character after `offset` that is escaped.  If
-          none was found, it returns the length of the Excerpt.
-
-        :rtype: int
-        """
-        length = len(self)
-        if not 0 <= offset < length:
-            raise IndexError("invalid value %d for "
-                             "offset in next_escaped_position near line %d of file %s" %
-                             (offset, self.original_positions[0].linenumber,
-                              self.original_positions[0].url))
-        next_positions = [position for position in self.escaped_positions if position >= offset]
-        if next_positions:
-            return sorted(next_positions)[0]
-        else:
-            return len(self)
     def escaped_text(self):
         """Returns the unicode representation of the Excerpt with all escaped
         characters replaced with Null characters.
