@@ -72,7 +72,8 @@ class Excerpt(unicode):
       ordered.
     :ivar code_snippets_intervals: all start--end tuples of index ranges in the
       Excerpt which contain code snippets, so that they have to be treated as
-      escaped.  Actually, this could also be called ``escaped_intervals``
+      escaped.  Note that they must be in ascending order of the start
+      indices. Actually, this could also be called ``escaped_intervals``
       because it could be substituted with many equivalent entries in
       `escaped_positions`.  However, for performance reasons, code snippets are
       stored in this start--end form.  Otherwise, `escaped_positions` would be
@@ -544,12 +545,12 @@ class Excerpt(unicode):
         slice_.escaped_positions = set([pos - i for pos in self.escaped_positions if i <= pos < j])
         slice_.code_snippets_intervals = \
             [(start - i, end - i) for start, end in self.code_snippets_intervals
-             if start < j or i < end]
+             if start < j and end > i]
         if slice_.code_snippets_intervals:
             slice_.code_snippets_intervals[0] = (max(slice_.code_snippets_intervals[0][0], 0),
                                                  slice_.code_snippets_intervals[0][1])
-            slice_.code_snippets_intervals[-1] = (slice_.code_snippets_intervals[0][0],
-                                                  min(slice_.code_snippets_intervals[0][1], j))
+            slice_.code_snippets_intervals[-1] = (slice_.code_snippets_intervals[-1][0],
+                                                  min(slice_.code_snippets_intervals[-1][1], j))
         return slice_
     @classmethod
     def apply_post_input_method(cls, excerpt):
