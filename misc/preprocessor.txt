@@ -80,3 +80,23 @@ PositionMarker("test2.rsl", 3, 0, 0)
 >>> parts[1].original_position()
 PositionMarker("test2.rsl", 3, 3, 0)
 >>> os.remove("test2.rsl")
+>>> #
+>>> #  Now, test Excerpt.code_snippets_intervals
+>>> #
+>>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n..\n\nThis is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```\n\nAnd here the file ends.\n')
+>>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> text, text.code_snippets_intervals
+(u'\n\n\n\nThis is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```\n\nAnd here the file ends.\n', [(31, 38), (91, 100)])
+>>> part1 = text[:34]; part2 = text[34:]
+>>> part1.code_snippets_intervals, part2.code_snippets_intervals
+([(31, 34)], [(0, 4), (57, 66)])
+>>> (part1+part2).code_snippets_intervals
+[(31, 34), (34, 38), (91, 100)]
+>>> text.escaped_text()
+u'\n\n\n\nThis is a code snippet: ```\x00\x00\x00\x00\x00\x00\x00```.  And this is one in a paragraph of its\nown:\n\n```\x00\x00\x00\x00\x00\x00\x00\x00\x00```\n\nAnd here the file ends.\n'
+>>> len(text.escaped_text()) == len(text)
+True
+>>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n..\n\nThis is a code snippet with open ending: ```GOTO 10\n')
+>>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> len(text) == text.code_snippets_intervals[0][1]
+True
