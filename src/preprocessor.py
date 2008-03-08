@@ -66,6 +66,32 @@ class Excerpt(unicode):
     :cvar entity_pattern: Regexp pattern for numerical entities like
       ``\\0x0207;`` or ``\\#8022;``.
     :type entity_pattern: re.pattern
+
+    :ivar escaped_positions: the indices of all characters in the Excerpt which
+      were escaped in the original input.  Note that this is a set which is not
+      ordered.
+    :ivar code_snippets_intervals: all start--end tuples of index ranges in the
+      Excerpt which contain code snippets, so that they have to be treated as
+      escaped.  Actually, this could also be called ``escaped_intervals``
+      because it could be substituted with many equivalent entries in
+      `escaped_positions`.  However, for performance reasons, code snippets are
+      stored in this start--end form.  Otherwise, `escaped_positions` would be
+      cluttered up with too many subsequent entries.
+    :ivar original_positions: maps indices in the Excerpt to position markers
+      that point to the actual origin of this index in the Excerpt.
+    :ivar original_text: the original unicode string this Excerpt stems from
+    :ivar __post_substitutions: the substitutions for the post input method.
+      They are stored here for eventual use in `apply_post_input_method`.
+    :ivar __escaped_text: the unicode equivalent of the Excerpt, with all
+      escaped characters and characters of code snippets replaced with NULL
+      characters.  It is a cache used in `escaped_text`.
+
+    :type escaped_positions: set of int
+    :type code_snippets_intervals: list of (int, int)
+    :type original_positions: list of `common.PositionMarker`
+    :type original_text: unicode
+    :type __post_substitutions: list of (re.pattern, unicode)
+    :type __escaped_text: unicode
     """
     # FixMe: The following pylint directive is necessary because astng doesn't
     # parse attribute settings in the __new__ classmethod.  If this changes or
@@ -458,8 +484,8 @@ class Excerpt(unicode):
             return NotImplemented
         concatenation = unicode(self) + unicode(other)
         concatenation = Excerpt(concatenation, mode="NONE")
-        assert self.post_substitutions == other.post_substitutions
-        concatenation.post_substitutions = self.post_substitutions
+        assert self.__post_substitutions == other.__post_substitutions
+        concatenation.__post_substitutions = self.__post_substitutions
         concatenation.original_text = self.original_text + other.original_text
         concatenation.original_positions = self.original_positions.copy()
         length_first_part = len(self)
@@ -484,7 +510,7 @@ class Excerpt(unicode):
             key += len(self)
         character = super(Excerpt, self).__getitem__(key)
         character = Excerpt(character, mode="NONE")
-        character.post_substitutions = self.post_substitutions
+        character.__post_substitutions = self.__post_substitutions
         marker = self.original_positions.get(key, self.original_position(key))
         character.original_text = \
             self.original_text[marker.index:self.original_position(key+1).index]
@@ -508,7 +534,7 @@ class Excerpt(unicode):
         j = max(min(j, length), i)
         text = super(Excerpt, self).__getslice__(i, j)
         slice_ = Excerpt(text, mode="NONE")
-        slice_.post_substitutions = self.post_substitutions
+        slice_.__post_substitutions = self.__post_substitutions
         start_marker = self.original_position(i)
         offset = start_marker.index
         slice_.original_text = \
@@ -582,7 +608,7 @@ class Excerpt(unicode):
         # store it.
         text = unicode(excerpt)
         next_match_position, next_match_length, replacement = \
-            cls.get_next_match(text, excerpt.post_substitutions)
+            cls.get_next_match(text, excerpt.__post_substitutions)
         # Next comes the Big While which crawls through the whole source code
         # and postprocesses it.
         while s.position < len(text):
@@ -610,7 +636,7 @@ class Excerpt(unicode):
             if s.position > next_match_position:
                 # I must update the next match
                 next_match_position, next_match_length, replacement = \
-                    cls.get_next_match(text, excerpt.post_substitutions, s.position)
+                    cls.get_next_match(text, excerpt.__post_substitutions, s.position)
             if s.position == next_match_position:
                 any_escaped = False
                 for i in range(s.position, s.position + next_match_length):
@@ -673,7 +699,7 @@ class Excerpt(unicode):
             self.original_positions = original_positions
             self.escaped_positions = escaped_positions
             self.code_snippets_intervals = code_snippets_intervals
-            self.post_substitutions = post_substitutions
+            self.__post_substitutions = post_substitutions
         elif mode == "POST":
             postprocessed_text, original_positions, escaped_positions, code_snippets_intervals = \
                 cls.apply_post_input_method(excerpt)
@@ -682,7 +708,7 @@ class Excerpt(unicode):
             self.escaped_positions = escaped_positions
             self.code_snippets_intervals = code_snippets_intervals
             self.original_text = excerpt.original_text
-            self.post_substitutions = post_substitutions
+            self.__post_substitutions = post_substitutions
         self.__escaped_text = None
         return self
     def apply_postprocessing(self):
