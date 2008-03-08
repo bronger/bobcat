@@ -79,7 +79,7 @@ class PositionMarker(object):
         return 'PositionMarker("%s", %d, %d, %d)' % \
             (self.url, self.linenumber, self.column, self.index)
     def __str__(self):
-        return 'file "%s", line %d, column %d' % (self.url, self.linenumber, self.column+1)
+        return 'file "%s", line %d, column %d' % (self.url, self.linenumber, self.column)
     def __cmp__(self, other):
         """The `index` must not be included in the decision whether two PositionMarkers
         are the same."""
@@ -1091,6 +1091,8 @@ settings.set_default("output path", None, "unicode", docstring="""
 settings.set_default("backend", None, "unicode", docstring="""
     The "official" name of the backend in all-lowercase, e.g. "latex" or
     "html".""")
+settings.set_default("quiet", False, docstring="""
+    If ``True``, all output to stdout and stderr is supressed.""")
 
 
 def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
@@ -1128,51 +1130,74 @@ def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
                 pass
         logging.basicConfig(stream=LogSink())
 
-class ParseError(object):
-    """An instance of this class contains one parsing error or warning.  At the
-    same time, the class holds the list with all errors and warnings.
+class ParseError(Error):
+    """Generic error class for parse errors and warnings.  At the same time,
+    the class holds the list with all errors and warnings.
 
     :cvar parse_errors: all errors and warnings during the last parsing run.
       This variable is to be used by external modules that are interested in
       the result of the parsing process.
     :cvar logger: logger instance for parser messages
 
+    :ivar provoking_element: the document element in which the error or warning
+      occured
+    :ivar type: if ``"error"``, it is an error; if ``"warning"``, it is a
+      warning
+    :ivar position: where the error or warning occured
+
     :type parse_errors: list of `ParseError`
     :type logger: logging.Logger
+    :type provoking_element: `parser.Node`
+    :type type: str
+    :type position: `PositionMarker`
     """
-    parse_errors = []
     logger = logging.getLogger("gummi.parser")
-    def __init__(self, provoking_element, exception, type, position_marker):
-        self.provoking_element, self.exception, self.type, self.position_marker = \
-            provoking_element, exception, type, position_marker
-    @classmethod
-    def add_error(cls, provoking_element, exception, type="error", position_marker=None):
-        """Adds en error or warning to the list of errors and warnings.  It
-        also writes it to the log file.
-
+    parse_errors = []
+    def __init__(self, provoking_element, description, type_="error", position_marker=None):
+        """
         :Parameters:
-          - `provoking_element`: the document element in which the error has
+          - `provoking_element`: the document element in which the error
             occured
-          - `exception`: the exception which describes the issue
-          - `type`: it ``"error"``, it is an error; if ``"warning"``, it is a
+          - `description`: error message
+          - `type_`: if ``"error"``, it is an error; if ``"warning"``, it is a
             warning
           - `position_marker`: if given, it denotes the exact position in the
             document where the error occured
 
         :type provoking_element: `parser.Node`
-        :type exception: `Error`
-        :type type: str
+        :type description: unicode
+        :type type_: str
         :type position_marker: `PositionMarker`
         """
-        assert isinstance(exception, Error)
-        position = position_marker or provoking_element.position
-        cls.parse_errors.append(ParseError(provoking_element, exception, type, position))
-        assert type in ["error", "warning"]
-        message = u"%s: %s" % (position_marker, exception)
-        if type == "error":
-            cls.logger.error(message)
-        else:
-            cls.logger.warning(message)
+        super(ParseError, self).__init__(description)
+        assert type_ in ["error", "warning"]
+        self.provoking_element, self.type, self.position = \
+            provoking_element, type_, position_marker or provoking_element.position
+    def __str__(self):
+        # FixMe: The following must be made OS-dependent
+        return unicode(self).encode("utf-8")
+    def __unicode__(self):
+        return u"%s: %s" % (self.position, self.description)
+
+def add_parse_error(parse_error):
+    """Adds en error or warning to the list of errors and warnings.  It
+    also writes it to the log file and to stderr, if this hasn't be changed by
+    the user.
+
+    :Parameters:
+      - `parse_error`: the actual parse error
+
+    :type parse_error: `ParseError`
+    """
+    assert isinstance(parse_error, ParseError)
+    ParseError.parse_errors.append(parse_error)
+    message = unicode(parse_error)
+    if parse_error.type == "error":
+        ParseError.logger.error(message)
+        if not settings["quiet"]:
+            print>>sys.stderr, message
+    else:
+        ParseError.logger.warning(message)
 
 if __name__ == "__main__":
     import doctest
