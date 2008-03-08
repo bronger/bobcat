@@ -157,13 +157,10 @@ class Excerpt(unicode):
         :rtype: boolean
         """
         if isinstance(position, (list, tuple)):
-            start, end = position
-            for i in self.escaped_positions:
-                if start <= i < end:
-                    return True
-            return False
+            part = self.escaped_text()[position[0]:position[1]]
         else:
-            return position in self.escaped_positions
+            part = self.escaped_text()[position]
+        return u"\u0000" in part
     def escaped_text(self):
         """Returns the unicode representation of the Excerpt with all escaped
         characters replaced with Null characters.
