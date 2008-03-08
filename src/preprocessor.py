@@ -311,6 +311,7 @@ class Excerpt(unicode):
             """
             if char == None:
                 char = current_char
+            assert len(current_char) == 1
             s.processed_text.append(char)
             s.position += 1
         def resync_at_linestart():
@@ -448,7 +449,8 @@ class Excerpt(unicode):
                 escape_next_character()
                 deferred_escape = False
             copy_character()
-        assert not s.in_sourcecode
+        if s.in_sourcecode:
+            code_snippets_intervals[-1] = (code_snippets_intervals[-1], len(s.processed_text))
         return u"".join(s.processed_text), original_positions, escaped_positions, \
             code_snippets_intervals
     def __add__(self, other):
