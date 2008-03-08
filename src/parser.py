@@ -280,6 +280,32 @@ class Node(object):
         never be overridden."""
         for child in self.children:
             child.process()
+    def throw_parse_error(self, description, position_marker=None):
+        """Adds a parsing error to the list of parsing errors.
+
+        :Parameters:
+          - `description`: description of what went wrong
+          - `position_marker`: the position where the error happened.  If not
+            given, the starting point of this element is used.
+
+        :type description: unicode
+        :type position_marker: `common.PositionMarker`
+        """
+        common.add_parse_error(
+            common.ParseError(self, description, position_marker=position_marker))
+    def throw_parse_warning(self, description, position_marker=None):
+        """Adds a parsing warning to the list of parsing errors.
+
+        :Parameters:
+          - `description`: description of what was sub-optimal
+          - `position_marker`: the position where the warning happened.  If not
+            given, the starting point of this element is used.
+
+        :type description: unicode
+        :type position_marker: `common.PositionMarker`
+        """
+        common.add_parse_error(
+            common.ParseError(self, description, "warning", position_marker))
 
 class Document(Node):
     """The root node of a document.
@@ -624,7 +650,8 @@ class Emphasize(Node):
     def parse(self, text, position, end):
         super(Emphasize, self).parse(text, position)
         position = parse_inline(self, text, position, end)
-        assert text[position] == "_"
+        if text[position] != "_":
+            self.throw_parse_error("Emphasize text is not terminated in current block")
         return position + 1
 
 class Hyperlink(Node):
