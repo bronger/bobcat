@@ -1134,6 +1134,11 @@ class ParseError(Error):
     """Generic error class for parse errors and warnings.  At the same time,
     the class holds the list with all errors and warnings.
 
+    This class is special in two respects: First, it isn't raised usually;
+    instead, its instances are appended to `parse_errors`.  And secondly, it
+    can also be a warning.  However, it would be awkward and useless to use
+    Python's warning facility for parser warnings, too.
+
     :cvar parse_errors: all errors and warnings during the last parsing run.
       This variable is to be used by external modules that are interested in
       the result of the parsing process.
@@ -1166,7 +1171,7 @@ class ParseError(Error):
 
         :type provoking_element: `parser.Node`
         :type description: unicode
-        :type type_: str
+        :type `type_`: str
         :type position_marker: `PositionMarker`
         """
         super(ParseError, self).__init__(description)
@@ -1180,7 +1185,7 @@ class ParseError(Error):
         return u"%s: %s" % (self.position, self.description)
 
 def add_parse_error(parse_error):
-    """Adds en error or warning to the list of errors and warnings.  It
+    r"""Adds en error or warning to the list of errors and warnings.  It
     also writes it to the log file and to stderr, if this hasn't be changed by
     the user.
 
@@ -1188,6 +1193,21 @@ def add_parse_error(parse_error):
       - `parse_error`: the actual parse error
 
     :type parse_error: `ParseError`
+
+        >>> import parser, preprocessor
+        >>> import os.path
+        >>> os.chdir(os.path.join(modulepath, "../misc/"))
+        >>> setup_logging()
+        >>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
+        ... "Dummy document.\n")
+        >>> text, __, __ = preprocessor.load_file("test2.rsl")
+        >>> node = parser.Node(None)
+        >>> node.parse(text, 0)
+        0
+        >>> parser.common.settings["quiet"] = True
+        >>> node.throw_parse_error("test error message")
+        >>> parser.common.ParseError.parse_errors
+        [ParseError('test error message',)]
     """
     assert isinstance(parse_error, ParseError)
     ParseError.parse_errors.append(parse_error)
