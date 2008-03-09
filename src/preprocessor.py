@@ -499,6 +499,8 @@ class Excerpt(unicode):
                 first_mark_in_second_excerpt.transpose(length_first_part_original)
         concatenation.escaped_positions = self.escaped_positions | \
             set([pos + length_first_part for pos in other.escaped_positions])
+        # FixMe: When the last interval from "self" and the first of "other"
+        # touch each other, they should be merged.
         concatenation.code_snippets_intervals = self.code_snippets_intervals + \
             [(start + length_first_part, end + length_first_part)
              for start, end in other.code_snippets_intervals]
