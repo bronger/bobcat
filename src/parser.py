@@ -52,7 +52,7 @@ by code injection from the backend module into the classes of the parser.
 """
 
 import re, weakref, imp, os.path
-import common
+import common, xrefs
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
@@ -149,11 +149,22 @@ class Node(object):
     :ivar language: the :RFC:`4646` language tag for this node.  Always in
       lowercase.
 
+    :ivar __text: The original text from which this node was created (parsed).
+      Only needed for calculating `__position`, see the `position` property.
+    :ivar __start_index: The index within `__text` where this node starts.
+      Only needed for calculating `__position`, see the `position` property.
+    :ivar __position: cache for the original position of this node in the
+      source file, see the `position` property.
+
     :type parent: weakref to Node
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
+    :type __text: `prepocessor.Excerpt`
+    :type __start_index: int
+    :type __position: `common.PositionMarker`
     """
+    __position = None
     def __init__(self, parent):
         """It will also be called by all derived classes.
 
@@ -181,11 +192,19 @@ class Node(object):
         representation of the current node.  Construct the current node and in
         particular its children according to that representation.
 
+        This is some sort of second ``__init__`` method.  In particular, its
+        signature differs from class to class.  However, doing it here rather
+        than in the official constructor gives more flexibility to the result
+        values.  Additionally, it makes the source more legible.
+
+        Derived classes must call this parse method at the beginning of their
+        parse method.  They may safely throw away the result value.
+
         :Parameters:
           - `text`: source document
           - `position`: starting position of the parsing
 
-        :type text: preprocessor.Excerpt
+        :type text: `preprocessor.Excerpt`
         :type position: int
 
         :Return:
@@ -197,7 +216,32 @@ class Node(object):
         :rtype: int
         """
         # pylint: disable-msg=R0201,W0613
+        self.__text, self.__start_index = text, position
         return position
+    def __get_position(self):
+        """Returns the starting position of this element.  In some situations,
+        for example when a parse error must be reported, it is necessary to
+        have the position of the element in the original source files.
+        However, calculating the position is rather costly and should only be
+        done if it is really needed.
+
+        Therefore, the position is calculated in this private method and cached
+        in ``self.__position``.  To get this working, it is necessary that the
+        ``parse`` method stored the original text and starting position in two
+        private instance variables that are used here for the calculation.
+
+        :Return:
+          the original position in the source file
+
+        :rtype: `common.PositionMarker`
+        """
+        if not self.__position:
+            self.__position = self.__text.original_position(self.__start_index)
+        return self.__position
+    position = property(__get_position, doc="""Starting position of this
+        document element in the original source file.
+
+        :type: `common.PositionMarker`""")
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
         `helpers.print_tree()` instead."""
@@ -236,6 +280,32 @@ class Node(object):
         never be overridden."""
         for child in self.children:
             child.process()
+    def throw_parse_error(self, description, position_marker=None):
+        """Adds a parsing error to the list of parsing errors.
+
+        :Parameters:
+          - `description`: description of what went wrong
+          - `position_marker`: the position where the error happened.  If not
+            given, the starting point of this element is used.
+
+        :type description: unicode
+        :type position_marker: `common.PositionMarker`
+        """
+        common.add_parse_error(
+            common.ParseError(self, description, position_marker=position_marker))
+    def throw_parse_warning(self, description, position_marker=None):
+        """Adds a parsing warning to the list of parsing errors.
+
+        :Parameters:
+          - `description`: description of what was sub-optimal
+          - `position_marker`: the position where the warning happened.  If not
+            given, the starting point of this element is used.
+
+        :type description: unicode
+        :type position_marker: `common.PositionMarker`
+        """
+        common.add_parse_error(
+            common.ParseError(self, description, "warning", position_marker))
 
 class Document(Node):
     """The root node of a document.
@@ -282,6 +352,7 @@ class Document(Node):
         self.packages = set()
         self.emit = None
     def parse(self, text, position=0):
+        super(Document, self).parse(text, position)
         position = parse_blocks(self, text, position)
         self.language = self.language or "en"
         return position
@@ -381,6 +452,7 @@ class Text(Node):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
         """Just copy a slice of the source code into `text`."""
+        super(Text, self).parse(text, position)
         self.text = text[position:end]
         return end
     def process(self):
@@ -389,7 +461,7 @@ class Text(Node):
         `preprocessor.Excerpt.apply_postprocessing`."""
         self.root().emit(self.text.apply_postprocessing())
 
-inline_delimiter = re.compile(r"[_]")
+inline_delimiter = re.compile(ur"[_`]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
 def parse_inline(parent, text, position, end):
     """Parse the source for inline elements like emphasize or footnode and add
     those elements to the current parental node.
@@ -417,11 +489,16 @@ def parse_inline(parent, text, position, end):
         if delimiter_match:
             textnode = Text(parent)
             position = textnode.parse(text, position, delimiter_match.start())
-            position = delimiter_match.end()
             delimiter = delimiter_match.group()
             if delimiter == "_":
-                emphasize = Emphasize(parent)
-                position = emphasize.parse(text, position, end)
+                if isinstance(parent, Emphasize):
+                    return position
+                else:
+                    emphasize = Emphasize(parent)
+                    position = emphasize.parse(text, position+1, end)
+            elif delimiter.startswith("<"):
+                hyperlink = Hyperlink(parent)
+                position = hyperlink.parse(text, position, delimiter_match.end())
         else:
             textnode = Text(parent)
             position = textnode.parse(text, position, end)
@@ -485,6 +562,7 @@ class Heading(Node):
     def __init__(self, parent):
         super(Heading, self).__init__(parent)
     def parse(self, text, position, end):
+        super(Heading, self).parse(text, position)
         position = parse_inline(self, text, position, end)
         return position
 
@@ -507,6 +585,7 @@ class Section(Node):
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):
+        super(Section, self).parse(text, position)
         section_number_match, self.nesting_level = self.parse_section_number(text, position)
         position = section_number_match.end()
         heading = Heading(self)
@@ -561,6 +640,7 @@ class Paragraph(Node):
     def __init__(self, parent):
         super(Paragraph, self).__init__(parent)
     def parse(self, text, position, end):
+        super(Paragraph, self).parse(text, position)
         return parse_inline(self, text, position, end)
 
 class Emphasize(Node):
@@ -568,12 +648,47 @@ class Emphasize(Node):
     def __init__(self, parent):
         super(Emphasize, self).__init__(parent)
     def parse(self, text, position, end):
-        end_of_emphasize = guarded_find("_", text, position, end)
-        position = parse_inline(self, text, position, end_of_emphasize)
-        return end_of_emphasize + 1
+        super(Emphasize, self).parse(text, position)
+        position = parse_inline(self, text, position, end)
+        if text[position] != "_":
+            self.throw_parse_error("Emphasize text is not terminated in current block")
+        return position + 1
+
+class Hyperlink(Node):
+    """Class for hyperlinks aka weblinks.
+
+    :ivar url: the URL of this hyperlink
+
+    :type url: unicode
+    """
+    def __init__(self, parent):
+        super(Hyperlink, self).__init__(parent)
+    def parse(self, text, position, end):
+        super(Hyperlink, self).parse(text, position)
+        if text[position] == "<" and text[end-1] == ">":
+            self.url = unicode(text)[position+1:end-1]
+        else:
+            raise NotImplementedError("Only URL-only hyperlinks are implemented so far")
+        return end
+
+class Footnote(Node):
+    pass
+
+class FootnoteReference(Node, xrefs.MarkBasedNode):
+    pass
+
+class DelayedWeblink(Node):
+    pass
+
+class DelayedWeblinkReference(Node, xrefs.MarkBasedNode):
+    pass
 
 import copy, inspect
 _globals = copy.copy(globals())
 Document.node_types = dict([(cls.__name__.lower(), cls) for cls in _globals.values()
                             if inspect.isclass(cls) and issubclass(cls, Node)])
 del _globals, cls
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

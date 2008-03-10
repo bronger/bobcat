@@ -47,7 +47,8 @@
 Gummi files are pure text files in an octet-based encoding.  This encoding
 SHOULD be supported by current Python implementations, see
 \url{http://docs.python.org/lib/standard-encodings.html}.  The encoding MUST
-have ASCII as its \mbox{7-bit} subset.
+have ASCII as its \mbox{7-bit} subset.  Gummi files MUST NOT contain NULL
+characters.
 
 To ensure interoperability, line endings may be those of Unix (LF), Windows
 (CR+LF), or Macintosh (CR) systems.  They may even be mixed in one file.
@@ -360,9 +361,11 @@ plus the extension ``\verb|.gim|''.
 
 \element{Heading}{\textit{inline}}
 
-\element{\textit{inline}}{\textit{Text} | Emphasize}
+\element{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink}
 
 \element{Emphasize}{\textit{inline}}
+
+\element{Hyperlink}{\textit{inline}}
 
 \endgroup
 

@@ -79,7 +79,7 @@ class PositionMarker(object):
         return 'PositionMarker("%s", %d, %d, %d)' % \
             (self.url, self.linenumber, self.column, self.index)
     def __str__(self):
-        return 'file "%s", line %d, column %d' % (self.url, self.linenumber, self.column+1)
+        return 'file "%s", line %d, column %d' % (self.url, self.linenumber, self.column)
     def __cmp__(self, other):
         """The `index` must not be included in the decision whether two PositionMarkers
         are the same."""
@@ -114,13 +114,11 @@ class Error(Exception):
         :Parameters:
           - `description`: error message
 
-        :type description: string
+        :type description: unicode
         """
-        if isinstance(description, unicode):
-            # FixMe: The following must be made OS-dependent
-            description = description.encode("utf-8")
         self.description = description
-        Exception.__init__(self, description)
+        # FixMe: The following must be made OS-dependent
+        Exception.__init__(self, description.encode("utf-8"))
 
 class LocalVariablesError(Error):
     """Error class for malformed lines with the local variables.
@@ -130,9 +128,9 @@ class LocalVariablesError(Error):
         :Parameters:
           - `description`: error message
 
-        :type description: string
+        :type description: unicode
         """
-        Error.__init__(self, description)
+        super(LocalVariablesError, self).__init__(description)
 
 class FileError(Error):
     """Error class for errors in a Gummi file.
@@ -143,10 +141,10 @@ class FileError(Error):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
-        Error.__init__(self, str(position_marker) + ": " + description)
+        super(FileError, self).__init__(str(position_marker) + ": " + description)
 
 class EncodingError(FileError):
     """Error class for encoding errors in a Gummi file.
@@ -157,10 +155,10 @@ class EncodingError(FileError):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
-        FileError.__init__(self, description, position_marker)
+        super(EncodingError, self).__init__(description, position_marker)
 
 class KeyValueError(FileError):
     """Error class for errors in key/value lists in a Gummi file.
@@ -171,10 +169,10 @@ class KeyValueError(FileError):
           - `description`: error message
           - `position_marker`: the exact position where the error occured
 
-        :type description: string
+        :type description: unicode
         :type position_marker: PositionMarker
         """
-        Error.__init__(self, str(position_marker) + ": " + description)
+        super(KeyValueError, self).__init__(str(position_marker) + ": " + description)
 
 def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
     r"""Treats first_line as a line with local variables and extracts the
@@ -279,7 +277,7 @@ class SettingError(Error):
         :type key: string
         :type value: str, unicode, float, int, or bool
         """
-        Error.__init__(self, "setting '%s = %s': %s" % (key, value, description))
+        super(SettingError, self).__init__("setting '%s = %s': %s" % (key, value, description))
 
 class Setting(object):
     """One single Setting, this means, a key--value pair.  It is used in
@@ -1100,6 +1098,8 @@ settings.set_default("output path", None, "unicode", docstring="""
 settings.set_default("backend", None, "unicode", docstring="""
     The "official" name of the backend in all-lowercase, e.g. "latex" or
     "html".""")
+settings.set_default("quiet", False, docstring="""
+    If ``True``, all output to stdout and stderr is supressed.""")
 
 
 def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
@@ -1137,7 +1137,94 @@ def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
                 pass
         logging.basicConfig(stream=LogSink())
 
+class ParseError(Error):
+    """Generic error class for parse errors and warnings.  At the same time,
+    the class holds the list with all errors and warnings.
 
+    This class is special in two respects: First, it isn't raised usually;
+    instead, its instances are appended to `parse_errors`.  And secondly, it
+    can also be a warning.  However, it would be awkward and useless to use
+    Python's warning facility for parser warnings, too.
+
+    :cvar parse_errors: all errors and warnings during the last parsing run.
+      This variable is to be used by external modules that are interested in
+      the result of the parsing process.
+    :cvar logger: logger instance for parser messages
+
+    :ivar provoking_element: the document element in which the error or warning
+      occured
+    :ivar type: if ``"error"``, it is an error; if ``"warning"``, it is a
+      warning
+    :ivar position: where the error or warning occured
+
+    :type parse_errors: list of `ParseError`
+    :type logger: logging.Logger
+    :type provoking_element: `parser.Node`
+    :type type: str
+    :type position: `PositionMarker`
+    """
+    logger = logging.getLogger("gummi.parser")
+    parse_errors = []
+    def __init__(self, provoking_element, description, type_="error", position_marker=None):
+        """
+        :Parameters:
+          - `provoking_element`: the document element in which the error
+            occured
+          - `description`: error message
+          - `type_`: if ``"error"``, it is an error; if ``"warning"``, it is a
+            warning
+          - `position_marker`: if given, it denotes the exact position in the
+            document where the error occured
+
+        :type provoking_element: `parser.Node`
+        :type description: unicode
+        :type `type_`: str
+        :type position_marker: `PositionMarker`
+        """
+        super(ParseError, self).__init__(description)
+        assert type_ in ["error", "warning"]
+        self.provoking_element, self.type, self.position = \
+            provoking_element, type_, position_marker or provoking_element.position
+    def __str__(self):
+        # FixMe: The following must be made OS-dependent
+        return unicode(self).encode("utf-8")
+    def __unicode__(self):
+        return u"%s: %s" % (self.position, self.description)
+
+def add_parse_error(parse_error):
+    r"""Adds en error or warning to the list of errors and warnings.  It
+    also writes it to the log file and to stderr, if this hasn't be changed by
+    the user.
+
+    :Parameters:
+      - `parse_error`: the actual parse error
+
+    :type parse_error: `ParseError`
+
+        >>> import parser, preprocessor
+        >>> import os.path
+        >>> os.chdir(os.path.join(modulepath, "../misc/"))
+        >>> setup_logging()
+        >>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
+        ... "Dummy document.\n")
+        >>> text, __, __ = preprocessor.load_file("test2.rsl")
+        >>> node = parser.Node(None)
+        >>> node.parse(text, 0)
+        0
+        >>> parser.common.settings["quiet"] = True
+        >>> node.throw_parse_error("test error message")
+        >>> parser.common.ParseError.parse_errors
+        [ParseError('test error message',)]
+    """
+    assert isinstance(parse_error, ParseError)
+    ParseError.parse_errors.append(parse_error)
+    message = unicode(parse_error)
+    if parse_error.type == "error":
+        ParseError.logger.error(message)
+        if not settings["quiet"]:
+            print>>sys.stderr, message
+    else:
+        ParseError.logger.warning(message)
 
 if __name__ == "__main__":
     import doctest

@@ -66,6 +66,33 @@ class Excerpt(unicode):
     :cvar entity_pattern: Regexp pattern for numerical entities like
       ``\\0x0207;`` or ``\\#8022;``.
     :type entity_pattern: re.pattern
+
+    :ivar escaped_positions: the indices of all characters in the Excerpt which
+      were escaped in the original input.  Note that this is a set which is not
+      ordered.
+    :ivar code_snippets_intervals: all start--end tuples of index ranges in the
+      Excerpt which contain code snippets, so that they have to be treated as
+      escaped.  Note that they must be in ascending order of the start
+      indices. Actually, this could also be called ``escaped_intervals``
+      because it could be substituted with many equivalent entries in
+      `escaped_positions`.  However, for performance reasons, code snippets are
+      stored in this start--end form.  Otherwise, `escaped_positions` would be
+      cluttered up with too many subsequent entries.
+    :ivar original_positions: maps indices in the Excerpt to position markers
+      that point to the actual origin of this index in the Excerpt.
+    :ivar original_text: the original unicode string this Excerpt stems from
+    :ivar __post_substitutions: the substitutions for the post input method.
+      They are stored here for eventual use in `apply_post_input_method`.
+    :ivar __escaped_text: the unicode equivalent of the Excerpt, with all
+      escaped characters and characters of code snippets replaced with NULL
+      characters.  It is a cache used in `escaped_text`.
+
+    :type escaped_positions: set of int
+    :type code_snippets_intervals: list of (int, int)
+    :type original_positions: list of `common.PositionMarker`
+    :type original_text: unicode
+    :type __post_substitutions: list of (re.pattern, unicode)
+    :type __escaped_text: unicode
     """
     # FixMe: The following pylint directive is necessary because astng doesn't
     # parse attribute settings in the __new__ classmethod.  If this changes or
@@ -130,43 +157,11 @@ class Excerpt(unicode):
 
         :rtype: boolean
         """
-        # Note that self.escaped_positions must be sorted!
         if isinstance(position, (list, tuple)):
-            start, end = position
-            for i in self.escaped_positions:
-                if start <= i < end:
-                    return True
-            return False
+            part = self.escaped_text()[position[0]:position[1]]
         else:
-            return position in self.escaped_positions
-    def next_escaped_position(self, offset):
-        """Yields the index for the first character that is escaped in the
-        Excerpt, starting from `offset`.  If none was found, it returns the
-        length of the Excerpt.
-
-        :Parameters:
-          - `offset`: starting offset of the search for the next escaped
-            characters.  Must be a character position within the Excerpt.
-
-        :type offset: int
-
-        :Return:
-          The index of the first character after `offset` that is escaped.  If
-          none was found, it returns the length of the Excerpt.
-
-        :rtype: int
-        """
-        length = len(self)
-        if not 0 <= offset < length:
-            raise IndexError("invalid value %d for "
-                             "offset in next_escaped_position near line %d of file %s" %
-                             (offset, self.original_positions[0].linenumber,
-                              self.original_positions[0].url))
-        next_positions = [position for position in self.escaped_positions if position >= offset]
-        if next_positions:
-            return sorted(next_positions)[0]
-        else:
-            return len(self)
+            part = self.escaped_text()[position]
+        return u"\u0000" in part
     def escaped_text(self):
         """Returns the unicode representation of the Excerpt with all escaped
         characters replaced with Null characters.
@@ -182,9 +177,11 @@ class Excerpt(unicode):
             text = list(unicode(self))
             for pos in self.escaped_positions:
                 text[pos] = u"\u0000"
+            for start, end in self.code_snippets_intervals:
+                text[start:end] = (end-start) * u"\u0000"
             self.__escaped_text = u"".join(text)
         return self.__escaped_text
-    def original_position(self, position):
+    def original_position(self, position=0):
         """Maps a position within the excerpt to the position in the original
         file.
 
@@ -218,6 +215,36 @@ class Excerpt(unicode):
         closest_marker = self.original_positions[closest_position].transpose(offset)
         closest_marker.column += offset
         return closest_marker
+    def split(self, split_characters=None):
+        """Splits the Excerpt like Python's split() string method does.  If no
+        argument is given, it splits at whitespace (just as the string method).
+        Important note: Escaped characters are not regarded as split
+        characters.
+
+        :Parameters:
+          - `split_characters`: a string containing all characters that divide
+            the parts that should be created
+
+        :type split_characters: unicode
+
+        :Return:
+          a list with all parts in which the Excerpt was split up
+
+        :rtype: list of `Excerpt`
+        """
+        parts = []
+        characters = split_characters if split_characters is not None else u" \t\v\n\r"
+        for match in re.finditer(u"[^" + re.escape(characters) + "]*",
+                                 self.escaped_text(), re.UNICODE):
+            start, end = match.span()
+            if start == end:
+                # Match was empty; then it is ignored, unless at the beginning
+                # and the end.
+                if split_characters is None or \
+                        (start != 0 and start != len(self.escaped_text())):
+                    continue
+            parts.append(self[start:end])
+        return parts
     class Status(object):
         """A mere container for some immutable data structures used in the pre-
         and postprocessing.
@@ -271,8 +298,9 @@ class Excerpt(unicode):
           - original positions as a dict of position -- (filename, linenumber,
             column).  The linenumber starts at 1, the column at 0.
           - positions of escaped characters as a list of positions
+          - intervals of source code snippets
 
-        :rtype: unicode, dict, list
+        :rtype: unicode, dict, list, list
         """
         comment_line_pattern = re.compile(r"^\.\.( .*)?$", re.MULTILINE)
         # The following functions seem to violate an important programming
@@ -307,6 +335,7 @@ class Excerpt(unicode):
             """
             if char == None:
                 char = current_char
+            assert len(current_char) == 1
             s.processed_text.append(char)
             s.position += 1
         def resync_at_linestart():
@@ -330,6 +359,7 @@ class Excerpt(unicode):
         s.processed_text = []
         original_positions = {}
         escaped_positions = set()
+        code_snippets_intervals = []
         deferred_escape = False
         resync_at_linestart()
         # For the sake of performance, I don't test every characters position
@@ -362,6 +392,8 @@ class Excerpt(unicode):
                 continue
             if s.in_sourcecode:
                 if original_text[s.position:s.position+3] == "```":
+                    code_snippets_intervals[-1] = \
+                        (code_snippets_intervals[-1], len(s.processed_text))
                     copy_character()
                     copy_character()
                     copy_character()
@@ -434,20 +466,24 @@ class Excerpt(unicode):
                 copy_character()
                 copy_character()
                 copy_character()
+                code_snippets_intervals.append(len(s.processed_text))
                 continue
             # Now for the usual case of an ordinary character
             if deferred_escape:
                 escape_next_character()
                 deferred_escape = False
             copy_character()
-        return u"".join(s.processed_text), original_positions, escaped_positions
+        if s.in_sourcecode:
+            code_snippets_intervals[-1] = (code_snippets_intervals[-1], len(s.processed_text))
+        return u"".join(s.processed_text), original_positions, escaped_positions, \
+            code_snippets_intervals
     def __add__(self, other):
         if not isinstance(other, Excerpt):
             return NotImplemented
         concatenation = unicode(self) + unicode(other)
         concatenation = Excerpt(concatenation, mode="NONE")
-        assert self.post_substitutions == other.post_substitutions
-        concatenation.post_substitutions = self.post_substitutions
+        assert self.__post_substitutions == other.__post_substitutions
+        concatenation.__post_substitutions = self.__post_substitutions
         concatenation.original_text = self.original_text + other.original_text
         concatenation.original_positions = self.original_positions.copy()
         length_first_part = len(self)
@@ -463,13 +499,18 @@ class Excerpt(unicode):
                 first_mark_in_second_excerpt.transpose(length_first_part_original)
         concatenation.escaped_positions = self.escaped_positions | \
             set([pos + length_first_part for pos in other.escaped_positions])
+        # FixMe: When the last interval from "self" and the first of "other"
+        # touch each other, they should be merged.
+        concatenation.code_snippets_intervals = self.code_snippets_intervals + \
+            [(start + length_first_part, end + length_first_part)
+             for start, end in other.code_snippets_intervals]
         return concatenation
     def __getitem__(self, key):
         if key < 0:
             key += len(self)
         character = super(Excerpt, self).__getitem__(key)
         character = Excerpt(character, mode="NONE")
-        character.post_substitutions = self.post_substitutions
+        character.__post_substitutions = self.__post_substitutions
         marker = self.original_positions.get(key, self.original_position(key))
         character.original_text = \
             self.original_text[marker.index:self.original_position(key+1).index]
@@ -479,6 +520,13 @@ class Excerpt(unicode):
             character.escaped_positions = set([0])
         else:
             character.escaped_positions = set()
+        character.code_snippets_intervals = []
+        for start, end in self.code_snippets_intervals:
+            if start <= key < end:
+                character.code_snippets_intervals = [(0, 1)]
+                break
+            if key < start:
+                break
         return character
     def __getslice__(self, i, j):
         length = len(self)
@@ -486,7 +534,7 @@ class Excerpt(unicode):
         j = max(min(j, length), i)
         text = super(Excerpt, self).__getslice__(i, j)
         slice_ = Excerpt(text, mode="NONE")
-        slice_.post_substitutions = self.post_substitutions
+        slice_.__post_substitutions = self.__post_substitutions
         start_marker = self.original_position(i)
         offset = start_marker.index
         slice_.original_text = \
@@ -497,6 +545,14 @@ class Excerpt(unicode):
         if 0 not in slice_.original_positions:
             slice_.original_positions[0] = start_marker.transpose(-offset)
         slice_.escaped_positions = set([pos - i for pos in self.escaped_positions if i <= pos < j])
+        slice_.code_snippets_intervals = \
+            [(start - i, end - i) for start, end in self.code_snippets_intervals
+             if start < j and end > i]
+        if slice_.code_snippets_intervals:
+            slice_.code_snippets_intervals[0] = (max(slice_.code_snippets_intervals[0][0], 0),
+                                                 slice_.code_snippets_intervals[0][1])
+            slice_.code_snippets_intervals[-1] = (slice_.code_snippets_intervals[-1][0],
+                                                  min(slice_.code_snippets_intervals[-1][1], j))
         return slice_
     @classmethod
     def apply_post_input_method(cls, excerpt):
@@ -515,9 +571,10 @@ class Excerpt(unicode):
           - the processed text
           - original positions as a dict of position -- (filename, linenumber,
             column).  The linenumber starts at 1, the column at 0.
-          - positions of escaped characters as a list of positions
+          - positions of escaped characters as a set of positions
+          - intervals of source code snippets
 
-        :rtype: unicode, dict, list
+        :rtype: unicode, dict, set, list
         """
         # The following functions seem to violate an important programming
         # rule: They modify variables of the outer scope, i.e. the enclosing
@@ -544,19 +601,34 @@ class Excerpt(unicode):
         s = Excerpt.Status()
         original_positions = {}
         escaped_positions = set()
+        code_snippets_intervals = []
+        original_code_snippets_intervals = excerpt.code_snippets_intervals[:]
         # For the sake of performance, I don't test every characters position
         # for input method matches, but look for the next upcoming match and
         # store it.
         text = unicode(excerpt)
         next_match_position, next_match_length, replacement = \
-            cls.get_next_match(text, excerpt.post_substitutions)
+            cls.get_next_match(text, excerpt.__post_substitutions)
         # Next comes the Big While which crawls through the whole source code
         # and postprocesses it.
         while s.position < len(text):
             if s.position in excerpt.escaped_positions:
                 escaped_positions.add(len(s.processed_text))
+            if s.in_sourcecode:
+                if s.position >= original_code_snippets_intervals[0][1]:
+                    del original_code_snippets_intervals[0]
+                    s.in_sourcecode = False
+                    code_snippets_intervals[-1] = \
+                        (code_snippets_intervals[-1], len(s.processed_text))
+            if original_code_snippets_intervals:
+                if s.position >= original_code_snippets_intervals[0][0]:
+                    code_snippets_intervals.append(len(s.processed_text))
+                    s.in_sourcecode = True
             if s.position in excerpt.original_positions:
                 original_positions[len(s.processed_text)] = excerpt.original_positions[s.position]
+            if s.in_sourcecode:
+                copy_character()
+                continue
             current_char = text[s.position]
             if current_char in string.whitespace:
                 copy_character()
@@ -564,7 +636,7 @@ class Excerpt(unicode):
             if s.position > next_match_position:
                 # I must update the next match
                 next_match_position, next_match_length, replacement = \
-                    cls.get_next_match(text, excerpt.post_substitutions, s.position)
+                    cls.get_next_match(text, excerpt.__post_substitutions, s.position)
             if s.position == next_match_position:
                 any_escaped = False
                 for i in range(s.position, s.position + next_match_length):
@@ -577,7 +649,13 @@ class Excerpt(unicode):
                     continue
             # Now for the usual case of an ordinary character
             copy_character()
-        return s.processed_text, original_positions, escaped_positions
+        if s.in_sourcecode:
+            assert len(original_code_snippets_intervals) == 1
+            assert original_code_snippets_intervals[0] == len(text)
+            code_snippets_intervals[-1] = (code_snippets_intervals[-1], len(s.processed_text))
+        else:
+            assert not original_code_snippets_intervals
+        return s.processed_text, original_positions, escaped_positions, code_snippets_intervals
     def __new__(cls, excerpt, mode, url=None,
                 pre_substitutions=None, post_substitutions=None):
         """Here I create the instance.  I create a unicode object and add some
@@ -614,21 +692,23 @@ class Excerpt(unicode):
         if mode == "NONE":
             self = unicode.__new__(cls, excerpt)
         elif mode == "PRE":
-            preprocessed_text, original_positions, escaped_positions = \
+            preprocessed_text, original_positions, escaped_positions, code_snippets_intervals = \
                 cls.apply_pre_input_method(excerpt, url, pre_substitutions)
             self = unicode.__new__(cls, preprocessed_text)
             self.original_text = unicode(excerpt)
             self.original_positions = original_positions
             self.escaped_positions = escaped_positions
-            self.post_substitutions = post_substitutions
+            self.code_snippets_intervals = code_snippets_intervals
+            self.__post_substitutions = post_substitutions
         elif mode == "POST":
-            postprocessed_text, original_positions, escaped_positions = \
+            postprocessed_text, original_positions, escaped_positions, code_snippets_intervals = \
                 cls.apply_post_input_method(excerpt)
             self = unicode.__new__(cls, postprocessed_text)
             self.original_positions = original_positions
             self.escaped_positions = escaped_positions
+            self.code_snippets_intervals = code_snippets_intervals
             self.original_text = excerpt.original_text
-            self.post_substitutions = post_substitutions
+            self.__post_substitutions = post_substitutions
         self.__escaped_text = None
         return self
     def apply_postprocessing(self):

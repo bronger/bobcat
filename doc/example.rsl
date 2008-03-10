@@ -1,49 +1,4 @@
-<!-- -*- mode: text; ispell-local-dictionary: "british"; -*- -->
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-GB" lang="en-GB">
-<head profile="http://dublincore.org/documents/dcq-html/">
-  <title>Gummi example</title>
-  <!--link rel="shortcut icon" href="./pool/favicon.ico" /-->
-  <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
-  <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" />
-  <meta name="generator" content="Torsten Bronger" />
-  <meta name="robots" content="index,follow" />
-  <meta name="DC.title" content="Gummi-Beispieldatei" />
-  <meta name="DC.date" content="2007-07-04" />
-  <meta name="Date" content="2007-07-04" />
-  <meta name="ICBM" content="50.78, 6.08" />
-  <meta name="geo.position" content="50.78;6.08" />
-  <meta name="geo.placename" content="Aachen, Northrhine-Westphalia" />
-  <meta name="geo.region" content="DE-NRW" />
-
-  <meta name="DC.creator" content="Torsten Bronger" />
-  <meta name="Author" content="Torsten Bronger" />
-  <meta name="DC.rights" content="Copyright © 2007 Torsten Bronger" />
-  <meta name="Copyright" content="Copyright © 2007 Torsten Bronger" />
-  <meta name="DC.description" content="Gummi-Beispieldatei" />
-  <meta name="DC.type" scheme="DCTERMS.DCMIType" content="Text" />
-  <meta name="DC.format" scheme="DCTERMS.IMT" content="text/html" />
-  <meta name="DC.language" scheme="rfc3066" content="en" />
-  <meta name="Language" content="en" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-<style type="text/css">
-/*<![CDATA[*/
-body { font-family: verdana,tahoma,sans-serif;
-       margin-left:10%; margin-right:15%; margin-top:5ex; margin-bottom:10ex;
-       line-height:140%}
-pre { font-weight: bold }
-/*]]>*/
-</style>
-</head>
-
-<body>
-<pre>
-.. -*- coding: utf-8 -*-
+.. -*- coding: utf-8; mode: text; mode: auto-fill -*-
 .. Gummi 1.0
 
 
@@ -70,13 +25,16 @@ sign line _above_ the heading.
 Cross references are put in backquotes.  I refer to the next chapter like this:
 See chapter `Inline markup`, or see chapter `Inline-…` if this is unambiguous,
 or see → chapter `Inline-Markup` so that the word “chapter” becomes part of the
-hyperlink, too.
+hyperlink, too.  Internally, only the first 80 characters of whatever are
+stored as a label.  This may lead to ambiguities but only in quite pathological
+cases.
 
 The heading number can be chosen freely.  The Gummi compiler or editor can
 adjust them to the print output if the author desires this.  This “writeback”
 includes input method substitutions (see below) and the very first line in
 which the encoding must be declared.  If this very first line is missing, this
 issues a warning.
+
 
 1. Inline markup
 ================
@@ -97,10 +55,11 @@ brackets, the protocol prefix may be omitted.
 
 The same footnote mark may occur multiple times.  They will be processed in
 order of appearance.  This means that you could mark all your footnotes with \*
-(not very wise, tough).
+(not very wise, tough).  Footnote and reference to footnote must be in the same
+section.  The reference must come first.
 
 With hyperlinks, you have two possibilities: `IBM's homepage` and the separated
-definition as above, or → Homepage of IBM &lt;www.ibm.com>.  Instead of angle
+definition as above, or → Homepage of IBM <www.ibm.com>.  Instead of angle
 brackets you can also use ASCII double quotes or round parentheses, but then
 the protocol prefix is mandatory.
 
@@ -109,18 +68,20 @@ the protocol prefix is mandatory.
 -------------------------------------------------------------------------------
 
 .. → may be written as --> (via the input method).
-.. → can be dropped with hyperlinks if everything remains unambiguous.
 ..
 .. → is used also for distinguishing between links to sections with same
 .. headings: `Results → Silicon samples`.  Thus, in case two sections are
 .. called “Silicon samples” but only one has a parent section called “Results”,
-.. this is the way to go.
+.. this is the way to go.  This also works for explicitly given labels.
 
 In this ↑paragraph you see how index entries are realised.
 
-.. ↑`long index entry` and ↑`index entry → long` or ↑`_index entry →
-.. long_` in order to get the page number printed emphasised.  Instead of \↑
-.. you may also type --^ (via input method).
+.. ↑`long index entry` and ↑`index entry → long` or ↑`_index entry → long_` in
+.. order to get the page number printed emphasised.  Instead of \↑ you may also
+.. type --^ (via input method).  Note that all these index entries are also
+.. printed in the text.  Page number markup is not printed, though.  If there
+.. is an “→” in the index entry, subentries are printed comma-separated in
+.. parentheses behind the main lemma: “index entry (long)”
 .. 
 .. Sort keys are written as follows: ↑`entry@sortkey` or ↑ `_long entry_ @sort
 .. key`.  So it's the other way round as with Makeindex.
@@ -142,24 +103,32 @@ current position, create a paragraph with only index entries and whitespace:
 .. Bibliography entries are marked-up like this:
 
 [Miller 2006]
-type:       book
+reference:: book
 label:      Miller 2006
 author:     Peter Miller
 title:      LaTeX –
-            an introduction
+            publisher: an introduction
 publisher:  WhatEver, Heidelberg
 year:       2006
 
-.. It is separated with empty lines at the top and the bottom.  The names
-.. “author”, “title” etc can be English or the current document language.
-.. “label” is optional.
+.. It is separated with empty lines at the top and the bottom.  If a paragraph
+.. consists only of citation labels in backets, this is equivalent to LaTeX's
+.. ```\nocite```.  The names “author”, “title” etc can be English or the
+.. current document language.  “label” is optional, as is the label in
+.. brackets.
 
-.. There are short forms with (unescaped) semicolons as separators (short and
-.. long form can be combined):
+.. As a second possibility, there is the short form which cannot be combined
+.. with the long form.  It uses “//” instead of line breaks.  If Gummi detects
+.. only one unescaped “//”, it assumes the short form:
 
-[Müller]  article:
-Die Expansion subterraner Knollengewächse; Peter Müller; Journal of
-Agriculture; 2006
+[Meier 2004]
+reference:: article // title: Die Expansion subterraner Knollengewächse //
+author: Peter Müller // journal: Journal of Agriculture // year: 2006 //
+publisher: WhatEver, Heidelberg
+
+.. Within the pre-defined environment ```references::```, you can use both
+.. constructs, however, the ```reference::``` directive can be dropped if
+.. desired.
 
 
 2. Lists
@@ -407,13 +376,13 @@ interesting if one uses a proportional screen font:
 !Frequency (MHz)
 !Remarks
 |-
-| → 3SAT &lt;http://www.3sat.de> || K10 || 210,25 ||
+| → 3SAT <http://www.3sat.de> || K10 || 210,25 ||
 |-
-| → ARD Das Erste &lt;http://www.DasErste.de> || K05 || 175,25 || 2)
+| → ARD Das Erste <http://www.DasErste.de> || K05 || 175,25 || 2)
 |-
-| → arte &lt;http://www.arte.de> || S20 || 294,25 || 2-Kanal: German &amp; French
+| → arte <http://www.arte.de> || S20 || 294,25 || 2-Kanal: German & French
 |-
-| → Bayrischer Rundfunk &lt;http://www.br-online.de> || S04 || 126,25 ||
+| → Bayrischer Rundfunk <http://www.br-online.de> || S04 || 126,25 ||
 |}
 
 The details can be found at http://en.wikipedia.org/wiki/Help:Table, however, I
@@ -442,8 +411,8 @@ table: {sin \alpha}.  You may also write {sin α}.  Roots work like {\root n}
 (or {√n}), cubic roots like {√³n} or {√^3 n}.  Equations can be aligned as in
 AMSMath:
 
-{ a  &amp;= 2 b }
-{ 2c &amp;= b   }
+{ a  &= 2 b }
+{ 2c &= b   }
 
 Text in equations is enclosed with "..." as in OpenOffice.org.
 
@@ -474,6 +443,7 @@ parameters, and only inline material is allowed.
 =======================
 
 Directives and roles also work in equations.
+
 
 8.1 Directives
 ==============
@@ -537,8 +507,8 @@ Theorem #.#, `Pythagoras`:: Pythagorean theorem
 The label may be implicit by the heading of the environment, or the explicit
 label.  There are no namespaces for labels.  In case that in a section, some
 environments have the same heading and they are referred to, this is an error.
-Therefore, you must use explicit labels.  Only the section can be referred to
-this way, even if it has the same heading, because it has high priority.
+The same is true if a section contains an environment _and_ a subsection with
+the same implicit label.  Then, you must use explicit labels.
 
 If a backend doesn't know about a certain environment, it must use a standard
 formatting for it, i.e. some sort of highlighted heading, printing of the
@@ -620,6 +590,3 @@ This document is an example file for Gummi.
 
 ::end abstract
 ```
-</pre></body>
-<!--  LocalWords:  unconsumed
- -->

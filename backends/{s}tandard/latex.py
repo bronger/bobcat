@@ -142,6 +142,7 @@ def process_document(self):
     babel_options = list(minor_babel_options) + [main_babel_option]
     emit(u"\\usepackage[%s]{babel}\n" % ", ".join(babel_options))
     preamble = emit.pop_output()
+    emit("\\usepackage{hyperref}\n")
     emit("\n\\begin{document}\n\n")
     self.process_children()
     emit("\\end{document}\n")
@@ -174,6 +175,10 @@ def process_emphasize(self):
     emit(r"\emph{")
     self.process_children()
     emit("}")
+
+def process_hyperlink(self):
+    """Emit a hyperlink."""
+    emit(r"\url{%s}" % self.url)
 
 def process_text(self):
     """Emit an ordinary text node.  I have to override the default because Unicodes
