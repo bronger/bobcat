@@ -172,7 +172,8 @@ class KeyValueError(FileError):
         :type description: unicode
         :type position_marker: PositionMarker
         """
-        super(KeyValueError, self).__init__(str(position_marker) + ": " + description)
+        super(KeyValueError, self).__init__(str(position_marker) + ": " + description,
+                                            position_marker)
 
 def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
     r"""Treats first_line as a line with local variables and extracts the
@@ -977,25 +978,40 @@ class SettingsDict(dict):
                 warnings.warn(SettingWarning(u"unknown setting '%s' ignored" % key),
                               stacklevel=2)
                 assert key not in self
-    def parse_keyvalue_list(self, excerpt):
+    def parse_keyvalue_list(self, excerpt, item_separator=u",", key_terminators=u":="):
         """
             >>> import preprocessor
             >>> excerpt = preprocessor.Excerpt("a=b", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.parse_keyvalue_list(excerpt)
+            >>> settings
         
         """
-        # FixMe: Not at all finished.
-        separator_pattern = re.compile("[=:]")
+        item_pattern = re.compile(u"(?P<key>.+?)[" + re.escape(key_terminators) +
+                                  "](?P<value>.*?)(?:(?:" + re.escape(item_separator) +
+                                  ")|\\Z)", re.UNICODE | re.DOTALL)
         escaped_text = excerpt.escaped_text().rstrip()
         current_position = 0
         while current_position < len(escaped_text):
-            next_separator = separator_pattern.search(escaped_text, current_position)
-            if not next_separator:
-                raise KeyValueError("key %s: key delimiter missing" %
+            next_item_match = item_pattern.match(escaped_text, current_position)
+            if next_item_match:
+                start, end = next_item_match.span("key")
+                key = excerpt[start:end].normalize_whitespace()
+                start, end = next_item_match.span("value")
+                value = excerpt[start:end]
+                if key in self:
+                    super(SettingsDict, self).__getitem__(key).set_value(value,
+                                                                         "conf file")
+                else:
+                    self.test_for_closed_section(key, value)
+                    super(SettingsDict, self).__setitem__(key, Setting(key, value,
+                                                                       source="conf file"))
+                current_position = next_item_match.end()
+            else:
+                raise KeyValueError("invalid key--value syntax" %
                                     excerpt[current_position:].apply_postprocessing().strip(),
                                     excerpt.original_position(current_position))
-            current_position += 1
+            
     def load_from_files(self, filenames, forbidden_sections=frozenset()):
         """Reads Windows-like INI files.  Inspired by
         <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65334>.  The
