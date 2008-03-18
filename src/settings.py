@@ -770,6 +770,23 @@ class SettingsDict(dict):
         places as in LaTeX.  You can use this method to build mini settings
         dictionaries in order to parse these lists.  The keys remain Excerpts,
         so that you can reconstruct the original positons in case of errors.
+
+        :Parameters:
+          - `excerpt`: the Excerpt which contains the complete key/value list
+            to be parsed
+          - `item_separator`: the string that divides key/value pairs
+            a.k.a. items in the list; it can be a single character or longer.
+            It defaults to ``","``.
+          - `key_terminators`: a string containing all single characters that
+            are allowed to divide the key from the value.  Its default is
+            ``":="``, so that you can use the colon *or* the equation sign for
+            this.
+
+        :type excerpt: `preprocessor.Excerpt`
+        :type item_separator: unicode
+        :type key_terminators: unicode
+
+        Example:
         
             >>> import preprocessor
             >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
