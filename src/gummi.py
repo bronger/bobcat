@@ -33,7 +33,7 @@
 
 The result should be test1.tex."""
 
-import sys, common, i18n
+import sys, common, settings, i18n
 from common import FileError
 _ = i18n.ugettext
 
@@ -72,10 +72,10 @@ if len(filenames) != 1:
     print u"Please specify exactly one input file."
     sys.exit()
 else:
-    common.settings["input filename"] = filenames[0]
+    settings.settings["input filename"] = filenames[0]
 if options.output_file:
-    common.settings["output path"] = options.output_file
-common.settings["backend"] = options.backend
+    settings.settings["output path"] = options.output_file
+settings.settings["backend"] = options.backend
 
 common.setup_logging(options.logfile, options.logging)
 
@@ -83,9 +83,9 @@ common.setup_logging(options.logfile, options.logging)
 import preprocessor, helpers
 parser = helpers.import_local_module("parser")
 
-text, encoding, gummi_version = preprocessor.load_file(common.settings["input filename"])
+text, encoding, gummi_version = preprocessor.load_file(settings.settings["input filename"])
 if gummi_version != "1.0":
-    raise FileError("Gummi version must be 1.0", common.settings["input filename"])
+    raise FileError("Gummi version must be 1.0", settings.settings["input filename"])
 
 document = parser.Document()
 document.parse(text)

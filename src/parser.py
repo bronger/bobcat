@@ -52,7 +52,7 @@ by code injection from the backend module into the classes of the parser.
 """
 
 import re, weakref, imp, os.path
-import common, xrefs
+import common, xrefs, settings
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
@@ -399,12 +399,12 @@ class Document(Node):
         # FixMe: Here, the settings from the metainfo in the document must be
         # added to `settings`.  For now, I just add the theme because it is
         # important and won't be given on the command line.
-        common.settings["theme"] = "Standard"
-        backend_module = self.find_backend(common.settings)
+        settings.settings["theme"] = "Standard"
+        backend_module = self.find_backend(settings.settings)
         # Bidirectional code injection.  Only `Document` and `Text` need `emit`
         # of all parser.py routines.
         self.emit = backend_module.emit
-        self.emit.set_settings(common.settings)
+        self.emit.set_settings(settings.settings)
         prefix = "process_"
         process_functions = [name for name in backend_module.__dict__ if name.startswith(prefix)]
         assert self.node_types
