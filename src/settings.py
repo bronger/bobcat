@@ -37,14 +37,15 @@ document.
 :type settings: SettingsDict
 """
 
-import ConfigParser, warnings, StringIO, preprocessor
+import ConfigParser, warnings, StringIO, preprocessor, logging, os, re
+import common
 
 class SettingWarning(UserWarning):
     """Warning class for invalid or unknown programm settings.  See `SettingsDict`.
     """
     pass
 
-class SettingError(Error):
+class SettingError(common.Error):
     """Error class for inconsistent settings use within Gummi.  Most errors with
     settings are mere warnings (in particular, malformed configuration files),
     however, other things must be considered internal errors.
@@ -320,17 +321,14 @@ class Setting(object):
         assert self.type in ["int", "bool", "float", "unicode"]
         def convert_single_value(value, type_):
             """Converts *one* `value` to `type_`."""
-            def unicode_or_excerpt(value):
-                return value if isinstance(value, preprocessor.Excerpt) else unicode(value)
-            
             assert type_ in ["int", "bool", "float", "unicode"], "unknown type '%s'" % type_
             if type_ == "int":
                 return int(value)
             elif type_ == "unicode":
                 if source == "conf file" and value.startswith('"') and value.endswith('"'):
-                    return unicode_or_excerpt(value[1:-1])
+                    return unicode(value[1:-1])
                 else:
-                    return unicode_or_excerpt(value)
+                    return unicode(value)
             elif type_ == "bool":
                 return self.get_boolean(value)
             elif type_ == "float":
@@ -767,13 +765,24 @@ class SettingsDict(dict):
                               stacklevel=2)
                 assert key not in self
     def parse_keyvalue_list(self, excerpt, item_separator=u",", key_terminators=u":="):
-        """
+        """Adds items from a key/value list to the dictionary.  These key/value
+        lists are most commonly found in Gummi source documents, in similar
+        places as in LaTeX.  You can use this method to build mini settings
+        dictionaries in order to parse these lists.  The keys remain Excerpts,
+        so that you can reconstruct the original positons in case of errors.
+        
             >>> import preprocessor
-            >>> excerpt = preprocessor.Excerpt("a=b", "PRE", "myfile.rsl", {}, {})
+            >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.parse_keyvalue_list(excerpt)
             >>> settings
-        
+            {u'a': u'b', u'c': 4}
+            >>> type(settings["c"])
+            <type 'int'>
+            >>> for key in settings.iterkeys(): print key.original_position()
+            file "myfile.rsl", line 1, column 0
+            file "myfile.rsl", line 1, column 5
+
         """
         item_pattern = re.compile(u"(?P<key>.+?)[" + re.escape(key_terminators) +
                                   "](?P<value>.*?)(?:(?:" + re.escape(item_separator) +
@@ -784,12 +793,11 @@ class SettingsDict(dict):
             next_item_match = item_pattern.match(escaped_text, current_position)
             if next_item_match:
                 start, end = next_item_match.span("key")
-                key = excerpt[start:end].normalize_whitespace()
+                key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
                 start, end = next_item_match.span("value")
-                value = excerpt[start:end]
+                value = unicode(excerpt[start:end].apply_postprocessing())
                 if key in self:
-                    super(SettingsDict, self).__getitem__(key).set_value(value,
-                                                                         "conf file")
+                    super(SettingsDict, self).__getitem__(key).set_value(value, "conf file")
                 else:
                     self.test_for_closed_section(key, value)
                     super(SettingsDict, self).__setitem__(key, Setting(key, value,
@@ -837,8 +845,8 @@ class SettingsDict(dict):
         for filename in filenames:
             try:
                 payload = open(filename).read()
-                encoding = parse_local_variables(payload.splitlines()[0],
-                                                 comment_marker="(#|;)").get("coding", "utf-8")
+                encoding = common.parse_local_variables(payload.splitlines()[0],
+                                                        comment_marker="(#|;)").get("coding", "utf-8")
                 payload_file = StringIO.StringIO(payload.decode(encoding))
             except UnicodeDecodeError:
                 warnings.warn(SettingWarning(u"invalid encoding in file %s; "
@@ -908,4 +916,4 @@ settings.set_default("quiet", False, docstring="""
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    doctest.testfile("../misc/common.txt")
+    doctest.testfile("../misc/settings.txt")
