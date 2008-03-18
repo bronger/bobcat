@@ -195,7 +195,9 @@ class Excerpt(unicode):
 
         :Return:
           the Position the given character originates from.  This includes url
-          (filename), linenumber, and column.  None if the Excerpt is empty.
+          (filename), linenumber, and column.  If the Excerpt was empty, the
+          position of the following character in the original file is
+          returned.
 
         :rtype: PositionMarker
 
@@ -209,8 +211,6 @@ class Excerpt(unicode):
                         "position in original_position near line %d of file %s" %
                         (position, self.original_positions[0].linenumber,
                          self.original_positions[0].url))
-        if length == 0:
-            return None
         closest_position = max([pos for pos in self.original_positions if pos <= position])
         offset = position - closest_position
         closest_marker = self.original_positions[closest_position].transpose(offset)
@@ -257,7 +257,7 @@ class Excerpt(unicode):
         else:
             current_position = start = 0
         while current_position < len(unicode_representation):
-            whitespace_match = self.whitespace_pattern.match(unicode_representation, current_position)
+            whitespace_match = self.whitespace_pattern.search(unicode_representation, current_position)
             if whitespace_match:
                 current_position = whitespace_match.end()
                 if whitespace_match.end() == len(unicode_representation):
@@ -276,7 +276,7 @@ class Excerpt(unicode):
             else:
                 result = add_part(result, self[start:len(unicode_representation)])
                 break
-        return result
+        return result or self[:0]
     class Status(object):
         """A mere container for some immutable data structures used in the pre-
         and postprocessing.
@@ -523,11 +523,7 @@ class Excerpt(unicode):
                 ([(pos + length_first_part,
                    other.original_positions[pos].transpose(length_first_part_original))
                   for pos in other.original_positions if pos > 0])
-            first_mark_in_second_excerpt = other.original_positions[0]
-            if self.original_position(length_first_part) != first_mark_in_second_excerpt:
-                # Should be necessary almost always, but here we go
-                concatenation.original_positions[length_first_part] = \
-                    first_mark_in_second_excerpt.transpose(length_first_part_original)
+            assert 0 in other.original_positions
             concatenation.escaped_positions = self.escaped_positions | \
                 set([pos + length_first_part for pos in other.escaped_positions])
             # FixMe: When the last interval from "self" and the first of "other"
