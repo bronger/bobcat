@@ -346,7 +346,7 @@ def add_parse_error(parse_error):
 
     :type parse_error: `ParseError`
 
-        >>> import parser, preprocessor
+        >>> import parser, preprocessor, settings
         >>> import os.path
         >>> os.chdir(os.path.join(modulepath, "../misc/"))
         >>> setup_logging()
@@ -356,7 +356,7 @@ def add_parse_error(parse_error):
         >>> node = parser.Node(None)
         >>> node.parse(text, 0)
         0
-        >>> parser.common.settings["quiet"] = True
+        >>> settings.settings["quiet"] = True
         >>> node.throw_parse_error("test error message")
         >>> parser.common.ParseError.parse_errors
         [ParseError('test error message',)]
@@ -366,7 +366,8 @@ def add_parse_error(parse_error):
     message = unicode(parse_error)
     if parse_error.type == "error":
         ParseError.logger.error(message)
-        if not settings["quiet"]:
+        import settings
+        if not settings.settings["quiet"]:
             print>>sys.stderr, message
     else:
         ParseError.logger.warning(message)
