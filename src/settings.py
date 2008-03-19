@@ -52,6 +52,12 @@ class SettingError(common.Error):
 
     As a general rule of thumb, the user's mistakes are warnings, whereas
     mistakes in the source are errors.
+
+    :ivar key: the key of the error provoking key/value pair
+    :ivar value: the key of the error provoking key/value pair
+
+    :type key: unicode
+    :type value: unicode, float, int, bool or NoneType
     """
     def __init__(self, description, key, value):
         """
@@ -60,11 +66,52 @@ class SettingError(common.Error):
           - `key`: key of the setting
           - `value`: value of the setting
 
-        :type description: string
-        :type key: string
+        :type description: unicode
+        :type key: unicode
         :type value: str, unicode, float, int, or bool
         """
         super(SettingError, self).__init__("setting '%s = %s': %s" % (key, value, description))
+        self.key, self.value = key, value
+
+class SettingUnknownKeyError(SettingError):
+    def __init__(self, key, value):
+        """
+        :Parameters:
+          - `key`: key of the setting
+          - `value`: value of the setting
+
+        :type key: unicode
+        :type value: str, unicode, float, int, or bool
+        """
+        super(SettingUnknownKeyError, self).__init__(
+            u"unknown setting key; section already closed", key, value)
+
+class SettingWrongTypeError(SettingError):
+    """
+    :ivar previous_type: the hitherto type of the value
+    :ivar new_type: the type that was tried to set now; it should have been
+      equal to `previous_type`, yet it wasn't.
+
+    :type previous_type: str
+    :type new_type: str
+    """
+    def __init__(self, key, value, previous_type, new_type):
+        """
+        :Parameters:
+          - `key`: key of the setting
+          - `value`: value of the setting
+          - `previous_type`: the hitherto type of the value
+          - `new_type`: the type that was tried to set now
+
+        :type key: unicode
+        :type value: str, unicode, float, int, or bool
+        :type previous_type: str
+        :type new_type: str
+        """
+        super(SettingWrongTypeError, self).__init__(
+            "new value of type '%s' is unequal to previous type '%s'" % (new_type, previous_type),
+            key, value)
+        self.previous_type, self.new_type = previous_type, new_type
 
 class Setting(object):
     """One single Setting, this means, a key--value pair.  It is used in
@@ -446,7 +493,7 @@ class Setting(object):
             >>> setting.set_value(1)
             Traceback (most recent call last):
               ...
-            SettingError: setting 'key = 1': new value of type 'int' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'key = 1': new value of type 'int' is unequal to previous type 'unicode'
 
         However, as an exception to the strict typechecking, you may pass an
         ``int`` to a ``float``:
@@ -515,8 +562,7 @@ class Setting(object):
                                        "with previous type '%s'" %
                                        (new_type, self.type), self.key, value)
                 else:
-                    raise SettingError("new value of type '%s' is unequal to previous type '%s'" %
-                                       (new_type, self.type), self.key, value)
+                    raise SettingWrongTypeError(self.key, value, self.type, new_type)
         else:
             new_type = None
         if source == "default":
@@ -638,11 +684,11 @@ class SettingsDict(dict):
             >>> settings.test_for_closed_section("General.quiet", False)
             Traceback (most recent call last):
               ...
-            SettingError: setting 'General.quiet = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quiet = False': unknown setting key; section already closed
             >>> settings.test_for_closed_section("General.quite", False)
             Traceback (most recent call last):
               ...
-            SettingError: setting 'General.quite = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quite = False': unknown setting key; section already closed
 
         """
         dot_position = key.rfind(".")
@@ -650,7 +696,7 @@ class SettingsDict(dict):
             u"invalid setting '%s', either section or option is empty" % key
         section = key[:dot_position] if dot_position != -1 else u""
         if section in self.closed_sections:
-            raise SettingError(u"unknown setting key; section already closed", key, value)
+            raise SettingUnknownKeyError(key, value)
     def set_default(self, key, value, explicit_type=None, docstring=None):
         """Set the default value of a setting.  It may already exist or not.
 
@@ -685,7 +731,7 @@ class SettingsDict(dict):
             >>> settings["General.b"] = True
             Traceback (most recent call last):
               ...
-            SettingError: setting 'General.b = True': new value of type 'bool' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'General.b = True': new value of type 'bool' is unequal to previous type 'unicode'
             >>> settings["General.quiet"] = True
             >>> settings.close_section("General")
             Traceback (most recent call last):
@@ -694,7 +740,7 @@ class SettingsDict(dict):
             >>> settings["General.f"] = "offf"
             Traceback (most recent call last):
                 ...
-            SettingError: setting 'General.f = offf': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = offf': unknown setting key; section already closed
             >>> settings["General."] = "offf"
             Traceback (most recent call last):
                 ...
@@ -702,7 +748,7 @@ class SettingsDict(dict):
             >>> settings.set_default("General.f", [1,2,3,4])
             Traceback (most recent call last):
                 ...
-            SettingError: setting 'General.f = [1, 2, 3, 4]': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting key; section already closed
         """
         assert key not in self or not super(SettingsDict, self).__getitem__(key).has_default, \
             u"setting '%s' has already a default value (%s)" % (key, repr(self[key]))
@@ -824,6 +870,8 @@ class SettingsDict(dict):
             >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
+            >>> settings.set_default("c", None, "int")
+            >>> settings.close_section("")
             >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
             >>> settings
             {u'a': u'b', u'c': 4}
@@ -850,7 +898,16 @@ class SettingsDict(dict):
                 key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
                 start, end = next_item_match.span("value")
                 value = unicode(excerpt[start:end].apply_postprocessing())
-                self.store_new_value(key, value, "conf file")
+                try:
+                    self.store_new_value(key, value, "conf file")
+                except SettingUnknownKeyError, error:
+                    parent_element.throw_parse_error(
+                        "unknown key '%s'" % key, key.original_position())
+                except SettingWrongTypeError, error:
+                    parent_element.throw_parse_error(
+                        "type of value for '%s' is wrong; expected %s but got %s" %
+                        (key, error.previous_type, error.new_type),
+                        key.original_position())
                 current_position = next_item_match.end()
             else:
                 parent_element.throw_parse_error(
