@@ -7,7 +7,7 @@
 >>> settings.set_default("width", None, "float")
 Traceback (most recent call last):
     ...
-SettingError: setting 'width = None': unknown setting key; section already closed
+SettingUnknownKeyError: setting 'width = None': unknown setting key; section already closed
 >>> read_files = settings.load_from_files("../misc/test.conf")
 Traceback (most recent call last):
     ...
