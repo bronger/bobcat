@@ -517,6 +517,8 @@ class Setting(object):
                 else:
                     raise SettingError("new value of type '%s' is unequal to previous type '%s'" %
                                        (new_type, self.type), self.key, value)
+        else:
+            new_type = None
         if source == "default":
             assert not self.has_default, "setting '%s' has already a default value" % self.key
             self.has_default = True
@@ -710,8 +712,33 @@ class SettingsDict(dict):
         else:
             super(SettingsDict, self).__setitem__(key, Setting(key, value, explicit_type,
                                                                "default", docstring))
-    def __setitem__(self, key, value):
+    def store_new_value(self, key, value, source="direct"):
         """Assign ``value`` to the setting ``key``.
+
+        :Parameters:
+          - `key`: the full section.option key
+          - `value`: the new contents of this setting
+          - `source`: the source of the value.  It may be "conf file",
+            "direct", or "default".  See `Setting.__init__` for further
+            details.
+
+        :type key: unicode
+        :type value: unicode, str, float, int, bool, or NoneType
+        :type source: str
+        """
+        if key in self:
+            old_value = super(SettingsDict, self).__getitem__(key)
+            old_value.set_value(value, source)
+            # I kill the old key because the new one could be an Excerpt while
+            # the old was a unicode.  However, I want the Excerpt.
+            super(SettingsDict, self).__delitem__(key)
+            super(SettingsDict, self).__setitem__(key, old_value)
+        else:
+            self.test_for_closed_section(key, value)
+            super(SettingsDict, self).__setitem__(key, Setting(key, value, source=source))
+    def __setitem__(self, key, value):
+        """Assign ``value`` to the setting ``key``.  This is mere syntactic
+        sugar for the more awkward `store_new_value`.
 
         :Parameters:
           - `key`: the full section.option key
@@ -720,11 +747,7 @@ class SettingsDict(dict):
         :type key: unicode
         :type value: unicode, str, float, int, bool, or NoneType
         """
-        if key in self:
-            super(SettingsDict, self).__getitem__(key).set_value(value)
-        else:
-            self.test_for_closed_section(key, value)
-            super(SettingsDict, self).__setitem__(key, Setting(key, value))
+        self.store_new_value(key, value)
     def __getitem__(self, key):
         """Return the value of a given setting.  The setting is given by its
         key.
@@ -769,7 +792,8 @@ class SettingsDict(dict):
                 warnings.warn(SettingWarning(u"unknown setting '%s' ignored" % key),
                               stacklevel=2)
                 assert key not in self
-    def parse_keyvalue_list(self, excerpt, item_separator=u",", key_terminators=u":="):
+    def parse_keyvalue_list(self, excerpt, parent_element,
+                            item_separator=u",", key_terminators=u":="):
         """Adds items from a key/value list to the dictionary.  These key/value
         lists are most commonly found in Gummi source documents, in similar
         places as in LaTeX.  You can use this method to build mini settings
@@ -779,6 +803,8 @@ class SettingsDict(dict):
         :Parameters:
           - `excerpt`: the Excerpt which contains the complete key/value list
             to be parsed
+          - `parent_element`: the document element in which this key/value list
+            occurs
           - `item_separator`: the string that divides key/value pairs
             a.k.a. items in the list; it can be a single character or longer.
             It defaults to ``","``.
@@ -788,15 +814,17 @@ class SettingsDict(dict):
             this.
 
         :type excerpt: `preprocessor.Excerpt`
+        :type parent_element: `parser.Node`
         :type item_separator: unicode
         :type key_terminators: unicode
 
         Example:
         
-            >>> import preprocessor
+            >>> import preprocessor, parser
             >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
-            >>> settings.parse_keyvalue_list(excerpt)
+            >>> settings.set_default("a", None, "unicode")
+            >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
             >>> settings
             {u'a': u'b', u'c': 4}
             >>> type(settings["c"])
@@ -806,6 +834,10 @@ class SettingsDict(dict):
             file "myfile.rsl", line 1, column 5
 
         """
+        # In the current Gummi source code, no warnings should happen here but
+        # only errors.  But just to be sure, I convert all warnings to errors
+        # nevertheless.
+        warnings.simplefilter("error", SettingWarning)
         item_pattern = re.compile(u"(?P<key>.+?)[" + re.escape(key_terminators) +
                                   "](?P<value>.*?)(?:(?:" + re.escape(item_separator) +
                                   ")|\\Z)", re.UNICODE | re.DOTALL)
@@ -818,17 +850,14 @@ class SettingsDict(dict):
                 key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
                 start, end = next_item_match.span("value")
                 value = unicode(excerpt[start:end].apply_postprocessing())
-                if key in self:
-                    super(SettingsDict, self).__getitem__(key).set_value(value, "conf file")
-                else:
-                    self.test_for_closed_section(key, value)
-                    super(SettingsDict, self).__setitem__(key, Setting(key, value,
-                                                                       source="conf file"))
+                self.store_new_value(key, value, "conf file")
                 current_position = next_item_match.end()
             else:
-                raise KeyValueError("invalid key--value syntax" %
-                                    excerpt[current_position:].apply_postprocessing().strip(),
-                                    excerpt.original_position(current_position))
+                parent_element.throw_parse_error(
+                    "invalid key--value syntax in " +
+                    excerpt[current_position:].apply_postprocessing().strip(),
+                    excerpt.original_position(current_position))
+        warnings.resetwarnings()
             
     def load_from_files(self, filenames, forbidden_sections=frozenset()):
         """Reads Windows-like INI files.  Inspired by
