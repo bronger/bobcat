@@ -823,6 +823,9 @@ class SettingsDict(dict):
 
         :type section: unicode
         """
+        # FixMe: It must also be possible to close *all* sections (even not yet
+        # existing ones) at the same time.  Or, it must be possible to say that
+        # it's forbidden to start new sections from now on.
         self.closed_sections.add(section)
         if section != u"":
             len_section = len(section)
@@ -882,6 +885,8 @@ class SettingsDict(dict):
             file "myfile.rsl", line 1, column 5
 
         """
+        # FixMe: Still needs doctests for parse errors.
+        #
         # In the current Gummi source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
         # nevertheless.
