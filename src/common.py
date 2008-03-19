@@ -156,21 +156,6 @@ class EncodingError(FileError):
         """
         super(EncodingError, self).__init__(description, position_marker)
 
-class KeyValueError(FileError):
-    """Error class for errors in key/value lists in a Gummi file.
-    """
-    def __init__(self, description, position_marker):
-        """
-        :Parameters:
-          - `description`: error message
-          - `position_marker`: the exact position where the error occured
-
-        :type description: unicode
-        :type position_marker: PositionMarker
-        """
-        super(KeyValueError, self).__init__(str(position_marker) + ": " + description,
-                                            position_marker)
-
 def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
     r"""Treats first_line as a line with local variables and extracts the
     key--value pairs from it.  Note that both first_line and the resulting
