@@ -646,10 +646,9 @@ class SettingsDict(dict):
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting '%s', either section or option is empty" % key
-        if dot_position != -1:
-            section = key[:dot_position]
-            if section in self.closed_sections:
-                raise SettingError(u"unknown setting key; section already closed", key, value)
+        section = key[:dot_position] if dot_position != -1 else u""
+        if section in self.closed_sections:
+            raise SettingError(u"unknown setting key; section already closed", key, value)
     def set_default(self, key, value, explicit_type=None, docstring=None):
         """Set the default value of a setting.  It may already exist or not.
 
@@ -748,16 +747,22 @@ class SettingsDict(dict):
         information and an example.
 
         :Parameters:
-          - `section`: the name of the section that is to be closed
+          - `section`: the name of the section that is to be closed.  If it is
+            the empty string, the section-free domain, i.e. all settings
+            without a section in them (i.e., without a dot in the key), is
+            closed.
 
         :type section: unicode
         """
         self.closed_sections.add(section)
-        len_section = len(section)
-        keys_in_section = [key for key in self.keys()
-                           if key.startswith(section+".")
-                           and len(key) > len_section + 1
-                           and not "." in key[len_section+1:]]
+        if section != u"":
+            len_section = len(section)
+            keys_in_section = [key for key in self.iterkeys()
+                               if key.startswith(section+".")
+                               and len(key) > len_section + 1
+                               and not "." in key[len_section+1:]]
+        else:
+            keys_in_section = [key for key in self.iterkeys() if not "." in key]
         for key in keys_in_section:
             if not super(SettingsDict, self).__getitem__(key).has_default:
                 del self[key]
