@@ -66,17 +66,22 @@ False
 >>> #  Now test SettingsDict.parse_keyvalue_list
 >>> #
 >>> import parser
->>> excerpt = preprocessor.Excerpt("a:b, c = 4, d.f=3", "PRE", "myfile.rsl", {}, {})
+>>> excerpt = preprocessor.Excerpt(r'a:b, c = 4, hallo: (2\,3\,4), super: "4", d.f=3', "PRE", "myfile.rsl", {}, {})
 >>> settings = SettingsDict()
 >>> settings.set_default("a", None, "unicode")
 >>> settings.set_default("c", None, "int")
+>>> settings.set_default("hallo", None, "int")
+>>> settings.set_default("super", None, "unicode")
 >>> settings.close_section("")
 >>> settings.inhibit_new_sections()
 >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
+>>> settings["super"]
+u'"4"'
 >>> common.ParseError.parse_errors
-[ParseError("unknown key 'd.f'",)]
+[ParseError("type of value for 'hallo' is wrong; expected int but got unicode",), ParseError("unknown key 'd.f'",)]
 >>> excerpt = preprocessor.Excerpt("a:b, c = 4,e", "PRE", "myfile.rsl", {}, {})
 >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
 >>> for error in common.ParseError.parse_errors: print error
-file "myfile.rsl", line 1, column 12: unknown key 'd.f'
+file "myfile.rsl", line 1, column 12: type of value for 'hallo' is wrong; expected int but got unicode
+file "myfile.rsl", line 1, column 42: unknown key 'd.f'
 file "myfile.rsl", line 1, column 11: invalid key--value syntax in 'e'

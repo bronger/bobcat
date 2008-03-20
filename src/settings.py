@@ -221,16 +221,17 @@ class Setting(object):
         for the auto-detection.  It is not checked whether the rest is of the
         same type (this is done by `adjust_value_to_type` anyway).
 
-        For values that are taken from user-provided environment (which means
-        that `source` is ``"conf file"``), two special syntaxes are accepted:
+        For values that are taken from a configuration file (which means that
+        `source` is ``"conf file"``), two special syntaxes are accepted:
         parentheses and commatas make lists, so ``(1, 2, 3)`` is a list of
         three integers.  And secondly, double quotes make strings, so ``"1"``
         is a string and not an integer.  You may user the latter in the first.
 
         :Parameters:
           - `value`: the value the type of which should be auto-detected
-          - `source`: the source of the value.  It may be "conf file",
-            "direct", or "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file", "keyval
+            list", "direct", or "default".  See `__init__` for further
+            details.
 
         :type value: unicode, str, int, float, or bool
         :type source: str
@@ -269,11 +270,19 @@ class Setting(object):
         
             >>> setting.detect_type("3.14", "conf file")
             'float'
+            >>> setting.detect_type("3.14", "keyval list")
+            'float'
             >>> setting.detect_type('"3.14"', "conf file")
             'unicode'
             >>> setting.detect_type("(1, 2, 3)", "conf file")
             'int'
             >>> setting.detect_type('("1", "2", "3")', "conf file")
+            'unicode'
+
+        Note that for a key/value list, the special syntaxes with ``"…"`` and
+        ``(…, …, …)`` are not supported:
+
+            >>> setting.detect_type("(1, 2, 3)", "keyval list")
             'unicode'
 
         However, the following things fail deliberately:
@@ -294,7 +303,7 @@ class Setting(object):
             SettingError: setting 'key = []': cannot detect type of empty list
         """
         # pylint: disable-msg=R0912
-        assert source in ["conf file", "direct", "default"]
+        assert source in ["conf file", "keyval list", "direct", "default"]
         if isinstance(value, list):
             if len(value) == 0:
                 raise SettingError("cannot detect type of empty list", self.key, value)
@@ -309,16 +318,17 @@ class Setting(object):
         elif isinstance(single_value, float):
             detected_type = "float"
         elif isinstance(single_value, basestring):
-            if source != "conf file":
+            if source not in ["conf file", "keyval list"]:
                 detected_type = "unicode"
             else:
                 # Test for special syntaxes: (…, …, …) and "…"
                 value = value.strip()
-                if value.startswith("(") and value.endswith(")"):
+                if source == "conf file" and value.startswith("(") and value.endswith(")"):
                     single_value = value[1:-1].split(",")[0].strip()
                 else:
                     single_value = value
-                if single_value.startswith('"') and single_value.endswith('"'):
+                if source == "conf file" and \
+                        single_value.startswith('"') and single_value.endswith('"'):
                     detected_type = "unicode"
                 else:
                     try:
@@ -356,8 +366,8 @@ class Setting(object):
         whether both types are really compatible, and not just convertible.
 
         :Parameters:
-          - `source`: the source of the value.  It may be "conf file",
-            "direct", or "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file", "keyval
+            list", "direct", or "default".  See `__init__` for further details.
 
         :type source: str
 
@@ -441,12 +451,14 @@ class Setting(object):
             ``"unicode"``.  If not given, an auto-detect is done with `value`.
             From this it follows that if `value` is ``None``, you *must* give
             an `explicit_type`.
-          - `source`: the origin of this setting.  May be ``"direct"``,
-            ``"conf file"``, or ``"default"``.  If ``"direct"``, this setting
-            was created in the program code directly.  If ``"conf file"``, this
-            setting was read from a configuration file.  If ``"default"``, the
-            initial value is the default value of this setting at the same
-            time.  Default is ``"direct"``.
+          - `source`: the origin of this setting.  May be ``"direct"``, ``"conf
+            file"``, ``"keyval list"``, or ``"default"``.  If ``"direct"``,
+            this setting was created in the program code directly.  If ``"conf
+            file"``, this setting was read from a configuration file.  If
+            ``"keyval list"``, this settings comes from a key/value list in a
+            Gummi source file (see `SettingsDict.parse_keyval_list`).  If
+            ``"default"``, the initial value is the default value of this
+            setting at the same time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
 
         :type key: unicode
@@ -484,7 +496,7 @@ class Setting(object):
             u"invalid setting key '%s', either section or option is empty" % key
         self.key, self.value, self.type, self.docstring, self.initial_source = \
             key, value, explicit_type, docstring, source
-        if self.initial_source == "conf file":
+        if self.initial_source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
             self.initial_value = self.value
         self.has_default = source == "default"
@@ -500,8 +512,8 @@ class Setting(object):
           - `value`: the value.  It must be of the type set in `self.type`,
             which cannot be changed after the initialisation.  It may be
             ``None``, though.
-          - `source`: the source of the value.  It may be "conf file",
-            "direct", or "default".  See `__init__` for further details.
+          - `source`: the source of the value.  It may be "conf file", "keyval
+            list", "direct", or "default".  See `__init__` for further details.
           - `docstring`: a describing docstring for this setting.
 
         :type value: unicode, bool, float, int, list, or ``NoneType``
@@ -584,8 +596,9 @@ class Setting(object):
         if value is not None:
             new_type = self.detect_type(value, source)
             if new_type != self.type \
-                    and not (source == "conf file" and self.type == "unicode") \
-                    and not (source == "default" and self.initial_source == "conf file"
+                    and not (source in ["conf file", "keyval list"] and self.type == "unicode") \
+                    and not (source == "default" and
+                             self.initial_source in ["conf file", "keyval list"]
                              and new_type == "unicode") \
                     and not (source == "default" and self.type == "int" and new_type == "float") \
                     and not (source != "default" and self.type == "float" and new_type == "int"):
@@ -602,7 +615,7 @@ class Setting(object):
             self.has_default = True
             if self.type == "int" and new_type == "float":
                 self.type = new_type
-            elif self.initial_source == "conf file" and new_type == "unicode":
+            elif self.initial_source in ["conf file", "keyval list"] and new_type == "unicode":
                 self.type = new_type
         else:
             self.value = value
@@ -958,7 +971,8 @@ class SettingsDict(dict):
             file "myfile.rsl", line 1, column 5
 
         """
-        # FixMe: Still needs doctests for parse errors.
+        # FixMe: (…, …, …) is not recognised; neither is a separator within
+        # "…".
         #
         # In the current Gummi source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
@@ -975,9 +989,9 @@ class SettingsDict(dict):
                 start, end = next_item_match.span("key")
                 key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
                 start, end = next_item_match.span("value")
-                value = unicode(excerpt[start:end].apply_postprocessing())
+                value = unicode(excerpt[start:end].apply_postprocessing()).strip()
                 try:
-                    self.store_new_value(key, value, "conf file")
+                    self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
                     parent_element.throw_parse_warning(
                         "unknown key '%s'" % key, key.original_position())
