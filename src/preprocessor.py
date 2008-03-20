@@ -101,6 +101,7 @@ class Excerpt(unicode):
     #
     # pylint: disable-msg=E1101
     entity_pattern = re.compile(r"((0x(?P<hex>[0-9a-fA-F]+))|(#(?P<dec>[0-9]+)));")
+    whitespace_pattern = re.compile(r"(\A\s+)|(\s+\Z)|(\s{2,})|([\t\n\r\f\v])")
     @classmethod
     def get_next_match(cls, original_text, substitutions, offset=0):
         """Return the next input method match in `original_text`.  The search
@@ -194,7 +195,9 @@ class Excerpt(unicode):
 
         :Return:
           the Position the given character originates from.  This includes url
-          (filename), linenumber, and column.  None if the Excerpt is empty.
+          (filename), linenumber, and column.  If the Excerpt was empty, the
+          position of the following character in the original file is
+          returned.
 
         :rtype: PositionMarker
 
@@ -208,8 +211,6 @@ class Excerpt(unicode):
                         "position in original_position near line %d of file %s" %
                         (position, self.original_positions[0].linenumber,
                          self.original_positions[0].url))
-        if length == 0:
-            return None
         closest_position = max([pos for pos in self.original_positions if pos <= position])
         offset = position - closest_position
         closest_marker = self.original_positions[closest_position].transpose(offset)
@@ -245,6 +246,37 @@ class Excerpt(unicode):
                     continue
             parts.append(self[start:end])
         return parts
+    def normalize_whitespace(self):
+        def add_part(result, new_part):
+            return result + new_part if result else new_part
+        result = None
+        unicode_representation = unicode(self)
+        whitespace_match = self.whitespace_pattern.match(unicode_representation)
+        if whitespace_match:
+            current_position = start = whitespace_match.end()
+        else:
+            current_position = start = 0
+        while current_position < len(unicode_representation):
+            whitespace_match = self.whitespace_pattern.search(unicode_representation, current_position)
+            if whitespace_match:
+                current_position = whitespace_match.end()
+                if whitespace_match.end() == len(unicode_representation):
+                    result = add_part(result, self[start:whitespace_match.start()])
+                    break
+                elif whitespace_match.group().startswith(u" "):
+                    result = add_part(result, self[start:whitespace_match.start()+1])
+                    start = current_position
+                elif whitespace_match.group().endswith(u" "):
+                    result = add_part(result, self[start:whitespace_match.start()])
+                    start = current_position - 1
+                else:
+                    result = add_part(result, self[start:whitespace_match.start()])
+                    result = add_part(result, u" ")
+                    start = current_position
+            else:
+                result = add_part(result, self[start:len(unicode_representation)])
+                break
+        return result or self[:0]
     class Status(object):
         """A mere container for some immutable data structures used in the pre-
         and postprocessing.
@@ -255,7 +287,7 @@ class Excerpt(unicode):
         apply_pre_input_method() and apply_post_input_method().  It's not nice,
         but the alternatives are even uglier.  BTDT.
 
-        Tu sum it up, Status holds (part of) the current status of the
+        To sum it up, Status holds (part of) the current status of the
         pre/postprocessor.
 
         :ivar linenumber: current linenumber in the source file
@@ -478,32 +510,39 @@ class Excerpt(unicode):
         return u"".join(s.processed_text), original_positions, escaped_positions, \
             code_snippets_intervals
     def __add__(self, other):
-        if not isinstance(other, Excerpt):
-            return NotImplemented
         concatenation = unicode(self) + unicode(other)
         concatenation = Excerpt(concatenation, mode="NONE")
-        assert self.__post_substitutions == other.__post_substitutions
         concatenation.__post_substitutions = self.__post_substitutions
-        concatenation.original_text = self.original_text + other.original_text
-        concatenation.original_positions = self.original_positions.copy()
-        length_first_part = len(self)
-        length_first_part_original = len(self.original_text)
-        concatenation.original_positions.update\
-            ([(pos + length_first_part,
-               other.original_positions[pos].transpose(length_first_part_original))
-              for pos in other.original_positions if pos > 0])
-        first_mark_in_second_excerpt = other.original_positions[0]
-        if self.original_position(length_first_part) != first_mark_in_second_excerpt:
-            # Should be necessary almost always, but here we go
-            concatenation.original_positions[length_first_part] = \
-                first_mark_in_second_excerpt.transpose(length_first_part_original)
-        concatenation.escaped_positions = self.escaped_positions | \
-            set([pos + length_first_part for pos in other.escaped_positions])
-        # FixMe: When the last interval from "self" and the first of "other"
-        # touch each other, they should be merged.
-        concatenation.code_snippets_intervals = self.code_snippets_intervals + \
-            [(start + length_first_part, end + length_first_part)
-             for start, end in other.code_snippets_intervals]
+        if isinstance(other, Excerpt):
+            assert self.__post_substitutions == other.__post_substitutions
+            concatenation.original_text = self.original_text + other.original_text
+            concatenation.original_positions = self.original_positions.copy()
+            length_first_part = len(self)
+            length_first_part_original = len(self.original_text)
+            concatenation.original_positions.update\
+                ([(pos + length_first_part,
+                   other.original_positions[pos].transpose(length_first_part_original))
+                  for pos in other.original_positions if pos > 0])
+            assert 0 in other.original_positions
+            concatenation.escaped_positions = self.escaped_positions | \
+                set([pos + length_first_part for pos in other.escaped_positions])
+            # FixMe: When the last interval from "self" and the first of "other"
+            # touch each other, they should be merged.
+            concatenation.code_snippets_intervals = self.code_snippets_intervals + \
+                [(start + length_first_part, end + length_first_part)
+                 for start, end in other.code_snippets_intervals]
+        else:
+            # Note that adding an ordinary Unicode to an Excerpt should only be
+            # done for simple cases.  At the moment, this functionality is only
+            # used for single spaces.  The reason is that otherwise, the post
+            # input method is also applied to the Unicode string, which may be
+            # wrong.  (Not mecessarily wrong, though.)
+            assert isinstance(other, basestring)
+            assert "\n" not in other
+            concatenation.original_text = self.original_text + other
+            concatenation.original_positions = self.original_positions.copy()
+            concatenation.escaped_positions = self.escaped_positions
+            concatenation.code_snippets_intervals = self.code_snippets_intervals
         return concatenation
     def __getitem__(self, key):
         if key < 0:
@@ -948,3 +987,4 @@ def load_file(filename):
 if __name__ == "__main__":
     import doctest
     doctest.testfile("../misc/preprocessor.txt")
+    os.remove("../misc/test2.rsl")

@@ -1,4 +1,4 @@
->>> from preprocessor import load_file
+>>> from preprocessor import load_file, Excerpt
 >>> from common import modulepath
 >>> import os.path
 >>> os.chdir(os.path.join(modulepath, "../misc/"))
@@ -100,3 +100,13 @@ True
 >>> text, encoding, gummi_version = load_file("test2.rsl")
 >>> len(text) == text.code_snippets_intervals[0][1]
 True
+>>> #
+>>> #  Testing Excerpt.normalize_whitespace()
+>>> #
+>>> Excerpt(" a\tb\t c  d \n ef \tg \n ", "PRE", "myfile.rsl", {}, {}).normalize_whitespace()
+u'a b c d ef g'
+>>> empty_excerpt = Excerpt(" \t\t    \n  \t \n ", "PRE", "myfile.rsl", {}, {}).normalize_whitespace()
+>>> empty_excerpt
+u''
+>>> empty_excerpt.original_position(0)
+PositionMarker("myfile.rsl", 1, 0, 0)
