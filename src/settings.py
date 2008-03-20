@@ -75,7 +75,10 @@ class SettingError(common.Error):
 
 class SettingUnknownKeyError(SettingError):
     def __init__(self, key, value):
-        """
+        """Error class for invalid keys.  A key is invalid if the section it
+        belongs to has been closed already, and it was not previously defined
+        in this section.
+        
         :Parameters:
           - `key`: key of the setting
           - `value`: value of the setting
@@ -87,7 +90,11 @@ class SettingUnknownKeyError(SettingError):
             u"unknown setting key; section already closed", key, value)
 
 class SettingWrongTypeError(SettingError):
-    """
+    """Error class for invalid types of values in a `SettingsDict`.  A type is
+    invalid if there is already a value stored for the respective key in the
+    dictionary, but this type is incompative with the one that is to be stored
+    with the new value.
+
     :ivar previous_type: the hitherto type of the value
     :ivar new_type: the type that was tried to set now; it should have been
       equal to `previous_type`, yet it wasn't.
@@ -113,6 +120,29 @@ class SettingWrongTypeError(SettingError):
             key, value)
         self.previous_type, self.new_type = previous_type, new_type
 
+class SettingInvalidSectionError(SettingError):
+    """Error class for invalid section names.  This error is raised if you try
+    to add a new key to a `SettingsDict` that belongs to a section that hasn't
+    occured yet in this dictionary (i.e. there is no key in this
+    ``SettingsDict`` of the same section), *and* this dictionary inhibits new
+    sections.  This means, `SettingsDict.inhibit_new_sections` has been called.
+    
+    :ivar section: the section name that provoked this error
+
+    :type section: unicode
+    """
+    def __init__(self, key, value, section):
+        """
+        :Parameters:
+          - `key`: key of the setting
+          - `value`: value of the setting
+
+        :type key: unicode
+        :type value: str, unicode, float, int, or bool
+        """
+        super(SettingInvalidSectionError, self).__init__(u"invalid section used in key", key, value)
+        self.section = section
+
 class Setting(object):
     """One single Setting, this means, a key--value pair.  It is used in
     `SettingsDict` for the values in this dictionary.
@@ -124,7 +154,7 @@ class Setting(object):
     :ivar key: the key of this Setting.  This may be an arbitrary non-empty
       string.  It may be divided by a dot into a section and an option part,
       where the option doesn't contain a dot, and both parts must not be
-      empty.
+      empty.  If there is no dot, the section is ``u""``.
     :ivar value: the value of this Setting.  Must be of the type described in
       `self.type`.  It may also be a list with values of that type.  It may
       also be ``None``.
@@ -580,8 +610,9 @@ class SettingsDict(dict):
     """Class for program settings, especially the global ones.  They may come
     from an INI file, or from the command line, or whereever.  Their keys (the
     keys in this dict) may be of the form “section.option”.  If read from a
-    configuration file, this form is mandatory.  Everything is case-sensitive
-    here, as usual in Gummi.
+    configuration file, this form is mandatory.  If it is just of the form
+    “option” (without a dot), the section is ``u""``.  Note that “.option” is
+    invalid.  Everything is case-sensitive here, as usual in Gummi.
 
     As an example, consider the following configuration file:
 
@@ -614,7 +645,7 @@ class SettingsDict(dict):
         ...
         (u'Ver\\xf6ffentlichung.supi', u'toll')
         (u'Paths.backends', u'/home/user/src/bobcat/src/backends')
-        ('General.quiet', True)
+        (u'General.quiet', True)
 
     As you can see, all settings set in the section “Paths” are expanded to
     absolute pathnames, with »~« working.
@@ -623,7 +654,7 @@ class SettingsDict(dict):
         super(SettingsDict, self).__init__()
         self.predefined_variables = {}
         self.closed_sections = set()
-        self.logger = logging.getLogger("gummi.settings")
+        self.__new_sections_inhibited = False
     def set_predefined_variable(self, name, value):
         """Set a predefined variable for use in configuration files.  See the
         general explanation in `SettingsDict` for an example.  There, the
@@ -780,6 +811,11 @@ class SettingsDict(dict):
             super(SettingsDict, self).__delitem__(key)
             super(SettingsDict, self).__setitem__(key, old_value)
         else:
+            if self.__new_sections_inhibited:
+                dot_position = key.rfind(".")
+                section = unicode(key)[:dot_position] if dot_position != -1 else u""
+                if section not in self.sections:
+                    raise Setting
             self.test_for_closed_section(key, value)
             super(SettingsDict, self).__setitem__(key, Setting(key, value, source=source))
     def __setitem__(self, key, value):
@@ -823,9 +859,6 @@ class SettingsDict(dict):
 
         :type section: unicode
         """
-        # FixMe: It must also be possible to close *all* sections (even not yet
-        # existing ones) at the same time.  Or, it must be possible to say that
-        # it's forbidden to start new sections from now on.
         self.closed_sections.add(section)
         if section != u"":
             len_section = len(section)
@@ -841,6 +874,24 @@ class SettingsDict(dict):
                 warnings.warn(SettingWarning(u"unknown setting '%s' ignored" % key),
                               stacklevel=2)
                 assert key not in self
+    def inhibit_new_sections(self):
+        """Inhibit new keys from previously unknown sections.  When this method
+        is called, from now on it is impossible to add new keys coming from
+        sections that haven't yet occured in this dictionary.
+
+        Note that the set of valid section names is generated when this method
+        is called.  This means that sections of keys that used to be in this
+        dictionary but have been deleted already are not considered.
+        """
+        if not self.__new_sections_inhibited:
+            self.__new_sections_inhibited = True
+            self.sections = set()
+            for key in self.iterkeys():
+                dot_position = key.rfind(".")
+                if dot_position != -1:
+                    self.sections.add(unicode(key)[:dot_position])
+                else:
+                    self.sections.add(u"")
     def parse_keyvalue_list(self, excerpt, parent_element,
                             item_separator=u",", key_terminators=u":="):
         """Adds items from a key/value list to the dictionary.  These key/value
@@ -986,13 +1037,7 @@ class SettingsDict(dict):
                                                   vars=self.predefined_variables).strip()
                         if section == "Paths":
                             value = os.path.abspath(os.path.expanduser(value))
-                        if key in self:
-                            super(SettingsDict, self).__getitem__(key).set_value(value,
-                                                                                 "conf file")
-                        else:
-                            self.test_for_closed_section(key, value)
-                            super(SettingsDict, self).__setitem__(key, Setting(key, value,
-                                                                               source="conf file"))
+                        self.store_new_value(key, value, source="conf file")
                     except ConfigParser.InterpolationMissingOptionError, error:
                         warnings.warn(SettingWarning(u"setting '%s' misses predefined "
                                                      u"variable '%s'" % (key, error.reference)))
