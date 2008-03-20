@@ -1,4 +1,4 @@
-.. -*- coding: utf-8 -*-
+.. -*- coding: utf-8; mode: text; mode: auto-fill -*-
 .. Gummi 1.0
 
 
@@ -55,7 +55,8 @@ brackets, the protocol prefix may be omitted.
 
 The same footnote mark may occur multiple times.  They will be processed in
 order of appearance.  This means that you could mark all your footnotes with \*
-(not very wise, tough).
+(not very wise, tough).  Footnote and reference to footnote must be in the same
+section.  The reference must come first.
 
 With hyperlinks, you have two possibilities: `IBM's homepage` and the separated
 definition as above, or → Homepage of IBM <www.ibm.com>.  Instead of angle
@@ -67,7 +68,6 @@ the protocol prefix is mandatory.
 -------------------------------------------------------------------------------
 
 .. → may be written as --> (via the input method).
-.. → can be dropped with hyperlinks if everything remains unambiguous.
 ..
 .. → is used also for distinguishing between links to sections with same
 .. headings: `Results → Silicon samples`.  Thus, in case two sections are
@@ -76,9 +76,12 @@ the protocol prefix is mandatory.
 
 In this ↑paragraph you see how index entries are realised.
 
-.. ↑`long index entry` and ↑`index entry → long` or ↑`_index entry →
-.. long_` in order to get the page number printed emphasised.  Instead of \↑
-.. you may also type --^ (via input method).
+.. ↑`long index entry` and ↑`index entry → long` or ↑`_index entry → long_` in
+.. order to get the page number printed emphasised.  Instead of \↑ you may also
+.. type --^ (via input method).  Note that all these index entries are also
+.. printed in the text.  Page number markup is not printed, though.  If there
+.. is an “→” in the index entry, subentries are printed comma-separated in
+.. parentheses behind the main lemma: “index entry (long)”
 .. 
 .. Sort keys are written as follows: ↑`entry@sortkey` or ↑ `_long entry_ @sort
 .. key`.  So it's the other way round as with Makeindex.
@@ -100,24 +103,32 @@ current position, create a paragraph with only index entries and whitespace:
 .. Bibliography entries are marked-up like this:
 
 [Miller 2006]
-type:       book
+reference:: book
 label:      Miller 2006
 author:     Peter Miller
 title:      LaTeX –
-            an introduction
+            publisher: an introduction
 publisher:  WhatEver, Heidelberg
 year:       2006
 
-.. It is separated with empty lines at the top and the bottom.  The names
-.. “author”, “title” etc can be English or the current document language.
-.. “label” is optional.
+.. It is separated with empty lines at the top and the bottom.  If a paragraph
+.. consists only of citation labels in backets, this is equivalent to LaTeX's
+.. ```\nocite```.  The names “author”, “title” etc can be English or the
+.. current document language.  “label” is optional, as is the label in
+.. brackets.
 
-.. There are short forms with (unescaped) semicolons as separators (short and
-.. long form can be combined):
+.. As a second possibility, there is the short form which cannot be combined
+.. with the long form.  It uses “//” instead of line breaks.  If Gummi detects
+.. only one unescaped “//”, it assumes the short form:
 
-[Müller]  article:
-Die Expansion subterraner Knollengewächse; Peter Müller; Journal of
-Agriculture; 2006
+[Meier 2004]
+reference:: article // title: Die Expansion subterraner Knollengewächse //
+author: Peter Müller // journal: Journal of Agriculture // year: 2006 //
+publisher: WhatEver, Heidelberg
+
+.. Within the pre-defined environment ```references::```, you can use both
+.. constructs, however, the ```reference::``` directive can be dropped if
+.. desired.
 
 
 2. Lists
@@ -497,8 +508,7 @@ The label may be implicit by the heading of the environment, or the explicit
 label.  There are no namespaces for labels.  In case that in a section, some
 environments have the same heading and they are referred to, this is an error.
 The same is true if a section contains an environment _and_ a subsection with
-the same explicit label.  Then, you must use explicit labels and/or include the
-labels of parental section using the arrow notation above.
+the same implicit label.  Then, you must use explicit labels.
 
 If a backend doesn't know about a certain environment, it must use a standard
 formatting for it, i.e. some sort of highlighted heading, printing of the
