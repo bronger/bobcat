@@ -378,3 +378,4 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    os.remove("../misc/test2.rsl")

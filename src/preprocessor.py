@@ -987,3 +987,4 @@ def load_file(filename):
 if __name__ == "__main__":
     import doctest
     doctest.testfile("../misc/preprocessor.txt")
+    os.remove("../misc/test2.rsl")

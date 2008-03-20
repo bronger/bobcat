@@ -361,3 +361,5 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
     doctest.testfile("../misc/common.txt")
+    os.remove("../misc/test2.rsl")
+    
