@@ -136,9 +136,11 @@ class SettingInvalidSectionError(SettingError):
         :Parameters:
           - `key`: key of the setting
           - `value`: value of the setting
+          - `section`: the section name that provoked this error
 
         :type key: unicode
         :type value: str, unicode, float, int, or bool
+        :type section: unicode
         """
         super(SettingInvalidSectionError, self).__init__(u"invalid section used in key", key, value)
         self.section = section
@@ -678,6 +680,10 @@ class SettingsDict(dict):
         If this is the case, an `SettingError` exception is raised.  Sections
         are closed with `close_section`.
 
+        This also tests whether a completely new section would be opened by
+        this key, and checks whether it is allowed to open it.  See
+        `inhibit_new_sections` for further details.
+
         The rationale behind this is that it helps to detect typos in
         configuration files: First, all defaults for a certain section are
         defined in the program, then it is closed, and then the configuration
@@ -728,6 +734,8 @@ class SettingsDict(dict):
         section = key[:dot_position] if dot_position != -1 else u""
         if section in self.closed_sections:
             raise SettingUnknownKeyError(key, value)
+        if self.__new_sections_inhibited and section not in self.sections:
+            raise SettingInvalidSectionError(key, value, section)
     def set_default(self, key, value, explicit_type=None, docstring=None):
         """Set the default value of a setting.  It may already exist or not.
 
@@ -811,11 +819,6 @@ class SettingsDict(dict):
             super(SettingsDict, self).__delitem__(key)
             super(SettingsDict, self).__setitem__(key, old_value)
         else:
-            if self.__new_sections_inhibited:
-                dot_position = key.rfind(".")
-                section = unicode(key)[:dot_position] if dot_position != -1 else u""
-                if section not in self.sections:
-                    raise Setting
             self.test_for_closed_section(key, value)
             super(SettingsDict, self).__setitem__(key, Setting(key, value, source=source))
     def __setitem__(self, key, value):
@@ -882,6 +885,24 @@ class SettingsDict(dict):
         Note that the set of valid section names is generated when this method
         is called.  This means that sections of keys that used to be in this
         dictionary but have been deleted already are not considered.
+
+            >>> settings = SettingsDict()
+            >>> settings.set_default("General.quiet", True)
+            >>> settings.inhibit_new_sections()
+            >>> settings.set_default("General.outfile", None, "unicode")
+            >>> settings.set_default("Newsection.outfile", None, "unicode")
+            Traceback (most recent call last):
+                ...
+            SettingInvalidSectionError: setting 'Newsection.outfile = None': invalid section used in key
+
+        Note that this also applies to new section-less keys.  The “section
+        with empty name” must also be known in order to accept new keys:
+
+            >>> settings["sectionlesskey"] = 0
+            Traceback (most recent call last):
+                ...
+            SettingInvalidSectionError: setting 'sectionlesskey = 0': invalid section used in key
+
         """
         if not self.__new_sections_inhibited:
             self.__new_sections_inhibited = True
@@ -926,6 +947,7 @@ class SettingsDict(dict):
             >>> settings.set_default("a", None, "unicode")
             >>> settings.set_default("c", None, "int")
             >>> settings.close_section("")
+            >>> settings.inhibit_new_sections()
             >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
             >>> settings
             {u'a': u'b', u'c': 4}
@@ -956,20 +978,21 @@ class SettingsDict(dict):
                 value = unicode(excerpt[start:end].apply_postprocessing())
                 try:
                     self.store_new_value(key, value, "conf file")
-                except SettingUnknownKeyError, error:
-                    parent_element.throw_parse_error(
+                except (SettingUnknownKeyError, SettingInvalidSectionError), error:
+                    parent_element.throw_parse_warning(
                         "unknown key '%s'" % key, key.original_position())
                 except SettingWrongTypeError, error:
-                    parent_element.throw_parse_error(
+                    parent_element.throw_parse_warning(
                         "type of value for '%s' is wrong; expected %s but got %s" %
                         (key, error.previous_type, error.new_type),
                         key.original_position())
                 current_position = next_item_match.end()
             else:
                 parent_element.throw_parse_error(
-                    "invalid key--value syntax in " +
+                    "invalid key--value syntax in '%s'" %
                     excerpt[current_position:].apply_postprocessing().strip(),
                     excerpt.original_position(current_position))
+                break
         warnings.resetwarnings()
             
     def load_from_files(self, filenames, forbidden_sections=frozenset()):

@@ -62,3 +62,21 @@ SettingWarning: setting 'General.not.allowed' contains a dot in the option part;
 >>> read_files = settings.load_from_files("../misc/test3.conf")
 >>> settings["General.quiet"]
 False
+>>> #
+>>> #  Now test SettingsDict.parse_keyvalue_list
+>>> #
+>>> import parser
+>>> excerpt = preprocessor.Excerpt("a:b, c = 4, d.f=3", "PRE", "myfile.rsl", {}, {})
+>>> settings = SettingsDict()
+>>> settings.set_default("a", None, "unicode")
+>>> settings.set_default("c", None, "int")
+>>> settings.close_section("")
+>>> settings.inhibit_new_sections()
+>>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
+>>> common.ParseError.parse_errors
+[ParseError("unknown key 'd.f'",)]
+>>> excerpt = preprocessor.Excerpt("a:b, c = 4,e", "PRE", "myfile.rsl", {}, {})
+>>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
+>>> for error in common.ParseError.parse_errors: print error
+file "myfile.rsl", line 1, column 12: unknown key 'd.f'
+file "myfile.rsl", line 1, column 11: invalid key--value syntax in 'e'
