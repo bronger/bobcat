@@ -352,43 +352,78 @@ plus the extension ``\verb|.gim|''.
 
 \subsection{The content models}
 
-\begingroup\parindent0pt\parskip2ex\raggedright
-\newcommand{\element}[2]{\par\texttt{\textbf{#1}}:\quad \texttt{#2}}
+\makeatletter
+\newcommand*{\contentmodel}[3][\@empty]{\bigskip\begingroup\par\noindent
+  \fbox{\vbox{\raggedright\parindent0pt\hangafter1\hangindent1em
+      \emph{Content model of} \texttt{\textbf{#2}}:\quad
+      \texttt{#3}%
+      \ifx#1\@empty\else\par\hangafter1\hangindent1em
+      \emph{Further constraints}:\quad#1\par\fi}}\par
+  \endgroup\vspace*{1ex}\par\noindent\ignorespaces}
+\newenvironment{attributes}{\noindent \emph{Attributes:}}{}
+\newcommand*{\attribute}[2]{\par\noindent\hangafter1\hangindent3em\lstinline{#1} --- #2\par}
+\makeatother
 
-\element{Document}{\textit{block}*, Section*}
-\element{\textit{block}}{Math | Environment | Table | Code | List |
+\contentmodel{Document}{\textit{block}*, Section*}
+
+\contentmodel{\textit{block}}{Math | Environment | Table | Code | List |
   DefinitionList | Paragraph | Footnote | Media}
-\element{\textit{flow}}{\textit{block} | Float | BibliographyEntry}
-\element{DefinitionList}{DefinitionListItem*}
-\element{DefinitionListItem}{\textit{Text}, \textit{block}*}
-\element{List}{ListItem*}
-\element{ListItem}{\textit{block}*}
-\element{Paragraph}{\textit{inline}*}
-\element{Section}{Heading, \textit{flow}*, Section*}
-\element{Heading}{\textit{inline}*}
-\element{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
-  IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}
-\element{Footnote}{\textit{inline}*} (but footnotes must not be nested)
-\element{Emphasize}{\textit{inline}*}
-\element{Hyperlink}{\textit{inline}*} (but hyperlinks must not be nested)
-\element{Role}{\textit{inline}*} (but roles must not be nested)
-\element{Citations}{Citation*}
-\element{Citation}{BibliographyEntry, \textit{inline}*} (but citations must not be nested)
-\element{BiblioEntry}{} (empty)
-\element{CrossReference}{\textit{inline}*} (but cross references must not be
-nested)
-\element{Code}{\textit{Text}}
-\element{Environment}{EnvironmentHeading, \textit{block}*} (but environments
-must not be nested)
-\element{EnvironmentHeading}{\textit{inline}*}
-\element{Float}{Caption?, (Subfigure* | \textit{block}*)}
-\element{Subfigure}{Caption?, \textit{block}*}
-\element{Caption}{\textit{inline}*}
-\element{Media}{} (empty)
-\element{IndexEntry}{IndexEntryPart\{1,3\}}
-\element{IndexEntryPart}{\textit{inline}*}
 
-\endgroup
+\contentmodel{\textit{flow}}{\textit{block} | Float | BibliographyEntry}
+
+\contentmodel{DefinitionList}{DefinitionListItem*}
+
+\contentmodel{DefinitionListItem}{\textit{Text}, \textit{block}*}
+
+\contentmodel{List}{ListItem*}
+
+\contentmodel{ListItem}{\textit{block}*}
+
+\contentmodel{Paragraph}{\textit{inline}*}
+
+\contentmodel{Section}{Heading, \textit{flow}*, Section*}
+
+\contentmodel{Heading}{\textit{inline}*}
+
+\contentmodel{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
+  IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}
+
+\contentmodel[footnotes must not be nested]{Footnote}{\textit{inline}*}
+
+\contentmodel{Emphasize}{\textit{inline}*}
+
+\contentmodel[hyperlinks must not be nested]{Hyperlink}{\textit{inline}*}
+\begin{attributes}
+  \attribute{url}{the target URL of the hyperlink}
+\end{attributes}
+  
+\contentmodel[roles must not be nested]{Role}{\textit{inline}*}
+
+\contentmodel{Citations}{Citation*}
+
+\contentmodel[citations must not be nested]{Citation}{BibliographyEntry, \textit{inline}*}
+
+\contentmodel{BiblioEntry}{\textit{empty}}
+
+\contentmodel[cross references must not be nested]{CrossReference}{\textit{inline}*}
+
+\contentmodel{Code}{\textit{Text}}
+
+\contentmodel[environments must not be nested]{Environment}{EnvironmentHeading, \textit{block}*}
+
+\contentmodel{EnvironmentHeading}{\textit{inline}*}
+
+\contentmodel{Float}{Caption?, (Subfigure* | \textit{block}*)}
+
+\contentmodel{Subfigure}{Caption?, \textit{block}*}
+
+\contentmodel{Caption}{\textit{inline}*}
+
+\contentmodel{Media}{\textit{empty}}
+
+\contentmodel{IndexEntry}{IndexEntryPart\{1,3\}}
+
+\contentmodel{IndexEntryPart}{\textit{inline}*}
 
 \section{Backend requirements}
 
