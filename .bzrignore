@@ -5,3 +5,8 @@ misc/test1.out
 misc/test1.tex
 /gummi.log
 homepage/epydoc/
+doc/gummi-spec.aux
+doc/gummi-spec.dvi
+doc/gummi-spec.log
+doc/gummi-spec.out
+doc/gummi-spec.toc
