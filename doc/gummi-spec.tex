@@ -1,6 +1,6 @@
 \documentclass[12pt,openany]{book}
 
-\usepackage[utf-8]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[british]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[lmargin=2cm,tmargin=2cm,rmargin=2cm,bmargin=3cm]{geometry}
@@ -352,20 +352,38 @@ plus the extension ``\verb|.gim|''.
 
 \subsection{The content models}
 
-\begingroup\parindent0pt\parskip2ex
-\newcommand{\element}[2]{\texttt{\textbf{#1}}: \texttt{#2}}
+\begingroup\parindent0pt\parskip2ex\raggedright
+\newcommand{\element}[2]{\par\texttt{\textbf{#1}}:\quad \texttt{#2}}
 
 \element{Document}{\textit{block}*, Section*}
-
-\element{Section}{Heading, \textit{block}*, Section*}
-
-\element{Heading}{\textit{inline}}
-
-\element{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink}
-
-\element{Emphasize}{\textit{inline}}
-
-\element{Hyperlink}{\textit{inline}}
+\element{\textit{block}}{Math | Environment | Table | Code | List |
+  DefinitionList | Paragraph | Footnote}
+\element{\textit{flow}}{\textit{block} | Float | BibliographyEntry}
+\element{DefinitionList}{DefinitionListItem*}
+\element{DefinitionListItem}{\textit{Text}, \textit{block}*}
+\element{List}{ListItem*}
+\element{ListItem}{\textit{block}*}
+\element{Paragraph}{\textit{inline}*}
+\element{Section}{Heading, \textit{flow}*, Section*}
+\element{Heading}{\textit{inline}*}
+\element{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
+  IndexEntry | CrossReference | Citation | Math | Role}
+\element{Footnote}{\textit{inline}*} (but footnotes must not be nested)
+\element{Emphasize}{\textit{inline}*}
+\element{Hyperlink}{\textit{inline}*} (but hyperlinks must not be nested)
+\element{Role}{\textit{inline}*} (but roles must not be nested)
+\element{Citations}{Citation*}
+\element{Citation}{BibliographyEntry, \textit{inline}*} (but citations must not be nested)
+\element{BiblioEntry}{} (empty)
+\element{CrossReference}{\textit{inline}*} (but cross references must not be
+nested)
+\element{Code}{\textit{Text}}
+\element{Environment}{EnvironmentHeading, \textit{block}*} (but environments
+must not be nested)
+\element{EnvironmentHeading}{\textit{inline}*}
+\element{Float}{Subfigure+}
+\element{Subfigure}{Caption, \textit{block}*}
+\element{Caption}{\textit{inline}*}
 
 \endgroup
 
