@@ -381,8 +381,8 @@ nested)
 \element{Environment}{EnvironmentHeading, \textit{block}*} (but environments
 must not be nested)
 \element{EnvironmentHeading}{\textit{inline}*}
-\element{Float}{Subfigure+}
-\element{Subfigure}{Caption, \textit{block}*}
+\element{Float}{Caption?, (Subfigure* | \textit{block}*)}
+\element{Subfigure}{Caption?, \textit{block}*}
 \element{Caption}{\textit{inline}*}
 
 \endgroup
