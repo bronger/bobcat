@@ -357,7 +357,7 @@ plus the extension ``\verb|.gim|''.
 
 \element{Document}{\textit{block}*, Section*}
 \element{\textit{block}}{Math | Environment | Table | Code | List |
-  DefinitionList | Paragraph | Footnote}
+  DefinitionList | Paragraph | Footnote | Media}
 \element{\textit{flow}}{\textit{block} | Float | BibliographyEntry}
 \element{DefinitionList}{DefinitionListItem*}
 \element{DefinitionListItem}{\textit{Text}, \textit{block}*}
@@ -367,7 +367,7 @@ plus the extension ``\verb|.gim|''.
 \element{Section}{Heading, \textit{flow}*, Section*}
 \element{Heading}{\textit{inline}*}
 \element{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
-  IndexEntry | CrossReference | Citation | Math | Role}
+  IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}
 \element{Footnote}{\textit{inline}*} (but footnotes must not be nested)
 \element{Emphasize}{\textit{inline}*}
 \element{Hyperlink}{\textit{inline}*} (but hyperlinks must not be nested)
@@ -384,6 +384,9 @@ must not be nested)
 \element{Float}{Caption?, (Subfigure* | \textit{block}*)}
 \element{Subfigure}{Caption?, \textit{block}*}
 \element{Caption}{\textit{inline}*}
+\element{Media}{} (empty)
+\element{IndexEntry}{IndexEntryPart\{1,3\}}
+\element{IndexEntryPart}{\textit{inline}*}
 
 \endgroup
 
