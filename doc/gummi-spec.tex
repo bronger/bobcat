@@ -360,7 +360,7 @@ plus the extension ``\verb|.gim|''.
       \ifx#3\@empty\else\par\hangafter1\hangindent1em
       \emph{Further constraints}:\quad#3\par\fi}}\par
   \endgroup\vspace*{1ex}\par\noindent\ignorespaces}
-\newenvironment{attributes}{\noindent\emph{Attributes:}\vspace*{-1ex}\begin{description*}}{\end{description*}}
+\newenvironment{attributes}[1][Attributes]{\noindent\emph{#1:}\vspace*{-1ex}\begin{description*}}{\end{description*}}
 \newcommand{\attribute}[3]{\item[\texttt{#1} \textmd{(#2)}]\hskip0.5em #3}
 \newenvironment{key-values}{\vspace*{-0.8ex}\begin{description*}}{\end{description*}}
 \newcommand{\keyvalue}[3]{\item[\texttt{#1} \textmd{(#2)}]\hskip0.5em #3}
@@ -369,85 +369,121 @@ plus the extension ``\verb|.gim|''.
 \newcommand{\opt}{\kern0.1em?}
 \newcommand{\repp}{\kern0.1em+}
 
-\contentmodel{Document}{\textit{flow}\rep, Section\rep}{}
+\begin{attributes}[Common attributes]
+  \attribute{language}{unicode}{human language in RFC\,4646 form}
+\end{attributes}
 
+~
+
+\contentmodel{Document}{\textit{flow}\rep, Section\rep}{}
+\begin{attributes}
+  \attribute{packages}{set of unicode}{features needed by this document,
+    e.\,g.\ tables, formulae etc.  This can be used by the \LaTeX\ backend to
+    decide which additional packages must be included.  Normally, it simply
+    contains \LaTeX\ package names, but maybe RTF or OpenDocument need further
+    possible items in this set.}
+\end{attributes}
 
 \contentmodel{\textit{block}}{Math | Environment | Table | Code | List |
   DefinitionList | Paragraph | Footnote | Media}{}
 
+~
 
 \contentmodel{\textit{flow}}{\textit{block} | Float | BibliographyEntry}{}
 
+~
 
 \contentmodel{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
   IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}{}
 
+~
 
 \contentmodel{DefinitionList}{DefinitionListItem\rep}{}
 
+~
 
 \contentmodel{DefinitionListItem}{\textit{Text}, \textit{block}\rep}{}
 
+~
 
 \contentmodel{List}{ListItem\rep}{}
 
+~
 
 \contentmodel{ListItem}{\textit{block}\rep}{}
 
+~
 
 \contentmodel{Paragraph}{\textit{inline}\rep}{}
 
+~
 
 \contentmodel{Section}{Heading, \textit{flow}\rep, Section\rep}{}
 
+~
 
 \contentmodel{Heading}{\textit{inline}\rep}{}
 
+~
 
 \contentmodel{Footnote}{\textit{inline}\rep}{footnotes must not be nested}
 
+~
 
 \contentmodel{Emphasize}{\textit{inline}\rep}{}
 
+~
 
 \contentmodel{Hyperlink}{\textit{inline}\rep}{hyperlinks must not be nested}
 \begin{attributes}
   \attribute{url}{unicode}{the target URL of the hyperlink}
 \end{attributes}
   
+~
 
 \contentmodel{Role}{\textit{inline}\rep}{roles must not be nested}
 
+~
 
 \contentmodel{Citations}{Citation\rep}{}
 
+~
 
 \contentmodel{Citation}{BibliographyEntry, \textit{inline}\rep}{citations must not be nested}
 
+~
 
 \contentmodel{BiblioEntry}{\textit{empty}}{}
 
+~
 
 \contentmodel{CrossReference}{\textit{inline}\rep}{cross references must not be nested}
 
+~
 
 \contentmodel{Code}{\textit{Text}}{}
 
+~
 
 \contentmodel{Environment}{EnvironmentHeading\opt, \textit{block}\rep}{environments must not be nested}
 
+~
 
 \contentmodel{EnvironmentHeading}{\textit{inline}\rep}{}
 
+~
 
 \contentmodel{Float}{Caption\opt, (Subfigure\rep\ | \textit{block}\rep)}{}
 
+~
 
 \contentmodel{Subfigure}{Caption\opt, \textit{block}\rep}{}
 
+~
 
 \contentmodel{Caption}{\textit{inline}\rep}{}
 
+~
 
 \contentmodel{Media}{\textit{empty}}{}
 \begin{attributes}
@@ -459,11 +495,15 @@ plus the extension ``\verb|.gim|''.
   }
 \end{attributes}
 
+~
 
 \contentmodel{IndexEntry}{IndexEntryPart\kern0.1em\{1,3\}}{}
 
+~
 
 \contentmodel{IndexEntryPart}{\textit{inline}\rep}{}
+
+~
 
 \section{Backend requirements}
 
