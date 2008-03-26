@@ -13,7 +13,7 @@
   alsoletter={-}
 }
 \lstset{language=}
-\usepackage{minioneu,textcomp,booktabs}
+\usepackage{minioneu,textcomp,booktabs,mdwlist}
 %\usepackage[T1,hyphens]{url}
 
 \usepackage{hyperref}
@@ -353,77 +353,117 @@ plus the extension ``\verb|.gim|''.
 \subsection{The content models}
 
 \makeatletter
-\newcommand*{\contentmodel}[3][\@empty]{\bigskip\begingroup\par\noindent
+\newcommand*{\contentmodel}[3]{\bigskip\bigskip\begingroup\par\noindent
   \fbox{\vbox{\raggedright\parindent0pt\hangafter1\hangindent1em
-      \emph{Content model of} \texttt{\textbf{#2}}:\quad
-      \texttt{#3}%
-      \ifx#1\@empty\else\par\hangafter1\hangindent1em
-      \emph{Further constraints}:\quad#1\par\fi}}\par
+      \emph{Content model of} \texttt{\textbf{#1}}:\quad
+      \texttt{#2}%
+      \ifx#3\@empty\else\par\hangafter1\hangindent1em
+      \emph{Further constraints}:\quad#3\par\fi}}\par
   \endgroup\vspace*{1ex}\par\noindent\ignorespaces}
-\newenvironment{attributes}{\noindent \emph{Attributes:}}{}
-\newcommand*{\attribute}[2]{\par\noindent\hangafter1\hangindent3em\lstinline{#1} --- #2\par}
+\newenvironment{attributes}{\noindent\emph{Attributes:}\vspace*{-1ex}\begin{description*}}{\end{description*}}
+\newcommand{\attribute}[3]{\item[\texttt{#1} \textmd{(#2)}]\hskip0.5em #3}
+\newenvironment{key-values}{\vspace*{-0.8ex}\begin{description*}}{\end{description*}}
+\newcommand{\keyvalue}[3]{\item[\texttt{#1} \textmd{(#2)}]\hskip0.5em #3}
 \makeatother
+\newcommand{\rep}{\raisebox{-0.3ex}{\kern0.1em*}}
+\newcommand{\opt}{\kern0.1em?}
+\newcommand{\repp}{\kern0.1em+}
 
-\contentmodel{Document}{\textit{block}*, Section*}
+\contentmodel{Document}{\textit{flow}\rep, Section\rep}{}
+
 
 \contentmodel{\textit{block}}{Math | Environment | Table | Code | List |
-  DefinitionList | Paragraph | Footnote | Media}
+  DefinitionList | Paragraph | Footnote | Media}{}
 
-\contentmodel{\textit{flow}}{\textit{block} | Float | BibliographyEntry}
 
-\contentmodel{DefinitionList}{DefinitionListItem*}
+\contentmodel{\textit{flow}}{\textit{block} | Float | BibliographyEntry}{}
 
-\contentmodel{DefinitionListItem}{\textit{Text}, \textit{block}*}
-
-\contentmodel{List}{ListItem*}
-
-\contentmodel{ListItem}{\textit{block}*}
-
-\contentmodel{Paragraph}{\textit{inline}*}
-
-\contentmodel{Section}{Heading, \textit{flow}*, Section*}
-
-\contentmodel{Heading}{\textit{inline}*}
 
 \contentmodel{\textit{inline}}{\textit{Text} | Emphasize | Hyperlink | Footnote |
-  IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}
+  IndexEntry | CrossReference | Citation | Math | Role | Media | IndexEntry}{}
 
-\contentmodel[footnotes must not be nested]{Footnote}{\textit{inline}*}
 
-\contentmodel{Emphasize}{\textit{inline}*}
+\contentmodel{DefinitionList}{DefinitionListItem\rep}{}
 
-\contentmodel[hyperlinks must not be nested]{Hyperlink}{\textit{inline}*}
+
+\contentmodel{DefinitionListItem}{\textit{Text}, \textit{block}\rep}{}
+
+
+\contentmodel{List}{ListItem\rep}{}
+
+
+\contentmodel{ListItem}{\textit{block}\rep}{}
+
+
+\contentmodel{Paragraph}{\textit{inline}\rep}{}
+
+
+\contentmodel{Section}{Heading, \textit{flow}\rep, Section\rep}{}
+
+
+\contentmodel{Heading}{\textit{inline}\rep}{}
+
+
+\contentmodel{Footnote}{\textit{inline}\rep}{footnotes must not be nested}
+
+
+\contentmodel{Emphasize}{\textit{inline}\rep}{}
+
+
+\contentmodel{Hyperlink}{\textit{inline}\rep}{hyperlinks must not be nested}
 \begin{attributes}
-  \attribute{url}{the target URL of the hyperlink}
+  \attribute{url}{unicode}{the target URL of the hyperlink}
 \end{attributes}
   
-\contentmodel[roles must not be nested]{Role}{\textit{inline}*}
 
-\contentmodel{Citations}{Citation*}
+\contentmodel{Role}{\textit{inline}\rep}{roles must not be nested}
 
-\contentmodel[citations must not be nested]{Citation}{BibliographyEntry, \textit{inline}*}
 
-\contentmodel{BiblioEntry}{\textit{empty}}
+\contentmodel{Citations}{Citation\rep}{}
 
-\contentmodel[cross references must not be nested]{CrossReference}{\textit{inline}*}
 
-\contentmodel{Code}{\textit{Text}}
+\contentmodel{Citation}{BibliographyEntry, \textit{inline}\rep}{citations must not be nested}
 
-\contentmodel[environments must not be nested]{Environment}{EnvironmentHeading, \textit{block}*}
 
-\contentmodel{EnvironmentHeading}{\textit{inline}*}
+\contentmodel{BiblioEntry}{\textit{empty}}{}
 
-\contentmodel{Float}{Caption?, (Subfigure* | \textit{block}*)}
 
-\contentmodel{Subfigure}{Caption?, \textit{block}*}
+\contentmodel{CrossReference}{\textit{inline}\rep}{cross references must not be nested}
 
-\contentmodel{Caption}{\textit{inline}*}
 
-\contentmodel{Media}{\textit{empty}}
+\contentmodel{Code}{\textit{Text}}{}
 
-\contentmodel{IndexEntry}{IndexEntryPart\{1,3\}}
 
-\contentmodel{IndexEntryPart}{\textit{inline}*}
+\contentmodel{Environment}{EnvironmentHeading\opt, \textit{block}\rep}{environments must not be nested}
+
+
+\contentmodel{EnvironmentHeading}{\textit{inline}\rep}{}
+
+
+\contentmodel{Float}{Caption\opt, (Subfigure\rep\ | \textit{block}\rep)}{}
+
+
+\contentmodel{Subfigure}{Caption\opt, \textit{block}\rep}{}
+
+
+\contentmodel{Caption}{\textit{inline}\rep}{}
+
+
+\contentmodel{Media}{\textit{empty}}{}
+\begin{attributes}
+  \attribute{url}{unicode}{the source URL where this media object can be found}
+  \attribute{options}{dict}{options given by the user.  Possible items:
+    \begin{key-values}
+      \keyvalue{scaling}{float}{the scaling percentage}
+    \end{key-values}
+  }
+\end{attributes}
+
+
+\contentmodel{IndexEntry}{IndexEntryPart\kern0.1em\{1,3\}}{}
+
+
+\contentmodel{IndexEntryPart}{\textit{inline}\rep}{}
 
 \section{Backend requirements}
 
