@@ -149,6 +149,9 @@ class Node(object):
     :ivar language: the :RFC:`4646` language tag for this node.  Always in
       lowercase.
 
+    :ivar types_path: path containing all ancestor element types in proper
+      order.  For example, it may be ``"/Document/Paragraph/Emphasize/Text"``.
+
     :ivar __text: The original text from which this node was created (parsed).
       Only needed for calculating `__position`, see the `position` property.
     :ivar __start_index: The index within `__text` where this node starts.
@@ -160,6 +163,8 @@ class Node(object):
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
+    :type absolute_path
+    :type types_path: str
     :type __text: `prepocessor.Excerpt`
     :type __start_index: int
     :type __position: `common.PositionMarker`
@@ -182,10 +187,12 @@ class Node(object):
             # for the very first child in the document node.
             parent.children.append(self)
             self.language = self.root().current_language
+            self.types_path = parent.types_path + "/" + str(self.__class__).split(".")[1][:-2]
         else:
             # This is the root node
             self.parent = None
             self.language = None
+            self.types_path = ""
         self.children = []
     def parse(self, text, position):
         u"""Parse a part of the source document and interpret it as the source
