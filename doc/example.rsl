@@ -199,18 +199,15 @@ the number is calculated accordingly.  Everything between the numbering and the
 label is discarded.  Is there neither a numbering nor a label, the backend must
 discard the "Figure x.x:" completely.  The contents of the caption can serve as
 an implicit label as with section headings.  If there is a collision, this is
-an error.  You must use then an explicit label.  The implicit label points to
-the section.
+an error.  You must use then an explicit label.
+///////////////////////////////////////////////////////////////////////////////
 
-This is the second paragraph of the caption.  Only in case of captions for
-subfigures it is necessary to use a “+” for continuation.  If the caption is
-empty _and_ there is neither a numbering nor a label, i. e. there is only the
-“Figure::”, no caption is printed at all.  This can be used to separate
-subfigures from each other, and from the shared caption.
+If the caption is empty _and_ there is neither a numbering nor a label,
+i. e. there is only the “Figure::”, no caption is printed at all.  This can be
+used to separate subfigures from each other, and from the shared caption.
 
 The caption is distinguished from environments (see below) in that it has no
 ending code.
-///////////////////////////////////////////////////////////////////////////////
 
 This is an example for the subfigure functionality:
 
@@ -431,7 +428,7 @@ depends on the backend).  You may use exponents and fractions in the unit:
 
 
 7. Text blocks
-==============
+===========<===
 
 Text blocks work as in reStructuredText, |text block|.  There are no
 parameters, and only inline material is allowed.
