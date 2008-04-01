@@ -476,15 +476,14 @@ class Text(Node):
     def __init__(self, parent):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
-        """Just copy a slice of the source code into `text`."""
+        """Copy a slice of the source code into `text` and apply the post input
+        method."""
         super(Text, self).parse(text, position)
-        self.text = text[position:end]
+        self.text = text[position:end].apply_postprocessing()
         return end
     def process(self):
-        """Pass `text` to the emitter.  Note that if you want to override this method
-        in the backend, you must apply the postprocessing with
-        `preprocessor.Excerpt.apply_postprocessing`."""
-        self.root().emit(self.text.apply_postprocessing())
+        """Pass `text` to the emitter."""
+        self.root().emit(self.text)
 
 inline_delimiter = re.compile(ur"[_`]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
 def parse_inline(parent, text, position, end):
