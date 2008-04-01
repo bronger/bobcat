@@ -152,12 +152,14 @@ class Node(object):
     :ivar types_path: path containing all ancestor element types in proper
       order.  For example, it may be ``"/Document/Paragraph/Emphasize/Text"``.
 
-    :ivar __text: The original text from which this node was created (parsed).
+    :ivar __original_text: The original text from which this node was created (parsed).
       Only needed for calculating `__position`, see the `position` property.
-    :ivar __start_index: The index within `__text` where this node starts.
+    :ivar __start_index: The index within `__original_text` where this node starts.
       Only needed for calculating `__position`, see the `position` property.
     :ivar __position: cache for the original position of this node in the
       source file, see the `position` property.
+    :ivar __text: cache for the text equivalent of this node in the source
+      file, see the `text` property.
 
     :type parent: weakref to Node
     :type root: weakref to Node
@@ -165,11 +167,13 @@ class Node(object):
     :type language: str
     :type absolute_path
     :type types_path: str
-    :type __text: `prepocessor.Excerpt`
+    :type __original_text: `prepocessor.Excerpt`
     :type __start_index: int
     :type __position: `common.PositionMarker`
+    :type __text: unicode
     """
     __position = None
+    __text = None
     def __init__(self, parent):
         """It will also be called by all derived classes.
 
@@ -223,7 +227,7 @@ class Node(object):
         :rtype: int
         """
         # pylint: disable-msg=R0201,W0613
-        self.__text, self.__start_index = text, position
+        self.__original_text, self.__start_index = text, position
         return position
     def __get_position(self):
         """Returns the starting position of this element.  In some situations,
@@ -243,12 +247,26 @@ class Node(object):
         :rtype: `common.PositionMarker`
         """
         if not self.__position:
-            self.__position = self.__text.original_position(self.__start_index)
+            self.__position = self.__original_text.original_position(self.__start_index)
         return self.__position
     position = property(__get_position, doc="""Starting position of this
         document element in the original source file.
 
         :type: `common.PositionMarker`""")
+    def __get_text(self):
+        if not self.__text:
+            self.__text = u"".join(child.text for child in self.children)
+        return self.__text
+    text = property(__get_text, doc="""Text of this node and all of its
+        children.  This is very similar to the ``text()`` function in XPath.
+        Note that it is overwritten with an ordinary attribute in the `Text`
+        class.
+
+        *Important*: You must not read this property while the element is
+        parsed.  The reason is simply that then the caching will lead to
+        incorrect results in future calls.
+
+        :type: unicode""")
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
         `helpers.print_tree()` instead."""
