@@ -456,7 +456,7 @@ class Setting(object):
             this setting was created in the program code directly.  If ``"conf
             file"``, this setting was read from a configuration file.  If
             ``"keyval list"``, this settings comes from a key/value list in a
-            Gummi source file (see `SettingsDict.parse_keyval_list`).  If
+            Gummi source file (see `SettingsDict.parse_keyvalue_list`).  If
             ``"default"``, the initial value is the default value of this
             setting at the same time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
@@ -942,6 +942,14 @@ class SettingsDict(dict):
         dictionaries in order to parse these lists.  The keys remain Excerpts,
         so that you can reconstruct the original positons in case of errors.
 
+        The following characters are allowed in keys: All alphanumerical
+        codepoins of Unicode, Unicode whitespace (which is normalised, though),
+        and any character in ``@^!$%&/?*~\#|><_``.  Moreover, the dot ``.`` is
+        allowed for dividing section and option.
+
+        If the separator between key and value as well as the value itself is
+        omitted, a boolean ``True`` is assumed for the value.
+
         :Parameters:
           - `excerpt`: the Excerpt which contains the complete key/value list
             to be parsed
@@ -963,29 +971,32 @@ class SettingsDict(dict):
         Example:
         
             >>> import preprocessor, parser
-            >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
+            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
             >>> settings.set_default("c", None, "int")
+            >>> settings.set_default("d", False)
             >>> settings.close_section("")
             >>> settings.inhibit_new_sections()
             >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
             >>> settings
-            {u'a': u'b', u'c': 4}
+            {u'a': u'b', u'c': 4, u'd': True}
             >>> type(settings["c"])
             <type 'int'>
             >>> for key in settings.iterkeys(): print key.original_position()
             file "myfile.rsl", line 1, column 0
             file "myfile.rsl", line 1, column 5
+            file "myfile.rsl", line 1, column 12
 
         """
         # In the current Gummi source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
         # nevertheless.
         warnings.simplefilter("error", SettingWarning)
-        item_pattern = re.compile(u"(?P<key>.+?)[" + re.escape(key_terminators) +
-                                  "](?P<value>.*?)(?:(?:" + re.escape(item_separator) +
-                                  ")|\\Z)", re.UNICODE | re.DOTALL)
+        item_pattern = re.compile(ur"(?P<key>[-\w\s.@^!$%&/?*~#|><]+?)(?:[" +
+                                  re.escape(key_terminators) +
+                                  ur"](?P<value>.*?))?(?:(?:" + re.escape(item_separator) +
+                                  ur"\s*)|\Z)", re.UNICODE | re.DOTALL)
         escaped_text = excerpt.escaped_text().rstrip()
         current_position = 0
         while current_position < len(escaped_text):
@@ -993,8 +1004,11 @@ class SettingsDict(dict):
             if next_item_match:
                 start, end = next_item_match.span("key")
                 key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
-                start, end = next_item_match.span("value")
-                value = unicode(excerpt[start:end].apply_postprocessing()).strip()
+                if next_item_match.group("value") is not None:
+                    start, end = next_item_match.span("value")
+                    value = unicode(excerpt[start:end].apply_postprocessing()).strip()
+                else:
+                    value = True
                 try:
                     self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
