@@ -34,52 +34,70 @@ instead."""
 from common import Error, modulepath
 import sys
 
-def print_tree(tree, line_columns=(0,)):
+def print_tree(tree):
     """Print a nested list of strings as an ASCII tree to stdout.  Example:
 
-    >>> print_tree([["Peter", ["Ian", ["Randy", ["Clara"]]]], "Paul", ["Mary", ["Arthur"]]])
-    |
-    +---> Peter
-    |       |
-    |       +---> Ian
-    |       |
-    |       +---> Randy
-    |               |
-    |               +---> Clara
-    |
-    +---> Paul
-    |
-    +---> Mary
-            |
-            +---> Arthur
+    >>> print_tree(["Root", [["Peter", ["Ian", ["Randy", ["Clara"]]]], "Paul",
+    ...                      ["Mary", ["Arthur"]]]])
+    Root
+      |
+      +---> Peter
+      |       |
+      |       +---> Ian
+      |       |
+      |       +---> Randy
+      |               |
+      |               +---> Clara
+      |
+      +---> Paul
+      |
+      +---> Mary
+              |
+              +---> Arthur
 
     :Parameters:
-      - `tree`: A list of items.  Every item is either a string (then it is
-        terminal) or a list of a string and its subtree.
+      - `tree`: A list of a string and its subtree.  The subtree consists of
+        items.  Every item is either a string (then it is terminal) or again a
+        list of a string and its subtree.
 
     :type tree: list
 
-    :Return:
-      None
-
     """
-    for i, item in enumerate(tree):
-        current_line = u""
-        last_pos = -1
-        for pos in line_columns:
-            current_line += (pos - last_pos - 1) * " " + "|"
-            last_pos = pos
-        print current_line
-        if isinstance(item, list):
-            print current_line[:-1] + "+---> " + item[0]
-            new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(item[0]) // 2]
-            if i == len(tree) - 1:
-                del new_line_columns[-2]
-            print_tree(item[1], new_line_columns)
-        elif isinstance(item, basestring):
-            print current_line[:-1] + "+---> " + item
-        else:
-            raise Error(u"Invalid type in tree: " + unicode(type(item)))
+    def print_subtree(subtree, line_columns):
+        """Here, the actual work is done.  In contrast to `print_tree`, this
+        routine takes a list of child elements.  Actually, one should see it
+        the other way round: `print_tree` is a front-end for this function that
+        allows for giving a named root element, and that can digest the output
+        of the `parser.Node.tree_list` function directly.
+        
+        :Parameters:
+          - `subtree`: list of items.  Every item is either a string (then it
+            is terminal) or a list of a string and its subtree.
+          - `line_columns`: tuple of column numbers with the vertical lines
+
+        :type subtree: list
+        :type line_columns: tuple of int
+        """
+        for i, item in enumerate(subtree):
+            current_line = u""
+            last_pos = -1
+            for pos in line_columns:
+                current_line += (pos - last_pos - 1) * " " + "|"
+                last_pos = pos
+            print current_line
+            if isinstance(item, list):
+                print current_line[:-1] + "+---> " + item[0]
+                new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(item[0]) // 2]
+                if i == len(subtree) - 1:
+                    del new_line_columns[-2]
+                print_subtree(item[1], new_line_columns)
+            elif isinstance(item, basestring):
+                print current_line[:-1] + "+---> " + item
+            else:
+                raise Error(u"Invalid type in tree: " + unicode(type(item)))
+    assert isinstance(tree, list) and len(tree) == 2
+    print tree[0]
+    print_subtree(tree[1], (len(tree[0])//2,))
 
 def import_local_module(name):
     """Load a module from the local Gummi modules directory.
