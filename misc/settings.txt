@@ -79,9 +79,9 @@ False
 u'"4"'
 >>> common.ParseError.parse_errors
 [ParseError("type of value for 'hallo' is wrong; expected int but got unicode",), ParseError("unknown key 'd.f'",)]
->>> excerpt = preprocessor.Excerpt("a:b, c = 4,e", "PRE", "myfile.rsl", {}, {})
+>>> excerpt = preprocessor.Excerpt("a:b, c = 4, a:, e(: 1", "PRE", "myfile.rsl", {}, {})
 >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
 >>> for error in common.ParseError.parse_errors: print error
 file "myfile.rsl", line 1, column 12: type of value for 'hallo' is wrong; expected int but got unicode
 file "myfile.rsl", line 1, column 42: unknown key 'd.f'
-file "myfile.rsl", line 1, column 11: invalid key--value syntax in 'e'
+file "myfile.rsl", line 1, column 16: invalid key--value syntax in 'e(: 1'

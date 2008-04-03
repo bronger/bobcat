@@ -456,7 +456,7 @@ class Setting(object):
             this setting was created in the program code directly.  If ``"conf
             file"``, this setting was read from a configuration file.  If
             ``"keyval list"``, this settings comes from a key/value list in a
-            Gummi source file (see `SettingsDict.parse_keyval_list`).  If
+            Gummi source file (see `SettingsDict.parse_keyvalue_list`).  If
             ``"default"``, the initial value is the default value of this
             setting at the same time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
@@ -486,11 +486,6 @@ class Setting(object):
 
         for more examples, see `set_value`.
         """
-        # FixMe: It may be an interesting alternative to move the code for
-        # parsing the special syntaxes in configuration files (i.e. "…" and (…,
-        # …, …)) to the code that actually reads the configuration files.
-        # Then, the source parameter could be abandoned in favour of a simple
-        # "default" parameter that may be True or False.
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
@@ -534,10 +529,11 @@ class Setting(object):
             >>> setting.set_value("Hallo")
             >>> setting.value
             u'Hallo'
-            >>> setting.set_value(1)
+            >>> setting.set_value(1)  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingWrongTypeError: setting 'key = 1': new value of type 'int' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'key = 1': new value of type 'int' is
+            unequal to previous type 'unicode'
 
         However, as an exception to the strict typechecking, you may pass an
         ``int`` to a ``float``:
@@ -561,10 +557,11 @@ class Setting(object):
         type-checked:
 
             >>> setting = Setting("key", "1")
-            >>> setting.set_value(1, "default")
+            >>> setting.set_value(1, "default")  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingError: setting 'key = 1': default value of type 'int' is incompatible with previous type 'unicode'
+            SettingError: setting 'key = 1': default value of type 'int' is
+            incompatible with previous type 'unicode'
             >>> setting.value
             u'1'
         
@@ -732,13 +729,17 @@ class SettingsDict(dict):
             ['../misc/test.conf']
             >>> settings.test_for_closed_section("Unknown.section.quiet", False)
             >>> settings.test_for_closed_section("General.quiet", False)
+            ...                                    #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingUnknownKeyError: setting 'General.quiet = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quiet = False': unknown setting key;
+            section already closed
             >>> settings.test_for_closed_section("General.quite", False)
+            ...                                     #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingUnknownKeyError: setting 'General.quite = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quite = False': unknown setting key;
+            section already closed
 
         """
         dot_position = key.rfind(".")
@@ -775,32 +776,36 @@ class SettingsDict(dict):
             >>> settings.set_default("General.c", 1)
             >>> settings.set_default("General.d", 4.5)
             >>> settings.set_default("General.e", None, "unicode")
-            >>> settings
-            {'General.c': 1, 'General.b': u'on', 'General.a': u'Hallo', 'General.e': None, 'General.d': 4.5}
+            >>> settings  #doctest:+NORMALIZE_WHITESPACE
+            {'General.c': 1, 'General.b': u'on', 'General.a': u'Hallo', 'General.e': None,
+            'General.d': 4.5}
 
         Now, we can index it (see `__setitem__`).
 
-            >>> settings["General.b"] = True
+            >>> settings["General.b"] = True  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingWrongTypeError: setting 'General.b = True': new value of type 'bool' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'General.b = True': new value of type 'bool'
+            is unequal to previous type 'unicode'
             >>> settings["General.quiet"] = True
             >>> settings.close_section("General")
             Traceback (most recent call last):
                 ...
             SettingWarning: unknown setting 'General.quiet' ignored
-            >>> settings["General.f"] = "offf"
+            >>> settings["General.f"] = "offf"  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingUnknownKeyError: setting 'General.f = offf': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = offf': unknown setting key;
+            section already closed
             >>> settings["General."] = "offf"
             Traceback (most recent call last):
                 ...
             AssertionError: invalid setting 'General.', either section or option is empty
-            >>> settings.set_default("General.f", [1,2,3,4])
+            >>> settings.set_default("General.f", [1,2,3,4])  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting
+            key; section already closed
         """
         assert key not in self or not super(SettingsDict, self).__getitem__(key).has_default, \
             u"setting '%s' has already a default value (%s)" % (key, repr(self[key]))
@@ -904,17 +909,20 @@ class SettingsDict(dict):
             >>> settings.inhibit_new_sections()
             >>> settings.set_default("General.outfile", None, "unicode")
             >>> settings.set_default("Newsection.outfile", None, "unicode")
+            ...                                   #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingInvalidSectionError: setting 'Newsection.outfile = None': invalid section used in key
+            SettingInvalidSectionError: setting 'Newsection.outfile = None': invalid
+            section used in key
 
         Note that this also applies to new section-less keys.  The “section
         with empty name” must also be known in order to accept new keys:
 
-            >>> settings["sectionlesskey"] = 0
+            >>> settings["sectionlesskey"] = 0  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingInvalidSectionError: setting 'sectionlesskey = 0': invalid section used in key
+            SettingInvalidSectionError: setting 'sectionlesskey = 0': invalid
+            section used in key
 
         """
         if not self.__new_sections_inhibited:
@@ -933,6 +941,14 @@ class SettingsDict(dict):
         places as in LaTeX.  You can use this method to build mini settings
         dictionaries in order to parse these lists.  The keys remain Excerpts,
         so that you can reconstruct the original positons in case of errors.
+
+        The following characters are allowed in keys: All alphanumerical
+        codepoins of Unicode, Unicode whitespace (which is normalised, though),
+        and any character in ``@^!$%&/?*~\#|><_``.  Moreover, the dot ``.`` is
+        allowed for dividing section and option.
+
+        If the separator between key and value as well as the value itself is
+        omitted, a boolean ``True`` is assumed for the value.
 
         :Parameters:
           - `excerpt`: the Excerpt which contains the complete key/value list
@@ -955,32 +971,32 @@ class SettingsDict(dict):
         Example:
         
             >>> import preprocessor, parser
-            >>> excerpt = preprocessor.Excerpt("a:b, c = 4", "PRE", "myfile.rsl", {}, {})
+            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
             >>> settings.set_default("c", None, "int")
+            >>> settings.set_default("d", False)
             >>> settings.close_section("")
             >>> settings.inhibit_new_sections()
             >>> settings.parse_keyvalue_list(excerpt, parser.Node(None))
             >>> settings
-            {u'a': u'b', u'c': 4}
+            {u'a': u'b', u'c': 4, u'd': True}
             >>> type(settings["c"])
             <type 'int'>
             >>> for key in settings.iterkeys(): print key.original_position()
             file "myfile.rsl", line 1, column 0
             file "myfile.rsl", line 1, column 5
+            file "myfile.rsl", line 1, column 12
 
         """
-        # FixMe: (…, …, …) is not recognised; neither is a separator within
-        # "…".
-        #
         # In the current Gummi source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
         # nevertheless.
         warnings.simplefilter("error", SettingWarning)
-        item_pattern = re.compile(u"(?P<key>.+?)[" + re.escape(key_terminators) +
-                                  "](?P<value>.*?)(?:(?:" + re.escape(item_separator) +
-                                  ")|\\Z)", re.UNICODE | re.DOTALL)
+        item_pattern = re.compile(ur"(?P<key>[-\w\s.@^!$%&/?*~#|><]+?)(?:[" +
+                                  re.escape(key_terminators) +
+                                  ur"](?P<value>.*?))?(?:(?:" + re.escape(item_separator) +
+                                  ur"\s*)|\Z)", re.UNICODE | re.DOTALL)
         escaped_text = excerpt.escaped_text().rstrip()
         current_position = 0
         while current_position < len(escaped_text):
@@ -988,8 +1004,11 @@ class SettingsDict(dict):
             if next_item_match:
                 start, end = next_item_match.span("key")
                 key = excerpt[start:end].apply_postprocessing().normalize_whitespace()
-                start, end = next_item_match.span("value")
-                value = unicode(excerpt[start:end].apply_postprocessing()).strip()
+                if next_item_match.group("value") is not None:
+                    start, end = next_item_match.span("value")
+                    value = unicode(excerpt[start:end].apply_postprocessing()).strip()
+                else:
+                    value = True
                 try:
                     self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
