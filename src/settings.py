@@ -486,11 +486,6 @@ class Setting(object):
 
         for more examples, see `set_value`.
         """
-        # FixMe: It may be an interesting alternative to move the code for
-        # parsing the special syntaxes in configuration files (i.e. "…" and (…,
-        # …, …)) to the code that actually reads the configuration files.
-        # Then, the source parameter could be abandoned in favour of a simple
-        # "default" parameter that may be True or False.
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
@@ -971,9 +966,6 @@ class SettingsDict(dict):
             file "myfile.rsl", line 1, column 5
 
         """
-        # FixMe: (…, …, …) is not recognised; neither is a separator within
-        # "…".
-        #
         # In the current Gummi source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
         # nevertheless.
