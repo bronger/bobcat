@@ -529,10 +529,11 @@ class Setting(object):
             >>> setting.set_value("Hallo")
             >>> setting.value
             u'Hallo'
-            >>> setting.set_value(1)
+            >>> setting.set_value(1)  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingWrongTypeError: setting 'key = 1': new value of type 'int' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'key = 1': new value of type 'int' is
+            unequal to previous type 'unicode'
 
         However, as an exception to the strict typechecking, you may pass an
         ``int`` to a ``float``:
@@ -556,10 +557,11 @@ class Setting(object):
         type-checked:
 
             >>> setting = Setting("key", "1")
-            >>> setting.set_value(1, "default")
+            >>> setting.set_value(1, "default")  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingError: setting 'key = 1': default value of type 'int' is incompatible with previous type 'unicode'
+            SettingError: setting 'key = 1': default value of type 'int' is
+            incompatible with previous type 'unicode'
             >>> setting.value
             u'1'
         
@@ -727,13 +729,17 @@ class SettingsDict(dict):
             ['../misc/test.conf']
             >>> settings.test_for_closed_section("Unknown.section.quiet", False)
             >>> settings.test_for_closed_section("General.quiet", False)
+            ...                                    #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingUnknownKeyError: setting 'General.quiet = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quiet = False': unknown setting key;
+            section already closed
             >>> settings.test_for_closed_section("General.quite", False)
+            ...                                     #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingUnknownKeyError: setting 'General.quite = False': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.quite = False': unknown setting key;
+            section already closed
 
         """
         dot_position = key.rfind(".")
@@ -770,32 +776,36 @@ class SettingsDict(dict):
             >>> settings.set_default("General.c", 1)
             >>> settings.set_default("General.d", 4.5)
             >>> settings.set_default("General.e", None, "unicode")
-            >>> settings
-            {'General.c': 1, 'General.b': u'on', 'General.a': u'Hallo', 'General.e': None, 'General.d': 4.5}
+            >>> settings  #doctest:+NORMALIZE_WHITESPACE
+            {'General.c': 1, 'General.b': u'on', 'General.a': u'Hallo', 'General.e': None,
+            'General.d': 4.5}
 
         Now, we can index it (see `__setitem__`).
 
-            >>> settings["General.b"] = True
+            >>> settings["General.b"] = True  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingWrongTypeError: setting 'General.b = True': new value of type 'bool' is unequal to previous type 'unicode'
+            SettingWrongTypeError: setting 'General.b = True': new value of type 'bool'
+            is unequal to previous type 'unicode'
             >>> settings["General.quiet"] = True
             >>> settings.close_section("General")
             Traceback (most recent call last):
                 ...
             SettingWarning: unknown setting 'General.quiet' ignored
-            >>> settings["General.f"] = "offf"
+            >>> settings["General.f"] = "offf"  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingUnknownKeyError: setting 'General.f = offf': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = offf': unknown setting key;
+            section already closed
             >>> settings["General."] = "offf"
             Traceback (most recent call last):
                 ...
             AssertionError: invalid setting 'General.', either section or option is empty
-            >>> settings.set_default("General.f", [1,2,3,4])
+            >>> settings.set_default("General.f", [1,2,3,4])  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting key; section already closed
+            SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting
+            key; section already closed
         """
         assert key not in self or not super(SettingsDict, self).__getitem__(key).has_default, \
             u"setting '%s' has already a default value (%s)" % (key, repr(self[key]))
@@ -899,17 +909,20 @@ class SettingsDict(dict):
             >>> settings.inhibit_new_sections()
             >>> settings.set_default("General.outfile", None, "unicode")
             >>> settings.set_default("Newsection.outfile", None, "unicode")
+            ...                                   #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingInvalidSectionError: setting 'Newsection.outfile = None': invalid section used in key
+            SettingInvalidSectionError: setting 'Newsection.outfile = None': invalid
+            section used in key
 
         Note that this also applies to new section-less keys.  The “section
         with empty name” must also be known in order to accept new keys:
 
-            >>> settings["sectionlesskey"] = 0
+            >>> settings["sectionlesskey"] = 0  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
                 ...
-            SettingInvalidSectionError: setting 'sectionlesskey = 0': invalid section used in key
+            SettingInvalidSectionError: setting 'sectionlesskey = 0': invalid
+            section used in key
 
         """
         if not self.__new_sections_inhibited:
