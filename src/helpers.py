@@ -32,13 +32,21 @@ should be available in (almost) all parts of Gummi, use the common module
 instead."""
 
 from common import Error, modulepath
-import sys
+import sys, codecs, os, parser, subprocess, StringIO, textwrap
 
 def print_tree(tree):
-    """Print a nested list of strings as an ASCII tree to stdout.  Example:
+    """Print a nested list of classes as an ASCII tree to stdout.  Example:
 
-    >>> print_tree(["Root", [["Peter", ["Ian", ["Randy", ["Clara"]]]], "Paul",
-    ...                      ["Mary", ["Arthur"]]]])
+    >>> class Root: pass
+    >>> class Peter: pass
+    >>> class Ian: pass
+    >>> class Randy: pass
+    >>> class Clara: pass
+    >>> class Paul: pass
+    >>> class Mary: pass
+    >>> class Arthur: pass
+    >>> print_tree([Root(), [[Peter(), [Ian(), [Randy(), [Clara()]]]], Paul(),
+    ...                      [Mary(), [Arthur()]]]])
     Root
       |
       +---> Peter
@@ -56,9 +64,9 @@ def print_tree(tree):
               +---> Arthur
 
     :Parameters:
-      - `tree`: A list of a string and its subtree.  The subtree consists of
-        items.  Every item is either a string (then it is terminal) or again a
-        list of a string and its subtree.
+      - `tree`: A list of a class and its subtree.  The subtree consists of
+        items.  Every item is either a class (then it is terminal) or again a
+        list of a class and its subtree.
 
     :type tree: list
 
@@ -86,18 +94,65 @@ def print_tree(tree):
                 last_pos = pos
             print current_line
             if isinstance(item, list):
-                print current_line[:-1] + "+---> " + item[0]
-                new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(item[0]) // 2]
+                itemname = item[0].__class__.__name__
+                print current_line[:-1] + "+---> " + itemname
+                new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(itemname) // 2]
                 if i == len(subtree) - 1:
                     del new_line_columns[-2]
                 print_subtree(item[1], new_line_columns)
-            elif isinstance(item, basestring):
-                print current_line[:-1] + "+---> " + item
             else:
-                raise Error(u"Invalid type in tree: " + unicode(type(item)))
+                print current_line[:-1] + "+---> " + item.__class__.__name__
     assert isinstance(tree, list) and len(tree) == 2
-    print tree[0]
-    print_subtree(tree[1], (len(tree[0])//2,))
+    rootname = tree[0].__class__.__name__
+    print rootname
+    print_subtree(tree[1], (len(rootname)//2,))
+
+def visualize_tree(tree):
+    node_dict = {}
+    relationships = []
+    def visualize_subtree(subtree):
+        def node_id(node):
+            id_ = "Node" + str(id(node))
+            node_dict[id_] = node
+            return id_
+        if subtree:
+            for item in subtree[1]:
+                line = "     " + node_id(subtree[0]) + " -> "
+                if isinstance(item, list):
+                    relationships.append(line + node_id(item[0]) + " ;" + os.linesep)
+                    visualize_subtree(item)
+                else:
+                    relationships.append(line + node_id(item) + " ;" + os.linesep)
+    dot_process = subprocess.Popen(["dot", "-Tps", "-o", "bobcat.ps"], stdin=subprocess.PIPE)
+    output = codecs.getwriter("utf-8")(dot_process.stdin)
+    print>>output, "digraph Bobcat_document"
+    print>>output, "{"
+    print>>output, 'ordering="out" ; node [fontname="Helvetica"] ;'
+    visualize_subtree(tree)
+    for id_, node in node_dict.iteritems():
+        is_text = isinstance(node, parser.Text)
+        print>>output, "    ", id_, "[",
+        if is_text:
+            text = node.text
+            if text.startswith(" "):
+                text = "_" + text[1:]
+            if text.endswith(" "):
+                text = text[:-1] + "_"
+            text = u" ".join(text.split())
+            if len(text) > 30:
+                text = text[:27] + u"..."
+            text = textwrap.fill(text, 10).replace("\n", "\\l")
+            if "\\l" in text:
+                text += "\\l"
+            print>>output, 'label="' + text + '", shape="box", fontsize="12pt", fontname="Times-Roman"',
+        else:
+            text = node.__class__.__name__
+            print>>output, "label=" + text + ', shape="egg"',
+        print>>output, "] ;"
+    output.writelines(relationships)
+    print>>output, "}"
+    # Send EOF through pipe
+    dot_process.communicate()
 
 def import_local_module(name):
     """Load a module from the local Gummi modules directory.
