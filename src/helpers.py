@@ -107,9 +107,11 @@ def print_tree(tree):
     print rootname
     print_subtree(tree[1], (len(rootname)//2,))
 
-def visualize_tree(tree):
+def visualize_tree(tree, output_filename):
+    extension = os.path.splitext(output_filename)[1][1:]
+    output_type = {"eps": "ps"}.get(extension, extension)
+    output_encoding = {"ps": "latin-1"}.get(output_type, "utf-8")
     node_dict = {}
-    relationships = []
     def visualize_subtree(subtree):
         def node_id(node):
             id_ = "Node" + str(id(node))
@@ -119,19 +121,22 @@ def visualize_tree(tree):
             for item in subtree[1]:
                 line = "     " + node_id(subtree[0]) + " -> "
                 if isinstance(item, list):
-                    relationships.append(line + node_id(item[0]) + " ;" + os.linesep)
+                    print>>output, line + node_id(item[0]) + " ;"
                     visualize_subtree(item)
                 else:
-                    relationships.append(line + node_id(item) + " ;" + os.linesep)
-    dot_process = subprocess.Popen(["dot", "-Tps", "-o", "bobcat.ps"], stdin=subprocess.PIPE)
-    output = codecs.getwriter("utf-8")(dot_process.stdin)
+                    print>>output, line + node_id(item) + " ;"
+    try:
+        dot_process = subprocess.Popen(["dot", "-T"+output_type, "-o", output_filename], stdin=subprocess.PIPE)
+    except OSError:
+        raise Error("could not start dot program")
+    output = codecs.getwriter(output_encoding)(dot_process.stdin, errors="replace")
     print>>output, "digraph Bobcat_document"
     print>>output, "{"
     print>>output, 'ordering="out" ; node [fontname="Helvetica"] ;'
     visualize_subtree(tree)
     for id_, node in node_dict.iteritems():
-        is_text = isinstance(node, parser.Text)
         print>>output, "    ", id_, "[",
+        is_text = isinstance(node, parser.Text)
         if is_text:
             text = node.text
             if text.startswith(" "):
@@ -140,7 +145,7 @@ def visualize_tree(tree):
                 text = text[:-1] + "_"
             text = u" ".join(text.split())
             if len(text) > 30:
-                text = text[:27] + u"..."
+                text = text[:29] + u"…" if output_encoding == "utf-8" else text[:27] + u"..."
             text = textwrap.fill(text, 10).replace("\n", "\\l")
             if "\\l" in text:
                 text += "\\l"
@@ -149,7 +154,6 @@ def visualize_tree(tree):
             text = node.__class__.__name__
             print>>output, "label=" + text + ', shape="egg"',
         print>>output, "] ;"
-    output.writelines(relationships)
     print>>output, "}"
     # Send EOF through pipe
     dot_process.communicate()
