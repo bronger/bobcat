@@ -115,6 +115,9 @@ def visualize_tree(tree, output_filename):
     relies on the dot program from the `Graphvis <http://www.graphviz.org/>`__
     package.
 
+    Note that whitespace at the beginning or ending of a text node is
+    represented by underscores in the output.
+
     :Parameters:
       - `tree`: A list of a class and its subtree.  The subtree consists of
         items.  Every item is either a class (then it is terminal) or again a
