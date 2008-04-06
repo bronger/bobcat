@@ -255,12 +255,14 @@ class Node(object):
         `helpers.print_tree()`.
 
         :Return:
-          A (nested) list of strings to be used in `helpers.print_tree`.
+          A (nested) list of nodes to be used in `helpers.print_tree`.
 
         :rtype: list
         """
-        return [str(self.__class__).split(".")[1][:-2], \
-                    [child.tree_list() for child in self.children]]
+        if self.children:
+            return [self, [child.tree_list() for child in self.children]]
+        else:
+            return self
     def process(self):
         """Convert this node to backend output.  Typically, this routine will
         be overridden by backend functions so that the nodes emit code that
