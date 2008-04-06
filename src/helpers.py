@@ -121,6 +121,10 @@ def visualize_tree(tree, output_filename):
       - `output_filename`: name of the output file.  The extension determines
         the file type.  Typical extensions are ``".eps"``, ``".gif"``, and
         ``".svg"``.  All possible output formats of Graphvis are supported.
+
+    :Exceptions:
+      - `common.Error`: if the dot program from the Graphviz package was not
+        found.
     """
     colors = {"Section": "yellow", "Paragraph": "green", "Document": "red",
               "Heading": "goldenrod", "Emphasize": "darkseagreen2"}
@@ -129,6 +133,8 @@ def visualize_tree(tree, output_filename):
     output_encoding = {"ps": "latin-1"}.get(output_type, "utf-8")
     node_dict = {}
     def visualize_subtree(subtree):
+        """Here, I generate the relationships of the nodes.  In particular, I
+        don't generate the labels here."""
         def node_id(node):
             id_ = "Node" + str(id(node))
             node_dict[id_] = node
