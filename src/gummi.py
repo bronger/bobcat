@@ -89,7 +89,8 @@ if gummi_version != "1.0":
 
 document = parser.Document()
 document.parse(text)
-#print helpers.print_tree(document.tree_list())
+#helpers.visualize_tree(document.tree_list(), "bobcat.eps")
+#helpers.print_tree(document.tree_list())
 document.generate_output()
 
 if 'epydoc' in sys.modules:
