@@ -335,8 +335,10 @@ def add_parse_error(parse_error):
         >>> import os.path
         >>> os.chdir(os.path.join(modulepath, "../misc/"))
         >>> setup_logging()
-        >>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
+        >>> testfile = open("test2.rsl", "w")
+        >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
         ... "Dummy document.\n")
+        >>> testfile.close()
         >>> text, __, __ = preprocessor.load_file("test2.rsl")
         >>> node = parser.Node(None)
         >>> node.parse(text, 0)
