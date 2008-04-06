@@ -1,37 +1,39 @@
 .. -*- coding: utf-8 -*-
 .. Gummi 1.0
 
-#. Einleitung
+#. Introduction
+===============
+
+This is the _first_ paragraph.
+
+
+#. Motivation
 =============
 
-Dies ist der _erste_ Absatz.
+This is the _second_ paragraph.
+
+And this is the third one.
 
 
-#. Problemstellung
-==================
+#.# Acknowledgements
+====================
 
-Dies ist der _zweite_ Absatz.
+Yet _another_ text block.
 
-Dies ist der zweite Absatz.
+And we go futher and further.
 
 
-#.# Problemstellung
-==================
+#.#.# A subsubheading
+=====================
 
-Dies ist der _zweite_ Absatz.
+"42" said Deep Thought, with infinite majesty and calm.
 
-Dies ist der zweite Absatz.
+It was a long time before anyone spoke.
 
-#.#.# Problemstellung
-==================
 
-Dies ist der _zweite_ Absatz.
+#. Last chapter
+===============
 
-Dies ist der zweite Absatz.
+This is almost the last paragraph.
 
-#. Problemstellung
-==================
-
-Dies ist der _zweite_ Absatz.
-
-Dies ist der zweite Absatz.
+And this is _definitely the last one_.

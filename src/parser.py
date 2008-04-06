@@ -130,7 +130,7 @@ def guarded_find(substring, excerpt, pos=0, endpos=None):
     return result
 
 class Node(object):
-    """Abstract base class for all elements in the AST.  It will never be
+    u"""Abstract base class for all elements in the AST.  It will never be
     instantiated itself, only derived classes.  So it only defines the
     interface, most notably `children`, `parse`, `process_children`, `process`,
     and -- for debugging purposes -- `tree_list`.
@@ -149,6 +149,12 @@ class Node(object):
     :ivar language: the :RFC:`4646` language tag for this node.  Always in
       lowercase.
 
+    :ivar characteristic_attributes: Attributes of this class that are
+      considered important enough so that they are printed for debugging
+      purposes.  This is the nesting depth of sections for example.  The
+      entries are either attribute names or 2-tuples with the first element
+      being the name of the attribute and the second a “human” name for it.
+
     :ivar __text: The original text from which this node was created (parsed).
       Only needed for calculating `__position`, see the `position` property.
     :ivar __start_index: The index within `__text` where this node starts.
@@ -160,11 +166,13 @@ class Node(object):
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
+    :type characteristic_attributes: list of (str, str) or list of str
     :type __text: `prepocessor.Excerpt`
     :type __start_index: int
     :type __position: `common.PositionMarker`
     """
     __position = None
+    characteristic_attributes = []
     def __init__(self, parent):
         """It will also be called by all derived classes.
 
@@ -255,12 +263,14 @@ class Node(object):
         `helpers.print_tree()`.
 
         :Return:
-          A (nested) list of strings to be used in `helpers.print_tree`.
+          A (nested) list of nodes to be used in `helpers.print_tree`.
 
         :rtype: list
         """
-        return [str(self.__class__).split(".")[1][:-2], \
-                    [child.tree_list() for child in self.children]]
+        if self.children:
+            return [self, [child.tree_list() for child in self.children]]
+        else:
+            return self
     def process(self):
         """Convert this node to backend output.  Typically, this routine will
         be overridden by backend functions so that the nodes emit code that
@@ -582,6 +592,7 @@ class Section(Node):
     equation_line_pattern = re.compile(r"\n[ \t]*={4,}[ \t]*$", re.MULTILINE)
     section_number_pattern = re.compile(r"[ \t]*(?P<numbers>((\d+|#)\.)*(\d+|#))(\.|[ \t\n])[ \t]*",
                                         re.MULTILINE)
+    characteristic_attributes = [("nesting_level", "level")]
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):
@@ -661,6 +672,7 @@ class Hyperlink(Node):
 
     :type url: unicode
     """
+    characteristic_attributes = [("url", "URL")]
     def __init__(self, parent):
         super(Hyperlink, self).__init__(parent)
     def parse(self, text, position, end):
