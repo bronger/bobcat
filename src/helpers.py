@@ -45,8 +45,8 @@ def print_tree(tree):
     >>> class Paul: pass
     >>> class Mary: pass
     >>> class Arthur: pass
-    >>> print_tree([Root(), [[Peter(), [Ian(), [Randy(), [Clara()]]]], Paul(),
-    ...                      [Mary(), [Arthur()]]]])
+    >>> print print_tree([Root(), [[Peter(), [Ian(), [Randy(), [Clara()]]]], Paul(),
+    ...                            [Mary(), [Arthur()]]]])
     Root
       |
       +---> Peter
@@ -62,6 +62,7 @@ def print_tree(tree):
       +---> Mary
               |
               +---> Arthur
+    <BLANKLINE>
 
     :Parameters:
       - `tree`: A list of a class and its subtree.  The subtree consists of
@@ -93,20 +94,21 @@ def print_tree(tree):
             for pos in line_columns:
                 current_line += (pos - last_pos - 1) * " " + "|"
                 last_pos = pos
-            print current_line
+            output_lines.append(current_line + "\n")
             if isinstance(item, list):
                 itemname = item[0].__class__.__name__
-                print current_line[:-1] + "+---> " + itemname
+                output_lines.append(current_line[:-1] + "+---> " + itemname + "\n")
                 new_line_columns = list(line_columns) + [line_columns[-1] + 6 + len(itemname) // 2]
                 if i == len(subtree) - 1:
                     del new_line_columns[-2]
                 print_subtree(item[1], new_line_columns)
             else:
-                print current_line[:-1] + "+---> " + item.__class__.__name__
+                output_lines.append(current_line[:-1] + "+---> " + item.__class__.__name__ + "\n")
     assert isinstance(tree, list) and len(tree) == 2
-    rootname = tree[0].__class__.__name__
-    print rootname
+    rootname = unicode(tree[0].__class__.__name__)
+    output_lines = [rootname + "\n"]
     print_subtree(tree[1], (len(rootname)//2,))
+    return u"".join(output_lines)
 
 def visualize_tree(tree, output_filename):
     """Creates an image file which visualises the document structure.  It
