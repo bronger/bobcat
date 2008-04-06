@@ -1,0 +1,237 @@
+>>> from helpers import *
+>>> os.chdir(os.path.join(modulepath, "../misc/"))
+>>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n\n#. Introduction\n===============\n\nThis is the _first_ paragraph.\n\n\n#. Motivation\n=============\n\nThis is the _second_ paragraph.\n\nAnd this is the third one.\n\n\n#.# Acknowledgements\n====================\n\nYet _another_ text block.\n\nAnd we go futher and further.\n\n\n#.#.# A subsubheading\n=====================\n\n\"42\" said Deep Thought, with infinite majesty and calm.\n\nIt was a long time before anyone spoke.\n\n\n#. Last chapter\n===============\n\nThis is almost the last paragraph.\n\nAnd this is _definitely the last one_.\n")
+>>> import preprocessor
+>>> parser = import_local_module("parser")
+>>> text, encoding, gummi_version = preprocessor.load_file("test2.rsl")
+>>> document = parser.Document()
+>>> __ = document.parse(text)
+>>> visualize_tree(document.tree_list(), "test2.plain")
+>>> print open("test2.plain").read()
+graph 1.000 65.903 2.333
+node Node0  0.653 1.972 1.306 0.500 <<TABLE BGCOLOR="red"><TR><TD>Document</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node1  0.653 0.556 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node2  2.083 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node3  2.083 0.556 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node4  3.431 1.972 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node5  3.431 0.556 0.861 0.611 "Introducti\lon\l" solid box black lightgrey
+node Node6  4.778 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node7  4.778 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node8  6.222 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node9  6.222 0.556 0.750 0.611 "This is\lthe_\l" solid box black lightgrey
+node Node10  7.806 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node11  7.806 0.556 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node12  9.403 1.972 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node13  9.403 0.556 0.750 0.500 first solid box black lightgrey
+node Node14  11.000 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node15  11.000 0.556 0.958 0.611 "_paragraph\l.\l" solid box black lightgrey
+node Node16  12.569 1.972 1.306 0.500 <<TABLE BGCOLOR="red"><TR><TD>Document</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node17  12.569 0.556 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node18  14.000 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node19  14.000 0.556 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node20  15.347 1.972 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node21  15.347 0.556 0.944 0.500 Motivation solid box black lightgrey
+node Node22  16.736 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node23  16.736 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node24  18.181 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node25  18.181 0.556 0.750 0.611 "This is\lthe_\l" solid box black lightgrey
+node Node26  19.764 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node27  19.764 0.556 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node28  21.361 1.972 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node29  21.361 0.556 0.750 0.500 second solid box black lightgrey
+node Node30  22.958 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node31  22.958 0.556 0.958 0.611 "_paragraph\l.\l" solid box black lightgrey
+node Node32  24.403 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node33  24.403 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node34  25.847 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node35  25.847 0.556 0.847 0.861 "And this\lis the\lthird one.\l" solid box black lightgrey
+node Node36  27.292 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node37  27.292 0.556 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node38  28.639 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node39  28.639 0.556 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node40  29.986 1.972 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node41  29.986 0.556 1.069 0.611 "Acknowledg\lements\l" solid box black lightgrey
+node Node42  31.431 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node43  31.431 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node44  32.875 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node45  32.875 0.556 0.750 0.500 Yet_ solid box black lightgrey
+node Node46  34.458 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node47  34.458 0.556 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node48  36.056 1.972 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node49  36.056 0.556 0.750 0.500 another solid box black lightgrey
+node Node50  37.653 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node51  37.653 0.556 0.750 0.611 "_text\lblock.\l" solid box black lightgrey
+node Node52  39.097 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node53  39.097 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node54  40.542 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node55  40.542 0.556 0.958 0.861 "And we go\lfuther and\lfurther.\l" solid box black lightgrey
+node Node56  41.986 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node57  41.986 0.556 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 2</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node58  43.333 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 2</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node59  43.333 0.556 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node60  44.681 1.972 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node61  44.681 0.556 1.014 0.611 "A subsubhe\lading\l" solid box black lightgrey
+node Node62  46.097 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 2</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node63  46.097 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node64  47.542 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node65  47.542 0.556 0.833 1.111 "“42” said\lDeep\lThought,\lwith …\l" solid box black lightgrey
+node Node66  48.986 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 2</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node67  48.986 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node68  50.431 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node69  50.431 0.556 0.833 1.111 "It was a\llong time\lbefore\lany…\l" solid box black lightgrey
+node Node70  52.000 1.972 1.306 0.500 <<TABLE BGCOLOR="red"><TR><TD>Document</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node71  52.000 0.556 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node72  53.431 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node73  53.431 0.556 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node74  54.778 1.972 1.139 0.500 <<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node75  54.778 0.556 0.750 0.611 "Last\lchapter\l" solid box black lightgrey
+node Node76  56.125 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node77  56.125 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node78  57.569 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node79  57.569 0.556 0.889 1.111 "This is\lalmost the\llast\lparag…\l" solid box black lightgrey
+node Node80  59.014 1.972 1.056 0.722 <<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node81  59.014 0.556 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node82  60.458 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node83  60.458 0.556 0.792 0.611 "And this\lis_\l" solid box black lightgrey
+node Node84  62.042 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node85  62.042 0.556 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node86  63.639 1.972 1.361 0.500 <<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node87  63.639 0.556 0.833 0.861 "definitely\lthe last\lone\l" solid box black lightgrey
+node Node88  65.236 1.972 1.333 0.500 <<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>> solid plaintext black lightgrey
+node Node89  65.236 0.556 0.750 0.500 "." solid box black lightgrey
+edge Node0 Node1 4 0.653 1.722 0.653 1.542 0.653 1.278 0.653 1.056 solid black
+edge Node2 Node3 4 2.083 1.611 2.083 1.417 2.083 1.153 2.083 0.944 solid black
+edge Node4 Node5 4 3.431 1.722 3.431 1.514 3.431 1.236 3.431 1.000 solid black
+edge Node6 Node7 4 4.778 1.611 4.778 1.417 4.778 1.153 4.778 0.944 solid black
+edge Node8 Node9 4 6.222 1.722 6.222 1.514 6.222 1.236 6.222 1.000 solid black
+edge Node10 Node11 4 7.806 1.722 7.806 1.500 7.806 1.194 7.806 0.944 solid black
+edge Node12 Node13 4 9.403 1.722 9.403 1.500 9.403 1.194 9.403 0.944 solid black
+edge Node14 Node15 4 11.000 1.722 11.000 1.514 11.000 1.236 11.000 1.000 solid black
+edge Node16 Node17 4 12.569 1.722 12.569 1.542 12.569 1.278 12.569 1.056 solid black
+edge Node18 Node19 4 14.000 1.611 14.000 1.417 14.000 1.153 14.000 0.944 solid black
+edge Node20 Node21 4 15.347 1.722 15.347 1.500 15.347 1.194 15.347 0.944 solid black
+edge Node22 Node23 4 16.736 1.611 16.736 1.417 16.736 1.153 16.736 0.944 solid black
+edge Node24 Node25 4 18.181 1.722 18.181 1.514 18.181 1.236 18.181 1.000 solid black
+edge Node26 Node27 4 19.764 1.722 19.764 1.500 19.764 1.194 19.764 0.944 solid black
+edge Node28 Node29 4 21.361 1.722 21.361 1.500 21.361 1.194 21.361 0.944 solid black
+edge Node30 Node31 4 22.958 1.722 22.958 1.514 22.958 1.236 22.958 1.000 solid black
+edge Node32 Node33 4 24.403 1.611 24.403 1.417 24.403 1.153 24.403 0.944 solid black
+edge Node34 Node35 4 25.847 1.722 25.847 1.556 25.847 1.333 25.847 1.125 solid black
+edge Node36 Node37 4 27.292 1.611 27.292 1.444 27.292 1.236 27.292 1.056 solid black
+edge Node38 Node39 4 28.639 1.611 28.639 1.417 28.639 1.153 28.639 0.944 solid black
+edge Node40 Node41 4 29.986 1.722 29.986 1.514 29.986 1.236 29.986 1.000 solid black
+edge Node42 Node43 4 31.431 1.611 31.431 1.417 31.431 1.153 31.431 0.944 solid black
+edge Node44 Node45 4 32.875 1.722 32.875 1.500 32.875 1.194 32.875 0.944 solid black
+edge Node46 Node47 4 34.458 1.722 34.458 1.500 34.458 1.194 34.458 0.944 solid black
+edge Node48 Node49 4 36.056 1.722 36.056 1.500 36.056 1.194 36.056 0.944 solid black
+edge Node50 Node51 4 37.653 1.722 37.653 1.514 37.653 1.236 37.653 1.000 solid black
+edge Node52 Node53 4 39.097 1.611 39.097 1.417 39.097 1.153 39.097 0.944 solid black
+edge Node54 Node55 4 40.542 1.722 40.542 1.556 40.542 1.333 40.542 1.125 solid black
+edge Node56 Node57 4 41.986 1.611 41.986 1.444 41.986 1.236 41.986 1.056 solid black
+edge Node58 Node59 4 43.333 1.611 43.333 1.417 43.333 1.153 43.333 0.944 solid black
+edge Node60 Node61 4 44.681 1.722 44.681 1.514 44.681 1.236 44.681 1.000 solid black
+edge Node62 Node63 4 46.097 1.611 46.097 1.417 46.097 1.153 46.097 0.944 solid black
+edge Node64 Node65 4 47.542 1.722 47.542 1.597 47.542 1.417 47.542 1.250 solid black
+edge Node66 Node67 4 48.986 1.611 48.986 1.417 48.986 1.153 48.986 0.944 solid black
+edge Node68 Node69 4 50.431 1.722 50.431 1.597 50.431 1.417 50.431 1.250 solid black
+edge Node70 Node71 4 52.000 1.722 52.000 1.542 52.000 1.278 52.000 1.056 solid black
+edge Node72 Node73 4 53.431 1.611 53.431 1.417 53.431 1.153 53.431 0.944 solid black
+edge Node74 Node75 4 54.778 1.722 54.778 1.514 54.778 1.236 54.778 1.000 solid black
+edge Node76 Node77 4 56.125 1.611 56.125 1.417 56.125 1.153 56.125 0.944 solid black
+edge Node78 Node79 4 57.569 1.722 57.569 1.597 57.569 1.417 57.569 1.250 solid black
+edge Node80 Node81 4 59.014 1.611 59.014 1.417 59.014 1.153 59.014 0.944 solid black
+edge Node82 Node83 4 60.458 1.722 60.458 1.514 60.458 1.236 60.458 1.000 solid black
+edge Node84 Node85 4 62.042 1.722 62.042 1.500 62.042 1.194 62.042 0.944 solid black
+edge Node86 Node87 4 63.639 1.722 63.639 1.556 63.639 1.333 63.639 1.125 solid black
+edge Node88 Node89 4 65.236 1.722 65.236 1.500 65.236 1.194 65.236 0.944 solid black
+stop
+<BLANKLINE>

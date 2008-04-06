@@ -138,7 +138,7 @@ def visualize_tree(tree, output_filename):
         """Here, I generate the relationships of the nodes.  In particular, I
         don't generate the labels here."""
         def node_id(node):
-            id_ = "Node" + str(id(node))
+            id_ = "Node" + str(len(node_dict))
             node_dict[id_] = node
             return id_
         if subtree:
@@ -158,6 +158,7 @@ def visualize_tree(tree, output_filename):
     print>>output, "{"
     print>>output, 'ordering="out" ; node [fontname="Helvetica"] ;'
     visualize_subtree(tree)
+    # Now come the labels
     for id_, node in node_dict.iteritems():
         print>>output, "    ", id_, "[",
         is_text = isinstance(node, parser.Text)
@@ -224,3 +225,6 @@ def import_local_module(name):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    doctest.testfile("../misc/helpers.txt")
+    os.remove("../misc/test2.rsl")
+    os.remove("../misc/test2.plain")
