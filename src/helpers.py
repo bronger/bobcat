@@ -66,7 +66,8 @@ def print_tree(tree):
     :Parameters:
       - `tree`: A list of a class and its subtree.  The subtree consists of
         items.  Every item is either a class (then it is terminal) or again a
-        list of a class and its subtree.
+        list of a class and its subtree.  This parameter is created by
+        `parser.Node.tree_list`.
 
     :type tree: list
 
@@ -108,6 +109,21 @@ def print_tree(tree):
     print_subtree(tree[1], (len(rootname)//2,))
 
 def visualize_tree(tree, output_filename):
+    """Creates an image file which visualises the document structure.  It
+    relies on the dot program from the `Graphvis <http://www.graphviz.org/>`__
+    package.
+
+    :Parameters:
+      - `tree`: A list of a class and its subtree.  The subtree consists of
+        items.  Every item is either a class (then it is terminal) or again a
+        list of a class and its subtree.  This parameter is created by
+        `parser.Node.tree_list`.
+      - `output_filename`: name of the output file.  The extension determines
+        the file type.  Typical extensions are ``".eps"``, ``".gif"``, and
+        ``".svg"``.  All possible output formats of Graphvis are supported.
+    """
+    colors = {"Section": "yellow", "Paragraph": "green", "Document": "red",
+              "Heading": "goldenrod", "Emphasize": "darkseagreen2"}
     extension = os.path.splitext(output_filename)[1][1:]
     output_type = {"eps": "ps"}.get(extension, extension)
     output_encoding = {"ps": "latin-1"}.get(output_type, "utf-8")
@@ -140,22 +156,31 @@ def visualize_tree(tree, output_filename):
         if is_text:
             text = node.text
             if text.startswith(" "):
-                text = "_" + text[1:]
+                text = u"_" + text[1:]
             if text.endswith(" "):
-                text = text[:-1] + "_"
+                text = text[:-1] + u"_"
             text = u" ".join(text.split())
             if len(text) > 30:
                 text = text[:29] + u"…" if output_encoding == "utf-8" else text[:27] + u"..."
             text = textwrap.fill(text, 10).replace("\n", "\\l")
             if "\\l" in text:
                 text += "\\l"
-            print>>output, 'label="' + text + '", shape="box", fontsize="12pt", fontname="Times-Roman"',
+            print>>output, u'label="' + text + '", shape="box", fontsize="12pt", fontname="Times-Roman"',
         else:
-            text = node.__class__.__name__
-            print>>output, "label=" + text + ', shape="egg"',
+            classname = node.__class__.__name__
+            print>>output, u"label=",
+            print>>output, u'<<TABLE BGCOLOR="%s"><TR><TD>' % colors.get(classname, "yellow") + \
+                classname + "</TD></TR>"
+            for attribute in node.characteristic_attributes:
+                name, human_name = \
+                    attribute if isinstance(attribute, (tuple, list)) else 2 * (attribute,)
+                print>>output, u'<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">%s: %s</FONT></TD></TR>' % \
+                    (human_name, getattr(node, name))
+            print>>output, u"</TABLE>>",
+            print>>output, ', shape="plaintext"',
         print>>output, "] ;"
     print>>output, "}"
-    # Send EOF through pipe
+    # Send EOF through pipe, wait for process to terminate
     dot_process.communicate()
 
 def import_local_module(name):
