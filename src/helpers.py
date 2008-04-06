@@ -137,10 +137,11 @@ def visualize_tree(tree, output_filename):
     def visualize_subtree(subtree):
         """Here, I generate the relationships of the nodes.  In particular, I
         don't generate the labels here."""
-        def node_id(node):
-            id_ = "Node" + str(len(node_dict))
-            node_dict[id_] = node
-            return id_
+        # The following lambda function cannot be understood.  It generates a
+        # unique string id for a given node element and returns it.  Or, if
+        # there is already one, returns it.  The node → node ID mapping is
+        # stored in ``node_dict``.
+        node_id = lambda node: node_dict.setdefault(node, "Node" + str(len(node_dict)))
         if subtree:
             for item in subtree[1]:
                 line = "     " + node_id(subtree[0]) + " -> "
@@ -150,7 +151,8 @@ def visualize_tree(tree, output_filename):
                 else:
                     print>>output, line + node_id(item) + " ;"
     try:
-        dot_process = subprocess.Popen(["dot", "-T"+output_type, "-o", output_filename], stdin=subprocess.PIPE)
+        dot_process = subprocess.Popen(["dot", "-T"+output_type, "-o", output_filename],
+                                       stdin=subprocess.PIPE)
     except OSError:
         raise Error("could not start dot program")
     output = codecs.getwriter(output_encoding)(dot_process.stdin, errors="replace")
@@ -159,7 +161,7 @@ def visualize_tree(tree, output_filename):
     print>>output, 'ordering="out" ; node [fontname="Helvetica"] ;'
     visualize_subtree(tree)
     # Now come the labels
-    for id_, node in node_dict.iteritems():
+    for node, id_ in node_dict.iteritems():
         print>>output, "    ", id_, "[",
         is_text = isinstance(node, parser.Text)
         if is_text:
