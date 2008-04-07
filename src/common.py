@@ -326,11 +326,6 @@ def add_parse_error(parse_error):
     also writes it to the log file and to stderr, if this hasn't be changed by
     the user.
 
-    :Parameters:
-      - `parse_error`: the actual parse error
-
-    :type parse_error: `ParseError`
-
         >>> import parser, preprocessor, settings
         >>> import os.path
         >>> os.chdir(os.path.join(modulepath, "../misc/"))
@@ -345,6 +340,12 @@ def add_parse_error(parse_error):
         >>> node.throw_parse_error("test error message")
         >>> parser.common.ParseError.parse_errors
         [ParseError('test error message',)]
+
+    :Parameters:
+      - `parse_error`: the actual parse error
+
+    :type parse_error: `ParseError`
+
     """
     assert isinstance(parse_error, ParseError)
     ParseError.parse_errors.append(parse_error)
