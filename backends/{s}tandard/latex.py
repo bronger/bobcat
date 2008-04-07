@@ -149,8 +149,8 @@ def process_document(self):
     body = emit.pop_output()
     # Now we do the emitting again, this time with the additional packages
     emit(preamble)
-    if self.packages:
-        emit("\\usepackage{%s}\n" % ", ".join(self.packages))
+    if self.features:
+        emit("\\usepackage{%s}\n" % ", ".join(self.features))
     emit(body)
 
 def process_paragraph(self):
@@ -182,5 +182,9 @@ def process_hyperlink(self):
 
 def process_text(self):
     """Emit an ordinary text node.  I have to override the default because Unicodes
-    must be transformed into LaTeX macros."""
-    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT", self.root().packages))
+    must be transformed into LaTeX macros.
+
+    It also collects all needed packages in the ``features`` attrbute of the
+    document node."""
+    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT",
+                                          self.root().features))
