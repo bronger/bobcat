@@ -165,7 +165,6 @@ class Node(object):
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
-    :type absolute_path
     :type types_path: str
     :type __original_text: `prepocessor.Excerpt`
     :type __start_index: int
@@ -338,7 +337,7 @@ class Document(Node):
     There is always exactly one Document node in a Gummi AST, and this is the
     top node.  This is not the only thing which is special about it: It also
     contains variables which are "global" to the whole document.  It also
-    contains special methods which are  used when the whole AST is finished and
+    contains special methods which are used when the whole AST is finished and
     the actual output should be prepared.  These methods are called from the
     main program.
 
@@ -473,6 +472,7 @@ class Text(Node):
 
     :type text: `preprocessor.Excerpt`
     """
+    text = u""
     def __init__(self, parent):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
@@ -596,7 +596,7 @@ class Section(Node):
 
     :cvar equation_line_pattern: regexp for section heading marker lines
     :cvar section_number_pattern: regexp for section numbers like ``#.#``
-    :ivar nesting_level: the nesting level of the section. -1 for parts, 0 for
+    :ivar nesting_level: the nesting level of the section.  -1 for parts, 0 for
       chapters, 1 for sections etc.  Thus, it is like LaTeX's secnumdepth.
 
     :type equation_line_pattern: re.pattern
