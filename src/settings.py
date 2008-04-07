@@ -456,7 +456,7 @@ class Setting(object):
             this setting was created in the program code directly.  If ``"conf
             file"``, this setting was read from a configuration file.  If
             ``"keyval list"``, this settings comes from a key/value list in a
-            Gummi source file (see `SettingsDict.parse_keyval_list`).  If
+            Gummi source file (see `SettingsDict.parse_keyvalue_list`).  If
             ``"default"``, the initial value is the default value of this
             setting at the same time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
