@@ -183,4 +183,4 @@ def process_hyperlink(self):
 def process_text(self):
     """Emit an ordinary text node.  I have to override the default because Unicodes
     must be transformed into LaTeX macros."""
-    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT", self.root().packages))
+    emit(latex_substitutions.process_text(self.text, self.language, "TEXT", self.root().packages))
