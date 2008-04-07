@@ -166,7 +166,7 @@ class Node(object):
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
-    :type characteristic_attributes: list of (str, str) or list of str
+    :type characteristic_attributes: list `common.AttributeDescriptor`
     :type __text: `prepocessor.Excerpt`
     :type __start_index: int
     :type __position: `common.PositionMarker`
@@ -592,7 +592,7 @@ class Section(Node):
     equation_line_pattern = re.compile(r"\n[ \t]*={4,}[ \t]*$", re.MULTILINE)
     section_number_pattern = re.compile(r"[ \t]*(?P<numbers>((\d+|#)\.)*(\d+|#))(\.|[ \t\n])[ \t]*",
                                         re.MULTILINE)
-    characteristic_attributes = [("nesting_level", "level")]
+    characteristic_attributes = [common.AttributeDescriptor("nesting_level", "level")]
     def __init__(self, parent):
         super(Section, self).__init__(parent)
     def parse(self, text, position, equation_line_span):
@@ -672,7 +672,7 @@ class Hyperlink(Node):
 
     :type url: unicode
     """
-    characteristic_attributes = [("url", "URL")]
+    characteristic_attributes = [common.AttributeDescriptor("url", "URL")]
     def __init__(self, parent):
         super(Hyperlink, self).__init__(parent)
     def parse(self, text, position, end):

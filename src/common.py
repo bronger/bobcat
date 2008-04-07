@@ -102,6 +102,30 @@ class PositionMarker(object):
         return PositionMarker(self.url, self.linenumber, self.column,
                                       self.index+offset)
 
+class AttributeDescriptor(object):
+    """A container class for use with `helpers.visualize_tree`.  One instance
+    of this class takes exactly one attribute of a parse tree class.  This way,
+    the parse tree class can export class and instance attributes that should
+    be printed in the AST image by ``visualize_tree``.
+    """
+    def __init__(self, name, printed_name=None, default_value=None):
+        """Note that this class is a mere container.  It would be a struct in C
+        and a record in Pascal.
+        
+        :Parameters:
+          - `name`: name of the attribute
+          - `printed_name`: name as it should be printed in the AST
+            visualisation
+          - `default_value`: If the attribute is of this value in the
+            respective parse tree element, it is not printed.
+
+        :type name: str
+        :type printed_name: unicode
+        :type default_value: object
+        """
+        self.name, self.printed_name, self.default_value = \
+            name, printed_name or name, default_value
+
 class Error(Exception):
     """Standard error class.
     """
