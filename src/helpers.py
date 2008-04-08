@@ -115,6 +115,9 @@ def visualize_tree(tree, output_filename):
     relies on the dot program from the `Graphvis <http://www.graphviz.org/>`__
     package.
 
+    Note that whitespace at the beginning or ending of a text node is
+    represented by underscores in the output.
+
     :Parameters:
       - `tree`: A list of a class and its subtree.  The subtree consists of
         items.  Every item is either a class (then it is terminal) or again a
@@ -183,10 +186,10 @@ def visualize_tree(tree, output_filename):
             print>>output, u'<<TABLE BGCOLOR="%s"><TR><TD>' % colors.get(classname, "yellow") + \
                 classname + "</TD></TR>"
             for attribute in node.characteristic_attributes:
-                name, human_name = \
-                    attribute if isinstance(attribute, (tuple, list)) else 2 * (attribute,)
-                print>>output, u'<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">%s: %s</FONT></TD></TR>' % \
-                    (human_name, getattr(node, name))
+                value = getattr(node, attribute.name)
+                if value != attribute.default_value:
+                    print>>output, u'<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">%s: %s' \
+                        u'</FONT></TD></TR>' % (attribute.printed_name, value)
             print>>output, u"</TABLE>>",
             print>>output, ', shape="plaintext"',
         print>>output, "] ;"

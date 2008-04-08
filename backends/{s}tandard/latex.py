@@ -30,10 +30,15 @@
 """The LaTeX backend for the Standard theme.
 
 :var emit: The emitter for this backend.
+
+:var packages: additional LaTeX packages needed by this document, especially
+  due to occurences of exotic Unicode characters.
+
 :var babel_options: Mapping from :RFC:`4646` language codes to options for
   LaTeX's babel package.
 
 :type emit: `emitter.Emitter`
+:type packages: set of str
 :type babel_options: dict
 """
 
@@ -56,6 +61,8 @@ class Emitter(emitter.Emitter):
         outfile.close()
 
 emit = Emitter()
+
+packages = set()
 
 nesting_level_offset = 2   # We're making an article; for a book, it'd be 1
 babel_options = {"af": "afrikaans",
@@ -149,8 +156,8 @@ def process_document(self):
     body = emit.pop_output()
     # Now we do the emitting again, this time with the additional packages
     emit(preamble)
-    if self.packages:
-        emit("\\usepackage{%s}\n" % ", ".join(self.packages))
+    if packages:
+        emit("\\usepackage{%s}\n" % ", ".join(packages))
     emit(body)
 
 def process_paragraph(self):
@@ -182,5 +189,8 @@ def process_hyperlink(self):
 
 def process_text(self):
     """Emit an ordinary text node.  I have to override the default because Unicodes
-    must be transformed into LaTeX macros."""
-    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT", self.root().packages))
+    must be transformed into LaTeX macros.
+
+    It also collects all needed packages."""
+    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT",
+                                          packages))
