@@ -349,11 +349,6 @@ class Document(Node):
       parent section.
     :ivar languages: all languages that have been used in the document, as
       :RFC:`4646` strings.
-    :ivar packages: set of features needed by this document, e.g. tables,
-      formulae etc.  This can be used by the LaTeX backend to decide which
-      additional packages must be included.  Normally, it simply contains LaTeX
-      package names, but maybe RTF or OpenDocument need further possible items
-      in this set.
     :ivar emit: `emitter.Emitter` object used for generating output.  Only
       `Document` and `Text` need `emit` of all routines in this module.
     :cvar node_types: dict which maps `Node` type names to the actual classes.
@@ -362,7 +357,6 @@ class Document(Node):
     :type root: weakref to Node
     :type nesting_level: int
     :type languages: set
-    :type packages: set of str
     :type node_types: dict
     :type emit: emitter.Emitter
     """
@@ -373,7 +367,6 @@ class Document(Node):
         self.languages = set()
         self.root = weakref.ref(self)
         self.nesting_level = -2
-        self.packages = set()
         self.emit = None
     def parse(self, text, position=0):
         super(Document, self).parse(text, position)

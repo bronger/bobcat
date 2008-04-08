@@ -93,7 +93,7 @@ class Substitution(object):
         :Parameters:
           - `packages`: a set of packages which contains the additional
             packages that have been requested so far.  Normally, it contains
-            the original `parser.Document.packages` (not a copy of it!).
+            the original `latex.packages` (not a copy of it!).
         """
         cls.packages = packages
     def __unicode__(self):
