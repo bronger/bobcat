@@ -747,7 +747,7 @@ class Excerpt(unicode):
             self.escaped_positions = escaped_positions
             self.code_snippets_intervals = code_snippets_intervals
             self.original_text = excerpt.original_text
-            self.__post_substitutions = post_substitutions
+            self.__post_substitutions = None
         self.__escaped_text = None
         return self
     def apply_postprocessing(self):
@@ -762,6 +762,7 @@ class Excerpt(unicode):
 
         :rtype: Excerpt
         """
+        assert self.__post_substitutions is not None, "post input method can be applied only once"
         return Excerpt(self, mode="POST")
 
 # FixMe: The following path variable will eventually be set by some sort of

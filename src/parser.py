@@ -155,24 +155,34 @@ class Node(object):
       entries are either attribute names or 2-tuples with the first element
       being the name of the attribute and the second a “human” name for it.
 
-    :ivar __text: The original text from which this node was created (parsed).
-      Only needed for calculating `__position`, see the `position` property.
-    :ivar __start_index: The index within `__text` where this node starts.
-      Only needed for calculating `__position`, see the `position` property.
+    :ivar types_path: path containing all ancestor element types in proper
+      order.  For example, it may be ``"/Document/Paragraph/Emphasize/Text"``.
+
+    :ivar __original_text: The original text from which this node was created
+      (parsed). Only needed for calculating `__position`, see the `position`
+      property.
+    :ivar __start_index: The index within `__original_text` where this node
+      starts.  Only needed for calculating `__position`, see the `position`
+      property.
     :ivar __position: cache for the original position of this node in the
       source file, see the `position` property.
+    :ivar __text: cache for the text equivalent of this node in the source
+      file, see the `text` property.
 
     :type parent: weakref to Node
     :type root: weakref to Node
     :type children: list of Nodes
     :type language: str
     :type characteristic_attributes: list `common.AttributeDescriptor`
-    :type __text: `prepocessor.Excerpt`
+    :type types_path: str
+    :type __original_text: `prepocessor.Excerpt`
     :type __start_index: int
     :type __position: `common.PositionMarker`
+    :type __text: unicode
     """
     __position = None
     characteristic_attributes = []
+    __text = None
     def __init__(self, parent):
         """It will also be called by all derived classes.
 
@@ -190,10 +200,12 @@ class Node(object):
             # for the very first child in the document node.
             parent.children.append(self)
             self.language = self.root().current_language
+            self.types_path = parent.types_path + "/" + str(self.__class__).split(".")[1][:-2]
         else:
             # This is the root node
             self.parent = None
             self.language = None
+            self.types_path = ""
         self.children = []
     def parse(self, text, position):
         u"""Parse a part of the source document and interpret it as the source
@@ -224,7 +236,7 @@ class Node(object):
         :rtype: int
         """
         # pylint: disable-msg=R0201,W0613
-        self.__text, self.__start_index = text, position
+        self.__original_text, self.__start_index = text, position
         return position
     def __get_position(self):
         """Returns the starting position of this element.  In some situations,
@@ -244,12 +256,26 @@ class Node(object):
         :rtype: `common.PositionMarker`
         """
         if not self.__position:
-            self.__position = self.__text.original_position(self.__start_index)
+            self.__position = self.__original_text.original_position(self.__start_index)
         return self.__position
     position = property(__get_position, doc="""Starting position of this
         document element in the original source file.
 
         :type: `common.PositionMarker`""")
+    def __get_text(self):
+        if not self.__text:
+            self.__text = u"".join(child.text for child in self.children)
+        return self.__text
+    text = property(__get_text, doc="""Text of this node and all of its
+        children.  This is very similar to the ``text()`` function in XPath.
+        Note that it is overwritten with an ordinary attribute in the `Text`
+        class.
+
+        *Important*: You must not read this property while the element is
+        parsed.  The reason is simply that then the caching will lead to
+        incorrect results in future calls.
+
+        :type: unicode""")
     def __str__(self):
         """Serves debugging purposes only.  Consider using `tree_list()` and
         `helpers.print_tree()` instead."""
@@ -323,7 +349,7 @@ class Document(Node):
     There is always exactly one Document node in a Gummi AST, and this is the
     top node.  This is not the only thing which is special about it: It also
     contains variables which are "global" to the whole document.  It also
-    contains special methods which are  used when the whole AST is finished and
+    contains special methods which are used when the whole AST is finished and
     the actual output should be prepared.  These methods are called from the
     main program.
 
@@ -451,18 +477,18 @@ class Text(Node):
 
     :type text: `preprocessor.Excerpt`
     """
+    text = u""
     def __init__(self, parent):
         super(Text, self).__init__(parent)
     def parse(self, text, position, end):
-        """Just copy a slice of the source code into `text`."""
+        """Copy a slice of the source code into `text` and apply the post input
+        method."""
         super(Text, self).parse(text, position)
-        self.text = text[position:end]
+        self.text = text[position:end].apply_postprocessing()
         return end
     def process(self):
-        """Pass `text` to the emitter.  Note that if you want to override this method
-        in the backend, you must apply the postprocessing with
-        `preprocessor.Excerpt.apply_postprocessing`."""
-        self.root().emit(self.text.apply_postprocessing())
+        """Pass `text` to the emitter."""
+        self.root().emit(self.text)
 
 inline_delimiter = re.compile(ur"[_`]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
 def parse_inline(parent, text, position, end):
@@ -575,7 +601,7 @@ class Section(Node):
 
     :cvar equation_line_pattern: regexp for section heading marker lines
     :cvar section_number_pattern: regexp for section numbers like ``#.#``
-    :ivar nesting_level: the nesting level of the section. -1 for parts, 0 for
+    :ivar nesting_level: the nesting level of the section.  -1 for parts, 0 for
       chapters, 1 for sections etc.  Thus, it is like LaTeX's secnumdepth.
 
     :type equation_line_pattern: re.pattern

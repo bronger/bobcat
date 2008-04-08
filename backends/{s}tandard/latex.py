@@ -192,5 +192,4 @@ def process_text(self):
     must be transformed into LaTeX macros.
 
     It also collects all needed packages."""
-    emit(latex_substitutions.process_text(self.text.apply_postprocessing(), self.language, "TEXT",
-                                          packages))
+    emit(latex_substitutions.process_text(self.text, self.language, "TEXT", packages))
