@@ -32,7 +32,8 @@ should be available in (almost) all parts of Gummi, use the common module
 instead."""
 
 from common import Error, modulepath
-import sys, codecs, os, parser, subprocess, StringIO, textwrap
+import sys, codecs, os, subprocess, StringIO, textwrap
+import .parser.basic_inline
 
 def print_tree(tree):
     """Print a nested list of classes as an ASCII tree to stdout.  Example:
@@ -166,7 +167,7 @@ def visualize_tree(tree, output_filename):
     # Now come the labels
     for node, id_ in node_dict.iteritems():
         print>>output, "    ", id_, "[",
-        is_text = isinstance(node, parser.Text)
+        is_text = isinstance(node, basic_inline.Text)
         if is_text:
             text = node.text
             if text.startswith(" "):

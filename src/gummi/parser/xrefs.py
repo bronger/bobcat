@@ -26,18 +26,9 @@
 #    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #    DEALINGS IN THE SOFTWARE.
 #
-"""Management of cross references of various kinds in Gummi documents.
 
-This module defines the classes and exceptions necessary for cross references
-management in Gummi documents.  This covers the actual cross references to
-sections or figures as well as bibliographical citations, text blocks,
-footnotes, and so-called delayed weblinks.
-
-Note that nothing is parsed here.  This module just resolves the references and
-makes the connection between referencing document element and referred element.
-"""
-
-import common
+from common import *
+from .. import common
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
@@ -605,3 +596,33 @@ class DelayedWeblinksManager(ReferencesManager):
         self.requesters_by_label.clear()
         self.current_definition_by_label.clear()
         self.unserved_requesters.clear()
+
+class Hyperlink(Node):
+    """Class for hyperlinks aka weblinks.
+
+    :ivar url: the URL of this hyperlink
+
+    :type url: unicode
+    """
+    characteristic_attributes = [common.AttributeDescriptor("url", "URL")]
+    def __init__(self, parent):
+        super(Hyperlink, self).__init__(parent)
+    def parse(self, text, position, end):
+        super(Hyperlink, self).parse(text, position)
+        if text[position] == "<" and text[end-1] == ">":
+            self.url = unicode(text)[position+1:end-1]
+        else:
+            raise NotImplementedError("Only URL-only hyperlinks are implemented so far")
+        return end
+
+class Footnote(Node):
+    pass
+
+class FootnoteReference(Node, xrefs.MarkBasedNode):
+    pass
+
+class DelayedWeblink(Node):
+    pass
+
+class DelayedWeblinkReference(Node, xrefs.MarkBasedNode):
+    pass
