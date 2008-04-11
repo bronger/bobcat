@@ -29,12 +29,13 @@
 
 """Currently, this is the main program.  You can test it with::
 
-    python gummi.py test1.rsl
+    python bobcat.py test1.rsl
 
 The result should be test1.tex."""
 
-import sys, common, settings, i18n
-from common import FileError
+import sys
+from gummi import common, settings, i18n
+from gummi.common import FileError
 _ = i18n.ugettext
 
 import optparse
@@ -80,8 +81,7 @@ settings.settings["backend"] = options.backend
 common.setup_logging(options.logfile, options.logging)
 
 
-import preprocessor, helpers
-parser = helpers.import_local_module("parser")
+from gummi import preprocessor, helpers, parser
 
 text, encoding, gummi_version = preprocessor.load_file(settings.settings["input filename"])
 if gummi_version != "1.0":

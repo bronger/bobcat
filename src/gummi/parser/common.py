@@ -29,6 +29,8 @@
 
 __all__ = ["guarded_match", "guarded_search", "guarded_find", "Node"]
 
+import weakref
+
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.
 

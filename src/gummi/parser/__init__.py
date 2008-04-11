@@ -45,4 +45,15 @@ This is the package initialisation file for the parser package.  It just
 includes all parser components and exports them as if there was one big parser
 module."""
 
-from .sectioning import Document
+import gummi.safefilename as _safefilename
+from .common import (Node)
+from .sectioning import (Document, Section, Heading)
+from .basic_inline import (Emphasize, Text)
+from .basic_block import (Paragraph)
+from .xrefs import (Hyperlink, Footnote, FootnoteReference, DelayedWeblink, DelayedWeblinkReference)
+
+import copy, inspect
+_globals = copy.copy(globals())
+Document.node_types = dict([(cls.__name__.lower(), cls) for cls in _globals.values()
+                            if inspect.isclass(cls) and issubclass(cls, Node)])
+del _globals, cls

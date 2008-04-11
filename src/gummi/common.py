@@ -39,9 +39,7 @@ most notably the Exception classes and logging.
 
 import re, sys, os.path, logging
 
-modulepath = os.path.abspath(os.path.dirname(sys.argv[0]))
-if 'epydoc' in sys.modules:
-    modulepath = os.path.abspath("src/")
+modulepath = os.path.abspath(os.path.dirname(__file__))
 
 class PositionMarker(object):
     """A mere container for a position in a original document, which is a

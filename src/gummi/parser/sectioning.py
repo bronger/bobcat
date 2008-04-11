@@ -28,8 +28,10 @@
 #
 
 from .common import (guarded_match, guarded_search, guarded_find, Node)
-from ..src import common
-import re
+from gummi.parser.basic_block import (parse_blocks)
+from gummi.parser.basic_inline import (parse_inline)
+from ..gummi import common, settings
+import re, weakref, os, imp
 
 class Document(Node):
     """The root node of a document.
@@ -91,7 +93,7 @@ class Document(Node):
         # FixMe: This path should be made more flexible; the themes needn't be
         # next to the Python source scripts
         backend_name = settings["backend"]
-        theme_path = os.path.normpath(os.path.join(common.modulepath, "..", "backends",
+        theme_path = os.path.normpath(os.path.join(common.modulepath, "backends",
                                                    settings["theme"].encode("safefilename")))
         file_, pathname, description = imp.find_module(backend_name, [theme_path])
         try:

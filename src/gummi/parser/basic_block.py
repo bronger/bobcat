@@ -27,7 +27,11 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-from common import *
+from .common import (guarded_match, guarded_search, guarded_find, Node)
+# FixMe: The following import should become relative.  At the moment, it can't
+# due to <http://bugs.python.org/issue992389>.
+import sectioning
+from gummi.parser.basic_inline import (parse_inline)
 import re
 
 empty_line_pattern = re.compile(r"\n[ \t\n]*\n")
@@ -66,13 +70,13 @@ def parse_blocks(parent, text, position):
         else:
             block_end = next_block_start = length
         equation_line_match = \
-            guarded_search(Section.equation_line_pattern, text, position, block_end)
+            guarded_search(sectioning.Section.equation_line_pattern, text, position, block_end)
         if equation_line_match:
-            assert isinstance(parent, (Document, Section))
+            assert isinstance(parent, (sectioning.Document, sectioning.Section))
             # Current block is a heading, so do a look-ahead to get the nesting
             # level
-            if Section.get_nesting_level(text, position) > parent.nesting_level:
-                section = Section(parent)
+            if sectioning.Section.get_nesting_level(text, position) > parent.nesting_level:
+                section = sectioning.Section(parent)
                 position = section.parse(text, position, equation_line_match.span())
             else:
                 return position

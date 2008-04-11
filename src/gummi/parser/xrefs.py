@@ -618,11 +618,11 @@ class Hyperlink(Node):
 class Footnote(Node):
     pass
 
-class FootnoteReference(Node, xrefs.MarkBasedNode):
+class FootnoteReference(Node, MarkBasedNode):
     pass
 
 class DelayedWeblink(Node):
     pass
 
-class DelayedWeblinkReference(Node, xrefs.MarkBasedNode):
+class DelayedWeblinkReference(Node, MarkBasedNode):
     pass

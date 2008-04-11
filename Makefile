@@ -19,14 +19,14 @@ src-doc-svn:
 	rm -Rf src-doc
 
 doctests:
-	cd src; python common.py                  2> /dev/null
-	cd src; python settings.py		  2> /dev/null
-	cd src; python parser.py		  2> /dev/null
-	cd src; python helpers.py		  2> /dev/null
-	cd src; python i18n.py			  2> /dev/null
-	cd src; python latex_substitutions.py	  2> /dev/null
-	cd src; python preprocessor.py		  2> /dev/null
-	cd src; python safefilename.py		  2> /dev/null
+	cd src/gummi; python common.py                    2> /dev/null
+	cd src/gummi; python settings.py		  2> /dev/null
+#	cd src/gummi; python parser.py		          2> /dev/null
+	cd src/gummi; python helpers.py                   2> /dev/null
+	cd src/gummi; python i18n.py			  2> /dev/null
+	cd src/gummi; python latex_substitutions.py	  2> /dev/null
+	cd src/gummi; python preprocessor.py		  2> /dev/null
+	cd src/gummi; python safefilename.py		  2> /dev/null
 
 pylint:
-	cd src; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log
+	cd src/gummi; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log

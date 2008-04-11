@@ -767,7 +767,7 @@ class Excerpt(unicode):
 
 # FixMe: The following path variable will eventually be set by some sort of
 # configuration.
-input_methods_path = common.modulepath
+input_methods_path = os.path.join(common.modulepath, "data")
 
 def read_input_method(input_method_name):
     """Return the substitution dictionary for one input method.
