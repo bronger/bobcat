@@ -68,7 +68,7 @@ if options.version:
     sys.exit()
 
 if 'epydoc' in sys.modules:
-    filenames = ["misc/test1.rsl"]
+    filenames = ["../misc/test1.rsl"]
 if len(filenames) != 1:
     print u"Please specify exactly one input file."
     sys.exit()
@@ -94,5 +94,5 @@ document.parse(text)
 document.generate_output()
 
 if 'epydoc' in sys.modules:
-    import latex_substitutions
-    latex_substitutions.Substitution.packages = set()
+    import gummi.latex_substitutions
+    gummi.latex_substitutions.Substitution.packages = set()

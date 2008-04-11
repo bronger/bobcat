@@ -44,13 +44,13 @@ class Emitter(object):
     `self.output`.
 
     The emitter is instantiatied in the backend module.  The parser module
-    copies this into the `Document` object and passes the settings to it
-    through `set_settings`.  Then, the actual processing is done on the AST,
-    during which the `__call__` method is invoked very often with the generated
-    output text (in the correct order).  Finally, the `Document` object in
-    parser.py calls `do_final_processing`.  This method must be overridden in
-    the derived class in the backend!  It can write self.output to a file for
-    example or more.
+    copies this into the `parser.Document` object and passes the settings
+    to it through `set_settings`.  Then, the actual processing is done on the
+    AST, during which the `__call__` method is invoked very often with the
+    generated output text (in the correct order).  Finally, the
+    `gummi.parser.sectioning.Document` object in parser.py calls
+    `do_final_processing`.  This method must be overridden in the derived class
+    in the backend!  It can write self.output to a file for example or more.
 
     :ivar output: serialised output of the current document processing.
     :ivar settings: settings for the emitter like name of the input file and
@@ -106,7 +106,8 @@ class Emitter(object):
         """This method generates the actual output, i.e. writes to files,
         creates subdirectories, calls post-processing conversion programs,
         prepares all images etc.  It is called from the
-        `parser.Document.generate_output` method in the `Document` root node.
+        `parser.sectioning.Document.generate_output` method in the
+        `sectioning.Document` root node.
 
         The method is not defined in this abstract base class, so it must be
         overridden in the derived class in the backend.  You may use

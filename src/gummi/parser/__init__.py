@@ -45,7 +45,14 @@ This is the package initialisation file for the parser package.  It just
 includes all parser components and exports them as if there was one big parser
 module."""
 
+# safefilename is not really used here, but it must be included so that the
+# codec is registered.
 import gummi.safefilename as _safefilename
+
+# FixMe: All imports in parentheses should be turned into "import *" once the
+# fix for http://article.gmane.org/gmane.comp.python.python-3000.devel/12267
+# has arrived here.  (Probably not befor Python 3.0.)  Of course, the __all__
+# attributes must be properly set in the respective modules.
 from .common import (Node)
 from .sectioning import (Document, Section, Heading)
 from .basic_inline import (Emphasize, Text)

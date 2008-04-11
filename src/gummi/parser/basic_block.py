@@ -27,11 +27,11 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-from .common import (guarded_match, guarded_search, guarded_find, Node)
+from .common import guarded_match, guarded_search, guarded_find, Node
 # FixMe: The following import should become relative.  At the moment, it can't
 # due to <http://bugs.python.org/issue992389>.
 import sectioning
-from gummi.parser.basic_inline import (parse_inline)
+from gummi.parser.basic_inline import parse_inline
 import re
 
 empty_line_pattern = re.compile(r"\n[ \t\n]*\n")

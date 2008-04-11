@@ -33,7 +33,7 @@ instead."""
 
 from common import Error, modulepath
 import sys, codecs, os, subprocess, StringIO, textwrap
-from .parser import basic_inline
+from gummi.parser import basic_inline
 
 def print_tree(tree):
     """Print a nested list of classes as an ASCII tree to stdout.  Example:

@@ -4,7 +4,7 @@ src-doc-sf:
 	rsync --rsh=ssh -avuz homepage/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/gummi/
 
 src-doc:
-	epydoc --config=misc/epydoc.cfg
+	cd src ; epydoc --config=../misc/epydoc.cfg
 
 src-doc-svn:
 	svn co https://svn.origo.ethz.ch/bobcat/src-doc
