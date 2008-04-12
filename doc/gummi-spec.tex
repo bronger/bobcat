@@ -373,15 +373,16 @@ plus the extension ``\verb|.gim|''.
   \attribute{language}{unicode}{human language in RFC\,4646 form}
 \end{attributes}
 
-~
 
-\contentmodel{Document}{\textit{flow}\rep, Section\rep}{}
+\contentmodel{Document}{\textit{flow}\rep, (Section | Part)\rep, Appendix\opt}{}
 \begin{attributes}
-  \attribute{packages}{set of unicode}{features needed by this document,
+  \attribute{features}{set of unicode}{features needed by this document,
     e.\,g.\ tables, formulae etc.  This can be used by the \LaTeX\ backend to
-    decide which additional packages must be included.  Normally, it simply
-    contains \LaTeX\ package names, but maybe RTF or OpenDocument need further
-    possible items in this set.}
+    decide which additional packages must be included.  By convention, it
+    simply contains \LaTeX\ package names to denote what's being needed, but
+    maybe RTF or OpenDocument need further possible items in this set.
+
+    An important application of it is that its}
 \end{attributes}
 
 \contentmodel{\textit{block}}{Math | Environment | Table | Code | List |
@@ -419,10 +420,29 @@ plus the extension ``\verb|.gim|''.
 ~
 
 \contentmodel{Section}{Heading, \textit{flow}\rep, Section\rep}{}
+\begin{attributes}
+  \attribute{nesting\_level}{int}{The nesting depth of the section within the
+    sectioning hierarchy.  The top-level sections have a value of~$0$,
+    subsections have~$1$ etc.  Parts have a value of~$-1$.  Thus, it is very
+    similar to the secnumdepth value in \LaTeX's book document class.
+
+    However, the top-level sections (i.\,e., those with exactly one dot in
+    their section numbering) \emph{always} have a nesting level of~$0$.  They
+    may become chapters or sections in the \LaTeX\ output, depending on the
+    theme and the options passed to it.}
+  \attribute{suppress\_numbering}{bool}{if \lstinline{True}, don't generate a
+    number for this section.}
+\end{attributes}
+
+\contentmodel{Heading}{\textit{inline}\rep}{}
 
 ~
 
-\contentmodel{Heading}{\textit{inline}\rep}{}
+\contentmodel{Part}{Heading}{}
+
+~
+
+\contentmodel{Appendix}{Section\rep}{}
 
 ~
 
@@ -439,11 +459,12 @@ plus the extension ``\verb|.gim|''.
   \attribute{url}{unicode}{the target URL of the hyperlink}
 \end{attributes}
   
-~
 
 \contentmodel{Role}{\textit{inline}\rep}{roles must not be nested}
+\begin{attributes}
+  \attribute{name}{unicode}{the name of the role}
+\end{attributes}
 
-~
 
 \contentmodel{Citations}{Citation\rep}{}
 
@@ -495,7 +516,13 @@ plus the extension ``\verb|.gim|''.
   }
 \end{attributes}
 
-~
+
+\contentmodel{Math}{<FixMe: To be done>}{}
+\begin{attributes}
+  \attribute{block}{bool}{\lstinline{True} if it's a block equation,
+    \lstinline{False} if it's an inline equation.}
+\end{attributes}
+
 
 \contentmodel{IndexEntry}{IndexEntryPart\kern0.1em\{1,3\}}{}
 
