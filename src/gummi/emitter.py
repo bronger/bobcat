@@ -40,10 +40,10 @@ class Emitter(object):
 
     Additionally, some output types may generate a whole bunch of files
     (e.g. HTML, and even more so if you want to have each chapter in its own
-    file).  Then, generating the output is more than just concetanating
+    file).  Then, generating the output is more than just concatenating
     `self.output`.
 
-    The emitter is instantiatied in the backend module.  The parser module
+    The emitter is instantiated in the backend module.  The parser module
     copies this into the `parser.Document` object and passes the settings
     to it through `set_settings`.  Then, the actual processing is done on the
     AST, during which the `__call__` method is invoked very often with the
@@ -60,7 +60,7 @@ class Emitter(object):
     :type settings: dict
     """
     def __init__(self):
-        """Class contructor."""
+        """Class constructor."""
         self.output = u""
         self.settings = None
     def set_settings(self, settings):
