@@ -30,7 +30,7 @@ for line in file("/home/bronger/xml/tbook/tbents.txt"):
             replacement = replacement[:-2] + "\\"
         text_replacements[character] = replacement.strip()
 
-outfile = codecs.open("en.gls", "w", encoding="utf-8")
+outfile = codecs.open("en.bls", "w", encoding="utf-8")
 
 print>>outfile,u""".. -*- mode: text; language-code: en -*-
 .. Gummi LaTeX substitutions

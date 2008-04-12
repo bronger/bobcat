@@ -792,7 +792,7 @@ def read_input_method(input_method_name):
         return [], []
     pre_substitutions = []
     post_substitutions = []
-    filename = os.path.join(input_methods_path, input_method_name+".gim")
+    filename = os.path.join(input_methods_path, input_method_name+".bim")
     local_variables = common.parse_local_variables(open(filename).readline(), force=True)
     if local_variables.get("input-method-name") != input_method_name:
         raise FileError("input method name in first line doesn't match file name", filename)

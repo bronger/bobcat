@@ -39,7 +39,7 @@ module for the LaTeX backend.
   dicts.
 :var cached_substitutions: all LaTeX substitutions read so far.  Its keys are
   full language tags.  In contrast to `cached_substitutions_with_fallbacks`,
-  this dict contains substitions directly read from gls files, so without any
+  this dict contains substitions directly read from bls files, so without any
   fallbacks.  `cached_substitutions_with_fallbacks` merges the substitions sets
   for the complete fallback chain downto English.
 :var undangerous_characters: string containing all characters that can be
@@ -115,7 +115,7 @@ class Substitution(object):
 latex_substitutions_path = os.path.join(common.modulepath, "data")
 
 def read_latex_substitutions(language_code):
-    """Read the LaTeX substitutions from a gls file for one language and return
+    """Read the LaTeX substitutions from a bls file for one language and return
     the resulting dictionary of language substitutions.
 
     :Parameters:
@@ -134,7 +134,7 @@ def read_latex_substitutions(language_code):
     """
     substitutions = {}
     language_code = language_code.lower()
-    filename = os.path.join(latex_substitutions_path, language_code+".gls")
+    filename = os.path.join(latex_substitutions_path, language_code+".bls")
     local_variables = common.parse_local_variables(open(filename).readline(), force=True)
     file_language_code = local_variables.get("language-code")
     if not file_language_code:
@@ -234,14 +234,14 @@ def build_language_substitutions(language_code):
     main_codes = [get_main_code(lc) for lc in cached_substitutions]
     if "en" not in main_codes:
         cached_substitutions.update(read_latex_substitutions("en"))
-    assert "en" in [get_main_code(lc) for lc in cached_substitutions], "en.gls was invalid"
+    assert "en" in [get_main_code(lc) for lc in cached_substitutions], "en.bls was invalid"
     main_code = get_main_code(language_code)
     if main_code not in main_codes and \
-            os.path.isfile(os.path.join(latex_substitutions_path, main_code+".gls")):
+            os.path.isfile(os.path.join(latex_substitutions_path, main_code+".bls")):
         cached_substitutions.update(read_latex_substitutions(main_code))
         assert main_code in [get_main_code(lc) for lc in cached_substitutions], \
             "file %s was invalid, it didn't contain pure '%s' substitutions" % \
-            (main_code+".gls", main_code)
+            (main_code+".bls", main_code)
     language_substitutions = {}
     language_codes = [lc for lc in cached_substitutions if language_code.startswith(lc)]
     language_codes.sort()
