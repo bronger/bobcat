@@ -1,4 +1,4 @@
->>> from gummi.settings import *
+>>> from bobcatlib.settings import *
 >>> settings["General.verbose"] = True
 >>> settings.set_default("General.verbose", None, "bool")
 >>> settings.close_section("General")

@@ -30,7 +30,7 @@
 from .common import guarded_match, guarded_search, guarded_find, Node
 from .basic_block import parse_blocks
 from .basic_inline import parse_inline
-from ..gummi import common, settings
+from ..bobcatlib import common, settings
 import re, weakref, os, imp
 
 class Document(Node):

@@ -48,7 +48,7 @@ class Emitter(object):
     to it through `set_settings`.  Then, the actual processing is done on the
     AST, during which the `__call__` method is invoked very often with the
     generated output text (in the correct order).  Finally, the
-    `gummi.parser.sectioning.Document` object in parser.py calls
+    `bobcatlib.parser.sectioning.Document` object in parser.py calls
     `do_final_processing`.  This method must be overridden in the derived class
     in the backend!  It can write self.output to a file for example or more.
 

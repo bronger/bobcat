@@ -348,7 +348,7 @@ def add_parse_error(parse_error):
     also writes it to the log file and to stderr, if this hasn't be changed by
     the user.
 
-        >>> from gummi import parser, preprocessor, settings
+        >>> from bobcatlib import parser, preprocessor, settings
         >>> import os.path
         >>> setup_logging()
         >>> testfile = open("test2.rsl", "w")

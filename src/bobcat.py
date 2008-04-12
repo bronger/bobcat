@@ -34,8 +34,8 @@
 The result should be test1.tex."""
 
 import sys
-from gummi import common, settings, i18n
-from gummi.common import FileError
+from bobcatlib import common, settings, i18n
+from bobcatlib.common import FileError
 _ = i18n.ugettext
 
 import optparse
@@ -81,7 +81,7 @@ settings.settings["backend"] = options.backend
 common.setup_logging(options.logfile, options.logging)
 
 
-from gummi import preprocessor, helpers, parser
+from bobcatlib import preprocessor, helpers, parser
 
 text, encoding, bobcat_version = preprocessor.load_file(settings.settings["input filename"])
 if bobcat_version != "1.0":
@@ -94,5 +94,5 @@ document.parse(text)
 document.generate_output()
 
 if 'epydoc' in sys.modules:
-    import gummi.latex_substitutions
-    gummi.latex_substitutions.Substitution.packages = set()
+    import bobcatlib.latex_substitutions
+    bobcatlib.latex_substitutions.Substitution.packages = set()

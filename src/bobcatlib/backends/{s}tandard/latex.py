@@ -43,7 +43,7 @@
 """
 
 import os.path, codecs
-from gummi import emitter, latex_substitutions
+from bobcatlib import emitter, latex_substitutions
 
 class Emitter(emitter.Emitter):
     def do_final_processing(self):

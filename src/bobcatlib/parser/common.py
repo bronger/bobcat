@@ -30,7 +30,7 @@
 __all__ = ["guarded_match", "guarded_search", "guarded_find", "Node"]
 
 import weakref
-from ..gummi import common
+from ..bobcatlib import common
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.

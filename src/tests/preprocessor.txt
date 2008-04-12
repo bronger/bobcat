@@ -1,5 +1,5 @@
->>> from gummi.preprocessor import load_file, Excerpt
->>> from gummi.common import modulepath
+>>> from bobcatlib.preprocessor import load_file, Excerpt
+>>> from bobcatlib.common import modulepath
 >>> import os.path
 >>> open("test2.rsl", "w").write('.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n')
 >>> text, encoding, bobcat_version = load_file("test2.rsl")

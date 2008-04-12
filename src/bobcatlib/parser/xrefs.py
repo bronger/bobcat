@@ -28,7 +28,7 @@
 #
 
 from .common import Node
-from ..gummi import common
+from ..bobcatlib import common
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels

@@ -19,21 +19,21 @@
 \usepackage{hyperref}
   \hypersetup{%
     pdfauthor={Torsten Bronger},%
-    pdftitle={Gummi secification}%
+    pdftitle={Bobcat secification}%
   }
 
 \setcounter{tocdepth}{6}
 \setcounter{secnumdepth}{6}
 \sloppy
 \begin{document}
-\title{Gummi project specification}
+\title{Bobcat project specification}
 \author{Torsten Bronger}
 \date{18. August 2007}
 \maketitle
 
 \tableofcontents
 
-\chapter{Gummi 1.0 specification}
+\chapter{Bobcat 1.0 specification}
 
 \begin{quotation}
   The key words ``MUST'', ``MUST NOT'', ``REQUIRED'', ``SHALL'', ``SHALL NOT'',
@@ -42,17 +42,17 @@
   \href{http://tools.ietf.org/html/rfc2119}{RFC~2119}.
 \end{quotation}
       
-\section{Gummi file format}
+\section{Bobcat file format}
 
-Gummi files are pure text files in an octet-based encoding.  This encoding
+Bobcat files are pure text files in an octet-based encoding.  This encoding
 SHOULD be supported by current Python implementations, see
 \url{http://docs.python.org/lib/standard-encodings.html}.  The encoding MUST
-have ASCII as its \mbox{7-bit} subset.  Gummi files MUST NOT contain NULL
+have ASCII as its \mbox{7-bit} subset.  Bobcat files MUST NOT contain NULL
 characters.
 
 To ensure interoperability, line endings may be those of Unix (LF), Windows
 (CR+LF), or Macintosh (CR) systems.  They may even be mixed in one file.
-Therefore, Gummi treats line endings like XML does: LF, CR+LF, and any CR not
+Therefore, Bobcat treats line endings like XML does: LF, CR+LF, and any CR not
 followed by LF are regarded as one line ending.  (LF: ASCII~\verb|0Ah|, CR:
 ASCII~\verb|0Dh|)
 
@@ -62,7 +62,7 @@ characters is treated as one whitespace character.
 
 \subsection{Header}
 
-A Gummi file MAY declare Emacs-like local variables in its very first line.
+A Bobcat file MAY declare Emacs-like local variables in its very first line.
 This line MUST have the following format:
 \begin{lstlisting}[escapechar=`]
 .. -*- `\textrm{keyword$1$}`: `\textrm{value$1$}`; `\textrm{keyword$2$}`: `\textrm{value$2$}` -*-
@@ -73,7 +73,7 @@ be ``\verb*|.. |''.
 Both, keywords and values, MUST consist only of the following characters:
 \verb|[A-Za-z0-9_-]|.  The values may additionally contain the comma but
 \emph{not} whitespace.  Both keywords and values are treated
-case-insensitively.  The following keywords are used by Gummi:
+case-insensitively.  The following keywords are used by Bobcat:
 
 \begin{center}
 \begin{tabular}{@{}lp{7cm}@{}}
@@ -91,10 +91,10 @@ Both are OPTIONAL\@.  Other keyword--value pairs MAY be declared in the line.
 \bigskip
 %
 Immediately after the local variables in the second line of the file -- or in
-the very first line if no local variables were declared -- there MAY be a Gummi
+the very first line if no local variables were declared -- there MAY be a Bobcat
 version line.  Its format is as follows:
 \begin{lstlisting}[escapechar=`]
-.. Gummi `$\langle$\textrm{\textit{version number}}$\rangle$
+.. Bobcat `$\langle$\textrm{\textit{version number}}$\rangle$
 \end{lstlisting}
 The version line MUST start with ``\verb*|.. |''.  The version number of this
 specification is ``\verb|1.0|''.
@@ -126,7 +126,7 @@ which is not LF or~CR\@.
 The default input method is called ``\verb|minimal|''.  It is used if no input
 method is given in the local variables line.  The input method
 ``\verb|minimal|'' is specified by the reference implementation and MUST be
-provided by any Gummi implementation.  The special input method name
+provided by any Bobcat implementation.  The special input method name
 ``\verb|none|'' means that no input method is applied.
 
 The text is searched from the beginning to the end.  If a portion of the text
@@ -144,7 +144,7 @@ point means equality for two or more rules, the next point is tried.
 
 \subsection{Escaping}
 
-Gummi uses the backslash »\char92« for escaping.  Escaping takes place on two
+Bobcat uses the backslash »\char92« for escaping.  Escaping takes place on two
 levels, namely the preprocessor and the parser level.  In order to avoid having
 two different escaping characters, things are a little bit more complicated
 than usual.
@@ -273,15 +273,15 @@ is to ensure that escaping is barely necessary in source code excerpts.
 \section{Input method file format}
 
 In the first line of an input file, local variables are set analogously to the
-Gummi file itself.  However, in input method files, this line is required.  It
+Bobcat file itself.  However, in input method files, this line is required.  It
 may be for example:
 
 \begin{lstlisting}
 .. -*- input-method-name: my_method;  parental-input-method: minimal -*-
 \end{lstlisting}
 
-The following fields are known to Gummi, however, further field may be added,
-they are ignored by Gummi.
+The following fields are known to Bobcat, however, further field may be added,
+they are ignored by Bobcat.
 
 \begin{center}
 \begin{tabular}{@{}lp{7cm}@{}}
@@ -298,7 +298,7 @@ The second line MUST be the exactly following (only additional trailing
 whitespace is allowed):
 
 \begin{lstlisting}
-.. Gummi input method
+.. Bobcat input method
 \end{lstlisting}
 
 From there on, all lines only consisting of whitespace or starting with
@@ -327,12 +327,12 @@ information of any kind.  Additionally, POST rules may use replacement
 characters of the first pass as part of their match, unless these replacements
 were escaped.
 
-The matches (normal strings or regexps) are matched against the Gummi source
+The matches (normal strings or regexps) are matched against the Bobcat source
 text on string level, i.\,e.\ only the proper encoding is already applied to
 both the input method match and the source code.
 
 The order of the substitution rules is significant.  The longest match wins.
-If two rules match with the same length, the latest match in the Gummi file is
+If two rules match with the same length, the latest match in the Bobcat file is
 used.  Therefore, rules which are defined later in the input method file may
 override earlier ones (or those in a parental input method), unless their match
 is shorter, as explained in section~\ref{sec:input-method}.
@@ -386,21 +386,12 @@ also listed on Gmane with the group name \url{gmane.text.formats.gummi}.
 
 The SVN repository of the source code is at
 \url{http://bobcat.origo.ethz.ch/wiki/development}.  You can also browse through
-the interfaces at \url{http://latex-bronger.sourceforge.net/gummi/epydoc/}.
-
-A sample document -- which is at the moment the only definitive specification
--- is at
-\url{http://latex-bronger.sourceforge.net/gummi/gummi-example.html}.
-
-\section{Name}
-
-The Name ``Gummi'' is provisional.  Better suggestions are welcomed.  The name
-should be cute and allow for a nice mascot.
+the interfaces at \url{http://latex-bronger.sourceforge.net/bobcat/}.
 
 
 \section{Goals}
 
-The primary goal is to generate a prototype in Python that reads a Gummi
+The primary goal is to generate a prototype in Python that reads a Bobcat
 source code, converts it internally into an Abstract Source Tree (AST), and
 pass this to backends for at least PDF (via \LaTeX) and HTML\@.
 
@@ -409,7 +400,7 @@ syntax highlighting.  My experiences with wxPython showed that this can be done
 with less than 1000 lines of code, at least for the basic stuff.
 
 
-\section{Design guidelines of the Gummi text format}
+\section{Design guidelines of the Bobcat text format}
 
 The text format is designed along the following guidelines:
 
@@ -423,7 +414,7 @@ The text format is designed along the following guidelines:
   that's all.  The important thing is that the syntax is practical for most
   authors.
 \item Semantic markup takes precedence over visual markup but not at all costs.
-  Clear separation between contents (Gummi file) and layout (themes) but not at
+  Clear separation between contents (Bobcat file) and layout (themes) but not at
   all costs.
 \item The target group are all authors who want to write non-trivial documents
   with the computer.  It's not for the geeks.
@@ -505,7 +496,7 @@ made of class instances.  You may see them as somethin like an XML file:
 
 Note that ``\texttt{This is the~}'', ``\texttt{first}'', and
 ``~\texttt{paragraph.}''\ are three so-called text nodes in XML, which are
-separate elements in the tree.  This is the same in Gummi: There are text
+separate elements in the tree.  This is the same in Bobcat: There are text
 nodes, which can't contain any children any more.  They are pure character
 sequences.
 
@@ -519,7 +510,7 @@ The elements in the AST should have a large set of attributes and special
 method so that the backend gets a rich and convenient environment.  For
 example, the \lstinline{Section} class can give its nesting level although the
 backend could find it out itself by parsing the section number.  However, not
-only Gummi authors but also backend authors should live as comfortable as
+only Bobcat authors but also backend authors should live as comfortable as
 possible.
 
 \subsection{Preprocessor}
@@ -561,7 +552,7 @@ directory.
 
 \section{Themes}
 
-Users love themes.  In Gummi, themes are groups of backends.  Thus, a theme
+Users love themes.  In Bobcat, themes are groups of backends.  Thus, a theme
 ``PhD thesis IEF-5'' may consist of a \LaTeX/PDF and an HTML backend.  Is a
 certain output format not available in a theme, there's a fallback with a
 warning.
@@ -575,7 +566,7 @@ the preamble.
 The standard theme is called ``Standard''.
 
 You may pass options to the theme -- effectively to the backend of that theme
--- in the Gummi source document.  So some things can be set to personal
+-- in the Bobcat source document.  So some things can be set to personal
 preferences, like paper size, font etc.  There will be a core set of options
 with specified semantics, however, each backend may support additional
 options.  English option names work always, the current document language may
@@ -584,15 +575,15 @@ also work.
 
 \section{Writebacks}
 
-In the Gummi world, the converter or the Gummi editor is allowed to change the
+In the Bobcat world, the converter or the Bobcat editor is allowed to change the
 source text but only if the user doesn't object to it.  There are two purposes
 for this: First, the section, enumeration etc numbers may be adjusted in order
 to have the same numbers in the document and in the PDF, and the input method
 substitutions may be written back to the source file.
 
-Additionally, in case of a missing encoding information, the Gummi converter
+Additionally, in case of a missing encoding information, the Bobcat converter
 will perform an autodetect and may write the found encoding into the source.
 
 \end{document}
 
-% LocalWords:  Cracks Themes Gummi regexps Emphasize AST backend's IEF
+% LocalWords:  Cracks Themes Bobcat regexps Emphasize AST backend's IEF

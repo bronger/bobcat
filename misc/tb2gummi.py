@@ -33,7 +33,7 @@ for line in file("/home/bronger/xml/tbook/tbents.txt"):
 outfile = codecs.open("en.bls", "w", encoding="utf-8")
 
 print>>outfile,u""".. -*- mode: text; language-code: en -*-
-.. Gummi LaTeX substitutions
+.. Bobcat LaTeX substitutions
 
 .. Es gibt folgende Modi: TEXT, MATH, SECTION, INDEX, BIBTEX
 .. 
