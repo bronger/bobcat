@@ -40,7 +40,7 @@ class Emitter(object):
 
     Additionally, some output types may generate a whole bunch of files
     (e.g. HTML, and even more so if you want to have each chapter in its own
-    file).  Then, generatin the output is more than just concetanating
+    file).  Then, generating the output is more than just concetanating
     `self.output`.
 
     The emitter is instantiatied in the backend module.  The parser module
