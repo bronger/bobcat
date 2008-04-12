@@ -1,11 +1,11 @@
-# German translations for the Gummi program.
-# Copyright (C) 2006 THE GUMMI'S COPYRIGHT HOLDERS
-# This file is distributed under the same license as the Gummi program.
-# Torsten Bronger <bronger@physik.rwth-aachen.de>, 2007.
+# German translations for the Bobcat program.
+# Copyright (C) 2007, 2008  Torsten Bronger <bronger@physik.rwth-aachen.de>
+# This file is distributed under the same license as the Bobcat program.
+# Torsten Bronger <bronger@physik.rwth-aachen.de>, 2008.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Gummi 1.0\n"
+"Project-Id-Version: Bobcat 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-09-01 15:49+0100\n"
 "PO-Revision-Date: 2007-09-01 15:36+0200\n"

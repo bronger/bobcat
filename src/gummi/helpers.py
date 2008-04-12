@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,7 @@
 #
 
 """General helper routines for minor tasks or debugging purposes.  If a routine
-should be available in (almost) all parts of Gummi, use the common module
+should be available in (almost) all parts of Bobcat, use the common module
 instead."""
 
 from .common import Error, modulepath
@@ -199,7 +199,7 @@ def visualize_tree(tree, output_filename):
     dot_process.communicate()
 
 def import_local_module(name):
-    """Load a module from the local Gummi modules directory.
+    """Load a module from the local Bobcat modules directory.
 
     Loading e.g. the parser module is difficult because on Windows, the stdlib
     parser module is a built-in and thus loaded with higher priority.  And as

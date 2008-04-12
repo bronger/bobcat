@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -144,7 +144,7 @@ def read_latex_substitutions(language_code):
         raise FileError("language code in first line doesn't match file name", filename)
     latex_substitutions_file = codecs.open(filename, encoding=local_variables.get("coding", "utf8"))
     latex_substitutions_file.readline()
-    if not re.match(r"\.\. Gummi LaTeX substitutions\Z",
+    if not re.match(r"\.\. Bobcat LaTeX substitutions\Z",
                     latex_substitutions_file.readline().rstrip()):
         raise FileError("second line is invalid", filename)
     line_pattern = re.compile(r"((?P<character>.)|(#(?P<dec>\d+))|(0x(?P<hex>[0-9a-fA-F]+)))"
@@ -211,7 +211,7 @@ def build_language_substitutions(language_code):
 
     :Parameters:
       - `language_code`: language_code accroding to :RFC:`4747`.  This is a
-        full language code as found in the Gummi source file.
+        full language code as found in the Bobcat source file.
 
     :type language_code: str
 

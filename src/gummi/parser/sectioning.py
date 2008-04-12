@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -36,7 +36,7 @@ import re, weakref, os, imp
 class Document(Node):
     """The root node of a document.
 
-    There is always exactly one Document node in a Gummi AST, and this is the
+    There is always exactly one Document node in a Bobcat AST, and this is the
     top node.  This is not the only thing which is special about it: It also
     contains variables which are "global" to the whole document.  It also
     contains special methods which are used when the whole AST is finished and
@@ -142,7 +142,7 @@ class Document(Node):
     def __set_current_language(self, current_language):
         self.__current_language = current_language.lower()
         if not hasattr(self, "language"):
-            # Before any node-generating Gummi code, there was a language
+            # Before any node-generating Bobcat code, there was a language
             # directive
             self.language = self.__current_language
         self.languages.add(self.__current_language)

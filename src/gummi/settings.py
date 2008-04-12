@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,10 +28,10 @@
 #
 
 """Handling of global and local settings dictionaries.  This includes
-configuration files as well es key/value pairs that are parsed in the Gummi
+configuration files as well es key/value pairs that are parsed in the Bobcat
 document.
 
-:var settings: global settings of the current Gummi process.  It is of the form
+:var settings: global settings of the current Bobcat process.  It is of the form
   ``settings["section.option"] = "value"``.  Everything is case-sensitive.
 
 :type settings: SettingsDict
@@ -46,7 +46,7 @@ class SettingWarning(UserWarning):
     pass
 
 class SettingError(common.Error):
-    """Error class for inconsistent settings use within Gummi.  Most errors with
+    """Error class for inconsistent settings use within Bobcat.  Most errors with
     settings are mere warnings (in particular, malformed configuration files),
     however, other things must be considered internal errors.
 
@@ -266,7 +266,7 @@ class Setting(object):
             'int'
 
         Strings are only “unpacked” if they come from the user (configuration
-        file, Gummi document):
+        file, Bobcat document):
         
             >>> setting.detect_type("3.14", "conf file")
             'float'
@@ -456,7 +456,7 @@ class Setting(object):
             this setting was created in the program code directly.  If ``"conf
             file"``, this setting was read from a configuration file.  If
             ``"keyval list"``, this settings comes from a key/value list in a
-            Gummi source file (see `SettingsDict.parse_keyvalue_list`).  If
+            Bobcat source file (see `SettingsDict.parse_keyvalue_list`).  If
             ``"default"``, the initial value is the default value of this
             setting at the same time.  Default is ``"direct"``.
           - `docstring`: a describing docstring for this setting.
@@ -624,7 +624,7 @@ class SettingsDict(dict):
     keys in this dict) may be of the form “section.option”.  If read from a
     configuration file, this form is mandatory.  If it is just of the form
     “option” (without a dot), the section is ``u""``.  Note that “.option” is
-    invalid.  Everything is case-sensitive here, as usual in Gummi.
+    invalid.  Everything is case-sensitive here, as usual in Bobcat.
 
     As an example, consider the following configuration file:
 
@@ -634,7 +634,7 @@ class SettingsDict(dict):
         # includes the pathname component separator ("/" on POSIX, "/" or "\\" on
         # Windows) as well as the path separator (":" on POSIX, ";" on Windows).
         #
-        # This means that default configurations files shipped with the Gummi
+        # This means that default configurations files shipped with the Bobcat
         # distribution must be adjusted for the respective platform.
         [Paths]
         backends = %(rootdir)s/src/backends
@@ -937,7 +937,7 @@ class SettingsDict(dict):
     def parse_keyvalue_list(self, excerpt, parent_element,
                             item_separator=u",", key_terminators=u":="):
         """Adds items from a key/value list to the dictionary.  These key/value
-        lists are most commonly found in Gummi source documents, in similar
+        lists are most commonly found in Bobcat source documents, in similar
         places as in LaTeX.  You can use this method to build mini settings
         dictionaries in order to parse these lists.  The keys remain Excerpts,
         so that you can reconstruct the original positons in case of errors.
@@ -989,7 +989,7 @@ class SettingsDict(dict):
             file "myfile.rsl", line 1, column 12
 
         """
-        # In the current Gummi source code, no warnings should happen here but
+        # In the current Bobcat source code, no warnings should happen here but
         # only errors.  But just to be sure, I convert all warnings to errors
         # nevertheless.
         warnings.simplefilter("error", SettingWarning)
@@ -1113,7 +1113,7 @@ class SettingsDict(dict):
 settings = SettingsDict()
 
 settings.set_default("input filename", "", docstring="""
-    The absolute path to the Gummi input filename.  Must be `None` if the input
+    The absolute path to the Bobcat input filename.  Must be `None` if the input
     doesn't come from a file.""")
 settings.set_default("output path", None, "unicode", docstring="""
     The destination path or filename.  For the PDF backend, it will be a file,

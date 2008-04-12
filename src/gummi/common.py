@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,10 +27,10 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-"""Module for things that are used by (almost) all parts of Gummi.  This is
+"""Module for things that are used by (almost) all parts of Bobcat.  This is
 most notably the Exception classes and logging.
 
-:var modulepath: path to the directory where gummi.py resides
+:var modulepath: path to the directory where the bobcatlib package resides
 :var preferred_encoding: the default shell encoding on the current machine
 
 :type modulepath: str
@@ -39,7 +39,7 @@ most notably the Exception classes and logging.
 
 import re, sys, os.path, logging
 
-modulepath = os.path.abspath(os.path.dirname(__file__))
+modulepath = os.path.dirname(os.path.abspath(__file__))
 
 class PositionMarker(object):
     """A mere container for a position in a original document, which is a
@@ -151,7 +151,7 @@ class LocalVariablesError(Error):
         super(LocalVariablesError, self).__init__(description)
 
 class FileError(Error):
-    """Error class for errors in a Gummi file.
+    """Error class for errors in a Bobcat file.
     """
     def __init__(self, description, position_marker):
         """
@@ -165,7 +165,7 @@ class FileError(Error):
         super(FileError, self).__init__(str(position_marker) + ": " + description)
 
 class EncodingError(FileError):
-    """Error class for encoding errors in a Gummi file.
+    """Error class for encoding errors in a Bobcat file.
     """
     def __init__(self, description, position_marker):
         """
@@ -256,10 +256,10 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
 
 def setup_logging(logfile_name=None, do_logging=True, level=logging.DEBUG):
     """Start the logging facility if the caller whishes this.  Every module in
-    Gummi can then write to the logfile by saying::
+    Bobcat can then write to the logfile by saying::
 
         import logging
-        logger = logging.getLogger("gummi.module.submodule")
+        logger = logging.getLogger("bobcat.module.submodule")
         logger.error("Something went wrong")
 
     By the way, ``getLogger`` returns a singleton object, so everything really
@@ -315,7 +315,7 @@ class ParseError(Error):
     :type type: str
     :type position: `PositionMarker`
     """
-    logger = logging.getLogger("gummi.parser")
+    logger = logging.getLogger("bobcat.parser")
     parse_errors = []
     def __init__(self, provoking_element, description, type_="error", position_marker=None):
         """
@@ -352,7 +352,7 @@ def add_parse_error(parse_error):
         >>> import os.path
         >>> setup_logging()
         >>> testfile = open("test2.rsl", "w")
-        >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
+        >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n"
         ... "Dummy document.\n")
         >>> testfile.close()
         >>> text, __, __ = preprocessor.load_file("test2.rsl")
