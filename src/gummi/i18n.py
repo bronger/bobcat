@@ -119,7 +119,8 @@ other modules will use this with::
 # in "strict" mode.  I don't yet know, however, whether this is feasible with
 # the gettext architecture.
 
-import common, gettext, locale, copy, os.path, sys
+import gettext, locale, copy, os.path, sys
+from . import common
 
 locale.setlocale(locale.LC_ALL, '')
 if os.name == 'nt':

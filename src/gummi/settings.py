@@ -37,8 +37,8 @@ document.
 :type settings: SettingsDict
 """
 
-import ConfigParser, warnings, StringIO, preprocessor, logging, os, re
-import common
+import ConfigParser, warnings, StringIO, logging, os, re
+from . import common
 
 class SettingWarning(UserWarning):
     """Warning class for invalid or unknown programm settings.  See `SettingsDict`.
@@ -970,7 +970,6 @@ class SettingsDict(dict):
 
         Example:
         
-            >>> import preprocessor, parser
             >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
@@ -1128,6 +1127,9 @@ settings.set_default("quiet", False, docstring="""
     If ``True``, all output to stdout and stderr is supressed.""")
 
 if __name__ == "__main__":
+    import sys
+    root_path = os.path.split(common.modulepath)[0]
+    sys.path.append(root_path)
     import doctest
     doctest.testmod()
     doctest.testfile("../misc/settings.txt")

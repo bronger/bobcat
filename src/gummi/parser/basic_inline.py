@@ -27,7 +27,11 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-from common import *
+# FixMe: This import should be turned into "import *" once the fix for
+# http://article.gmane.org/gmane.comp.python.python-3000.devel/12267 has
+# arrived here.  (Probably not befor Python 3.0.)  Of course, the __all__
+# attribute must be properly set in common.py.
+from .common import (Node, guarded_search)
 import re
 
 class Text(Node):

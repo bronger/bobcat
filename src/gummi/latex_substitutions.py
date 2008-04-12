@@ -60,8 +60,8 @@ module for the LaTeX backend.
 """
 
 import re, os.path, codecs, string, sys
-import common
-from common import Error, FileError
+from . import common
+from .common import Error, FileError
 
 class Substitution(object):
     """Basic LaTeX Unicode substitution.  This is just a container for the

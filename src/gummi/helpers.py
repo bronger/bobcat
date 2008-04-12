@@ -31,7 +31,7 @@
 should be available in (almost) all parts of Gummi, use the common module
 instead."""
 
-from common import Error, modulepath
+from .common import Error, modulepath
 import sys, codecs, os, subprocess, StringIO, textwrap
 from gummi.parser import basic_inline
 

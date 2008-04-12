@@ -38,8 +38,8 @@ It achieves this by one fat unicode-like data type called `Excerpt`.
 """
 
 import re, os.path, codecs, string, warnings
-import common
-from common import FileError, EncodingError, PositionMarker
+from . import common
+from .common import FileError, EncodingError, PositionMarker
 
 class Excerpt(unicode):
     """Class for preprocessed Gummi source text. It behaves like a unicode string

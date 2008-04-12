@@ -27,8 +27,8 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-from common import *
-from .. import common
+from .common import Node
+from ..gummi import common
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels

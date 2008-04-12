@@ -47,7 +47,7 @@ module."""
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
-import gummi.safefilename as _safefilename
+from ..gummi import safefilename as _safefilename
 
 # FixMe: All imports in parentheses should be turned into "import *" once the
 # fix for http://article.gmane.org/gmane.comp.python.python-3000.devel/12267

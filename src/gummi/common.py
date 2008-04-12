@@ -348,9 +348,10 @@ def add_parse_error(parse_error):
     also writes it to the log file and to stderr, if this hasn't be changed by
     the user.
 
-        >>> import parser, preprocessor, settings
+        >>> from gummi import parser, preprocessor, settings
+        >>> from gummi.parser.common import common as real_common
         >>> import os.path
-        >>> os.chdir(os.path.join(modulepath, "../misc/"))
+        >>> os.chdir(os.path.join(modulepath, "../../misc/"))
         >>> setup_logging()
         >>> testfile = open("test2.rsl", "w")
         >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
@@ -362,7 +363,7 @@ def add_parse_error(parse_error):
         0
         >>> settings.settings["quiet"] = True
         >>> node.throw_parse_error("test error message")
-        >>> parser.common.ParseError.parse_errors
+        >>> real_common.ParseError.parse_errors
         [ParseError('test error message',)]
 
     :Parameters:
@@ -383,8 +384,12 @@ def add_parse_error(parse_error):
         ParseError.logger.warning(message)
 
 if __name__ == "__main__":
+    import sys, os.path
+    start_path = os.getcwd()
+    root_path = os.path.split(modulepath)[0]
+    sys.path.append(root_path)
     import doctest
     doctest.testmod()
-    doctest.testfile("../misc/common.txt")
-    os.remove("../misc/test2.rsl")
-    
+    os.chdir(start_path)
+    doctest.testfile("../../misc/common.txt")
+    os.remove(os.path.join(root_path, "../misc/test2.rsl"))
