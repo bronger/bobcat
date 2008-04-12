@@ -245,7 +245,7 @@ This can also be used to insert a text file.  ```image``` is an alias for
 ```insertion```.  By the way, these are shortened URLs, i.e., actually one must
 say ```file:image.png```, and you can insert web documents:
 
-insertion:: http://www.whatever.org/my_chapter4.rsl
+insertion:: http://www.whatever.org/my_chapter4.bcat
 
 You may add parameters:
 

@@ -351,12 +351,12 @@ def add_parse_error(parse_error):
         >>> from bobcatlib import parser, preprocessor, settings
         >>> import os.path
         >>> setup_logging()
-        >>> testfile = open("test2.rsl", "w")
+        >>> testfile = open("test2.bcat", "w")
         >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n"
         ... "Dummy document.\n")
         >>> testfile.close()
-        >>> text, __, __ = preprocessor.load_file("test2.rsl")
-        >>> os.remove("test2.rsl")
+        >>> text, __, __ = preprocessor.load_file("test2.bcat")
+        >>> os.remove("test2.bcat")
         >>> node = parser.Node(None)
         >>> node.parse(text, 0)
         0

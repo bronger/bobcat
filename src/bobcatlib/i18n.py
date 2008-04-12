@@ -334,7 +334,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
     """Test whether a string, or its translation into the current document
     language, matches a certain part of the input script.
 
-        >>> filename = "test2.rsl"
+        >>> filename = "test2.bcat"
         >>> open(filename, "w").write(\""".. -*- coding: utf-8 -*-
         ... .. Bobcat 1.0
         ...

@@ -1,7 +1,7 @@
 >>> from bobcatlib.helpers import *
->>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n\n#. Introduction\n===============\n\nThis is the _first_ paragraph.\n\n\n#. Motivation\n=============\n\nThis is the _second_ paragraph.\n\nAnd this is the third one.\n\n\n#.# Acknowledgements\n====================\n\nYet _another_ text block.\n\nAnd we go further and further.\n\n\n#.#.# A subsubheading\n=====================\n\n\"42\" said Deep Thought, with infinite majesty and calm.\n\nIt was a long time before anyone spoke.\n\n\n#. Last chapter\n===============\n\nThis is almost the last paragraph.\n\nAnd this is _definitely the last one_.\n")
+>>> open("test2.bcat", "w").write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n\n#. Introduction\n===============\n\nThis is the _first_ paragraph.\n\n\n#. Motivation\n=============\n\nThis is the _second_ paragraph.\n\nAnd this is the third one.\n\n\n#.# Acknowledgements\n====================\n\nYet _another_ text block.\n\nAnd we go further and further.\n\n\n#.#.# A subsubheading\n=====================\n\n\"42\" said Deep Thought, with infinite majesty and calm.\n\nIt was a long time before anyone spoke.\n\n\n#. Last chapter\n===============\n\nThis is almost the last paragraph.\n\nAnd this is _definitely the last one_.\n")
 >>> from bobcatlib import preprocessor, parser
->>> text, encoding, bobcat_version = preprocessor.load_file("test2.rsl")
+>>> text, encoding, bobcat_version = preprocessor.load_file("test2.bcat")
 >>> document = parser.Document()
 >>> __ = document.parse(text)
 >>> visualize_tree(document.tree_list(), "test2.plain")
@@ -129,5 +129,5 @@ edge Node41 Node45 7 20.958 4.944 21.181 4.778 21.472 4.556 21.722 4.333 21.778 
 edge Node43 Node44 4 20.917 3.528 20.917 3.319 20.917 3.000 20.917 2.736 solid black
 stop
 <BLANKLINE>
->>> os.remove("test2.rsl")
+>>> os.remove("test2.bcat")
 >>> os.remove("test2.plain")

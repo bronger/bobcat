@@ -29,7 +29,7 @@
 
 """Currently, this is the main program.  You can test it with::
 
-    python bobcat.py test1.rsl
+    python bobcat.py test1.bcat
 
 The result should be test1.tex."""
 
@@ -68,7 +68,7 @@ if options.version:
     sys.exit()
 
 if 'epydoc' in sys.modules:
-    filenames = ["../misc/test1.rsl"]
+    filenames = ["../misc/test1.bcat"]
 if len(filenames) != 1:
     print u"Please specify exactly one input file."
     sys.exit()

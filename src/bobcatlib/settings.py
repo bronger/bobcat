@@ -971,7 +971,8 @@ class SettingsDict(dict):
         Example:
 
             >>> from . import preprocessor, parser
-            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE",
+            ...                                "myfile.bcat", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
             >>> settings.set_default("c", None, "int")
@@ -984,9 +985,9 @@ class SettingsDict(dict):
             >>> type(settings["c"])
             <type 'int'>
             >>> for key in settings.iterkeys(): print key.original_position()
-            file "myfile.rsl", line 1, column 0
-            file "myfile.rsl", line 1, column 5
-            file "myfile.rsl", line 1, column 12
+            file "myfile.bcat", line 1, column 0
+            file "myfile.bcat", line 1, column 5
+            file "myfile.bcat", line 1, column 12
 
         """
         # In the current Bobcat source code, no warnings should happen here but
