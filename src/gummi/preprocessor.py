@@ -984,8 +984,3 @@ def load_file(filename):
                                         "Please specify explicitly.", filename)
     text = process_text(u"".join(lines), filename, input_method)
     return text, encoding, gummi_version
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testfile("../misc/preprocessor.txt")
-    os.remove("../misc/test2.rsl")

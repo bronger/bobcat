@@ -628,7 +628,7 @@ class SettingsDict(dict):
 
     As an example, consider the following configuration file:
 
-        >>> print open("../misc/test.conf").read()
+        >>> print open("test.conf").read()
         # -*- coding: utf-8 -*-
         # Paths are given in a form suitable for the respective operating system.  This
         # includes the pathname component separator ("/" on POSIX, "/" or "\\" on
@@ -650,8 +650,8 @@ class SettingsDict(dict):
         >>> settings = SettingsDict()
         >>> settings.set_default("General.quiet", True)
         >>> settings.set_predefined_variable("rootdir", "~/src/bobcat/")
-        >>> settings.load_from_files("../misc/test.conf")
-        ['../misc/test.conf']
+        >>> settings.load_from_files("test.conf")
+        ['test.conf']
         >>> for key in settings:
         ...     key, settings[key]
         ...
@@ -725,8 +725,8 @@ class SettingsDict(dict):
             >>> settings.set_default("General.quiet", True)
             >>> settings.close_section("General")
             >>> settings.set_predefined_variable("rootdir", "~/src/bobcat/")
-            >>> settings.load_from_files("../misc/test.conf")
-            ['../misc/test.conf']
+            >>> settings.load_from_files("test.conf")
+            ['test.conf']
             >>> settings.test_for_closed_section("Unknown.section.quiet", False)
             >>> settings.test_for_closed_section("General.quiet", False)
             ...                                    #doctest:+NORMALIZE_WHITESPACE
@@ -969,7 +969,8 @@ class SettingsDict(dict):
         :type key_terminators: unicode
 
         Example:
-        
+
+            >>> from . import preprocessor, parser
             >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
@@ -1125,11 +1126,3 @@ settings.set_default("backend", None, "unicode", docstring="""
     "html".""")
 settings.set_default("quiet", False, docstring="""
     If ``True``, all output to stdout and stderr is supressed.""")
-
-if __name__ == "__main__":
-    import sys
-    root_path = os.path.split(common.modulepath)[0]
-    sys.path.append(root_path)
-    import doctest
-    doctest.testmod()
-    doctest.testfile("../misc/settings.txt")

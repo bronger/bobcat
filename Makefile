@@ -1,4 +1,4 @@
-.PHONY: src-doc-sf src-doc doctests pylint src-doc-svn
+.PHONY: src-doc-sf src-doc tests pylint src-doc-svn
 
 src-doc-sf:
 	rsync --rsh=ssh -avuz homepage/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/gummi/
@@ -18,15 +18,8 @@ src-doc-svn:
 	svn commit -m "Updated web sources documentation." src-doc/*
 	rm -Rf src-doc
 
-doctests:
-	cd src/gummi; python common.py                    2> /dev/null
-	cd src/gummi; python settings.py		  2> /dev/null
-#	cd src/gummi; python parser.py		          2> /dev/null
-	cd src/gummi; python helpers.py                   2> /dev/null
-	cd src/gummi; python i18n.py			  2> /dev/null
-	cd src/gummi; python latex_substitutions.py	  2> /dev/null
-	cd src/gummi; python preprocessor.py		  2> /dev/null
-	cd src/gummi; python safefilename.py		  2> /dev/null
+tests:
+	python src/tests/test_doctests.py
 
 pylint:
 	cd src/gummi; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log

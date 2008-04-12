@@ -404,7 +404,3 @@ def process_text(text, language, mode, packages=None):
             # other characters doesn't work so easily, too.
             processed_text += get_TEXT_escaping(char)
     return processed_text
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

@@ -227,10 +227,3 @@ def import_local_module(name):
             # Since we may exit via an exception, close fp explicitly.
             if fp:
                 fp.close()
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    doctest.testfile("../misc/helpers.txt")
-    os.remove("../misc/test2.rsl")
-    os.remove("../misc/test2.plain")

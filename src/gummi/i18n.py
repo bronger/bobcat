@@ -38,7 +38,7 @@ this: It must generate translations into *arbitrary* languages, for example for
 a German text processed on a French computer.  This is realised in this module,
 for example:
 
-    >>> gettext._default_localedir = os.path.join(common.modulepath, "../misc/locale")
+    >>> gettext._default_localedir = "locale"
     >>> # The above line is not necessary in the final program of course.
     >>> translate(u"January", "de")
     u'Januar'
@@ -334,7 +334,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
     """Test whether a string, or its translation into the current document
     language, matches a certain part of the input script.
 
-        >>> filename = os.path.join(common.modulepath, "../misc/test2.rsl")
+        >>> filename = "test2.rsl"
         >>> open(filename, "w").write(\""".. -*- coding: utf-8 -*-
         ... .. Gummi 1.0
         ...
@@ -343,6 +343,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
         ... \""")
         >>> import preprocessor
         >>> text, __, __ = preprocessor.load_file(filename)
+        >>> os.remove(filename)
         >>> match_language_dependently(u"January", text, 3, "de")
         True
         >>> match_language_dependently(u"January", text, 10, "de", unescaped_only=False)
@@ -375,8 +376,3 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
         text = unicode(excerpt)
     return text.startswith(match_string, pos) or \
         text.startswith(translate(match_string, language, strict=True), pos)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    os.remove("../misc/test2.rsl")
