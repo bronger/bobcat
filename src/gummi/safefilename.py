@@ -217,8 +217,3 @@ def registry(encoding):
         return None
 
 codecs.register(registry)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    doctest.testfile("../misc/safefilename.txt")

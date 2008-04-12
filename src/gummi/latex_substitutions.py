@@ -60,8 +60,8 @@ module for the LaTeX backend.
 """
 
 import re, os.path, codecs, string, sys
-import common
-from common import Error, FileError
+from . import common
+from .common import Error, FileError
 
 class Substitution(object):
     """Basic LaTeX Unicode substitution.  This is just a container for the
@@ -112,7 +112,7 @@ class Substitution(object):
 
 # FixMe: The following path variable will eventually be set by some sort of
 # configuration.
-latex_substitutions_path = common.modulepath
+latex_substitutions_path = os.path.join(common.modulepath, "data")
 
 def read_latex_substitutions(language_code):
     """Read the LaTeX substitutions from a gls file for one language and return
@@ -404,7 +404,3 @@ def process_text(text, language, mode, packages=None):
             # other characters doesn't work so easily, too.
             processed_text += get_TEXT_escaping(char)
     return processed_text
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

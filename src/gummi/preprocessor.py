@@ -38,8 +38,8 @@ It achieves this by one fat unicode-like data type called `Excerpt`.
 """
 
 import re, os.path, codecs, string, warnings
-import common
-from common import FileError, EncodingError, PositionMarker
+from . import common
+from .common import FileError, EncodingError, PositionMarker
 
 class Excerpt(unicode):
     """Class for preprocessed Gummi source text. It behaves like a unicode string
@@ -767,7 +767,7 @@ class Excerpt(unicode):
 
 # FixMe: The following path variable will eventually be set by some sort of
 # configuration.
-input_methods_path = common.modulepath
+input_methods_path = os.path.join(common.modulepath, "data")
 
 def read_input_method(input_method_name):
     """Return the substitution dictionary for one input method.
@@ -984,8 +984,3 @@ def load_file(filename):
                                         "Please specify explicitly.", filename)
     text = process_text(u"".join(lines), filename, input_method)
     return text, encoding, gummi_version
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testfile("../misc/preprocessor.txt")
-    os.remove("../misc/test2.rsl")

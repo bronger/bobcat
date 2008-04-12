@@ -1,4 +1,4 @@
->>> from common import *
+>>> from gummi.common import parse_local_variables
 >>> #
 >>> #  First, let's test "parse_local_variables"
 >>> #
