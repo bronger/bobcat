@@ -39,9 +39,7 @@ most notably the Exception classes and logging.
 
 import re, sys, os.path, logging
 
-modulepath = os.path.abspath(os.path.dirname(sys.argv[0]))
-if 'epydoc' in sys.modules:
-    modulepath = os.path.abspath("src/")
+modulepath = os.path.abspath(os.path.dirname(__file__))
 
 class PositionMarker(object):
     """A mere container for a position in a original document, which is a
@@ -350,21 +348,21 @@ def add_parse_error(parse_error):
     also writes it to the log file and to stderr, if this hasn't be changed by
     the user.
 
-        >>> import parser, preprocessor, settings
+        >>> from gummi import parser, preprocessor, settings
         >>> import os.path
-        >>> os.chdir(os.path.join(modulepath, "../misc/"))
         >>> setup_logging()
         >>> testfile = open("test2.rsl", "w")
         >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\n"
         ... "Dummy document.\n")
         >>> testfile.close()
         >>> text, __, __ = preprocessor.load_file("test2.rsl")
+        >>> os.remove("test2.rsl")
         >>> node = parser.Node(None)
         >>> node.parse(text, 0)
         0
         >>> settings.settings["quiet"] = True
         >>> node.throw_parse_error("test error message")
-        >>> parser.common.ParseError.parse_errors
+        >>> ParseError.parse_errors
         [ParseError('test error message',)]
 
     :Parameters:
@@ -383,10 +381,3 @@ def add_parse_error(parse_error):
             print>>sys.stderr, message
     else:
         ParseError.logger.warning(message)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    doctest.testfile("../misc/common.txt")
-    os.remove("../misc/test2.rsl")
-    

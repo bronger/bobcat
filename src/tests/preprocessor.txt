@@ -1,7 +1,6 @@
->>> from preprocessor import load_file, Excerpt
->>> from common import modulepath
+>>> from gummi.preprocessor import load_file, Excerpt
+>>> from gummi.common import modulepath
 >>> import os.path
->>> os.chdir(os.path.join(modulepath, "../misc/"))
 >>> open("test2.rsl", "w").write('.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n')
 >>> text, encoding, gummi_version = load_file("test2.rsl")
 >>> text, encoding, gummi_version
@@ -96,6 +95,7 @@ PositionMarker("test2.rsl", 3, 3, 0)
 u'\n\n\n\nThis is a code snippet: ```\x00\x00\x00\x00\x00\x00\x00```.  And this is one in a paragraph of its\nown:\n\n```\x00\x00\x00\x00\x00\x00\x00\x00\x00```\n\nAnd here the file ends.\n'
 >>> len(text.escaped_text()) == len(text)
 True
+>>> os.remove("test2.rsl")
 >>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n..\n\nThis is a code snippet with open ending: ```GOTO 10\n')
 >>> text, encoding, gummi_version = load_file("test2.rsl")
 >>> len(text) == text.code_snippets_intervals[0][1]
@@ -110,3 +110,4 @@ u'a b c d ef g'
 u''
 >>> empty_excerpt.original_position(0)
 PositionMarker("myfile.rsl", 1, 0, 0)
+>>> os.remove("test2.rsl")
