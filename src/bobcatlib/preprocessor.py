@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,7 +27,7 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 
-"""The preprocessor of Gummi source files.
+"""The preprocessor of Bobcat source files.
 
 Its main purpose is twofold: First, it converts characters sequences to single
 Unicode characters.  And secondly, it keeps track of the origins of the
@@ -42,12 +42,12 @@ from . import common
 from .common import FileError, EncodingError, PositionMarker
 
 class Excerpt(unicode):
-    """Class for preprocessed Gummi source text. It behaves like a unicode string
+    """Class for preprocessed Bobcat source text. It behaves like a unicode string
     with extra methods and attributes.
 
     The typical lifecycle of such an object is as follows:
 
-    1. The Gummi source text is read from the file (or whereever) and stored as
+    1. The Bobcat source text is read from the file (or whereever) and stored as
        one big unicode string.
 
     2. This unicode string is used to create an Excerpt instance from it.  In
@@ -108,7 +108,7 @@ class Excerpt(unicode):
         starts at `offset`.
 
         :Parameters:
-          - `original_text`: the original line in the Gummi input file
+          - `original_text`: the original line in the Bobcat input file
           - `substitutions`: the substitution dictionary to be used
           - `offset`: starting position for the search in original_text
 
@@ -317,7 +317,7 @@ class Excerpt(unicode):
         input method.
 
         :Parameters:
-          - `original_text`: the original text from a Gummi source file
+          - `original_text`: the original text from a Bobcat source file
           - `url`: URL of the original ressource file
           - `pre_substitutions`: substitution list of the pre input method
 
@@ -792,13 +792,13 @@ def read_input_method(input_method_name):
         return [], []
     pre_substitutions = []
     post_substitutions = []
-    filename = os.path.join(input_methods_path, input_method_name+".gim")
+    filename = os.path.join(input_methods_path, input_method_name+".bim")
     local_variables = common.parse_local_variables(open(filename).readline(), force=True)
     if local_variables.get("input-method-name") != input_method_name:
         raise FileError("input method name in first line doesn't match file name", filename)
     input_method_file = codecs.open(filename, encoding=local_variables.get("coding", "utf8"))
     input_method_file.readline()
-    if not re.match(r"\.\. Gummi input method\Z", input_method_file.readline().rstrip()):
+    if not re.match(r"\.\. Bobcat input method\Z", input_method_file.readline().rstrip()):
         raise FileError("second line is invalid", filename)
     if "parental-input-method" in local_variables:
         for input_method in local_variables["parental-input-method"].split(","):
@@ -838,13 +838,13 @@ def read_input_method(input_method_name):
     return pre_substitutions, post_substitutions
 
 def process_text(text, filepath, input_method):
-    """Take the raw contents of the Gummi file and turn it into "digested"
+    """Take the raw contents of the Bobcat file and turn it into "digested"
     contents with applied input method and marking of escaped characters.
 
     :Parameters:
       - `text`: raw contents of the input file.  Only the encoding was
         applied.
-      - `filepath`: path to the Gummi input file.  This is only used for the
+      - `filepath`: path to the Bobcat input file.  This is only used for the
         error messages.
       - `input_method`: name of the input method to be applied.  If more than
         one, a list of names of input methods.
@@ -887,51 +887,51 @@ def process_text(text, filepath, input_method):
     # Now, apply it to the contents
     return Excerpt(text, "PRE", filepath, pre_substitutions, post_substitutions)
 
-def detect_header_data(gummi_file):
-    """Detect the local variables of the given text file and the Gummi format
+def detect_header_data(bobcat_file):
+    """Detect the local variables of the given text file and the Bobcat format
     version according to its first two lines.  This is very similar to the
     method used for Python source files.  There is no default encoding, the
     default input method is "minimal".
 
     :Parameters:
-      - `gummi_file`: source file, with the file pointer set to the start
+      - `bobcat_file`: source file, with the file pointer set to the start
 
-    :type gummi_file: string
+    :type bobcat_file: string
 
     :Return:
       - encoding of the file.  If none was found, it returns None.
       - input method of the file.  It defaults to "minimal".  If more than one
         input method was given, a list of strings is returned.
-      - Gummi version; defaults to "1.0"
+      - Bobcat version; defaults to "1.0"
 
     :rtype: string, string, string
     """
-    first_line = gummi_file.readline()
+    first_line = bobcat_file.readline()
     local_variables = common.parse_local_variables(first_line)
     if local_variables != None:
         coding = local_variables.get("coding")
         input_method = local_variables.get("input-method", "minimal")
-        second_line = gummi_file.readline()
+        second_line = bobcat_file.readline()
     else:
         coding, input_method = None, "minimal"
         second_line = first_line
-    if re.match(r"\.\. \s*Gummi", second_line):
-        gummi_version_match = re.match(r"\.\. \s*Gummi\s+([0-9]+\.[0-9]+)\s*\Z", second_line)
-        if gummi_version_match:
-            gummi_version = gummi_version_match.group(1)
+    if re.match(r"\.\. \s*Bobcat", second_line):
+        bobcat_version_match = re.match(r"\.\. \s*Bobcat\s+([0-9]+\.[0-9]+)\s*\Z", second_line)
+        if bobcat_version_match:
+            bobcat_version = bobcat_version_match.group(1)
         else:
-            raise FileError("Gummi version line was invalid", gummi_file.name)
+            raise FileError("Bobcat version line was invalid", bobcat_file.name)
     else:
-        warnings.warn("No Gummi version was specified.  I assume 1.0.")
-        gummi_version = "1.0"
-    return coding, input_method, gummi_version
+        warnings.warn("No Bobcat version was specified.  I assume 1.0.")
+        bobcat_version = "1.0"
+    return coding, input_method, bobcat_version
 
 def load_file(filename):
-    """Load the Gummi file "filename" and return an `Excerpt` instance containing
+    """Load the Bobcat file "filename" and return an `Excerpt` instance containing
     that file.
 
     :Parameters:
-      - `filename`: Gummi filename
+      - `filename`: Bobcat filename
 
     :type filename: string
 
@@ -939,11 +939,11 @@ def load_file(filename):
       - `Excerpt` with the contents of the file
       - auto-detected encoding of the file.  None if the encoding was given
         explicitly in the file.
-      - Gummi version of the file as a string
+      - Bobcat version of the file as a string
 
     :rtype: Excerpt, string, string
     """
-    encoding, input_method, gummi_version = detect_header_data(open(filename))
+    encoding, input_method, bobcat_version = detect_header_data(open(filename))
     # First, auto-detect encoding
     if encoding:
         try:
@@ -978,9 +978,9 @@ def load_file(filename):
                 # Test for cp1252
                 try:
                     return codecs.open(filename, encoding="cp1252").readlines(), "cp1252", \
-                        gummi_version
+                        bobcat_version
                 except UnicodeDecodeError:
                     raise EncodingError("Couldn't auto-detect file encoding.  "
                                         "Please specify explicitly.", filename)
     text = process_text(u"".join(lines), filename, input_method)
-    return text, encoding, gummi_version
+    return text, encoding, bobcat_version

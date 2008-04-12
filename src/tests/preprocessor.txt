@@ -1,14 +1,14 @@
->>> from gummi.preprocessor import load_file, Excerpt
->>> from gummi.common import modulepath
+>>> from bobcatlib.preprocessor import load_file, Excerpt
+>>> from bobcatlib.common import modulepath
 >>> import os.path
->>> open("test2.rsl", "w").write('.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n')
->>> text, encoding, gummi_version = load_file("test2.rsl")
->>> text, encoding, gummi_version
+>>> open("test2.rsl", "w").write('.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n')
+>>> text, encoding, bobcat_version = load_file("test2.rsl")
+>>> text, encoding, bobcat_version
 (u'\n\n\n\n\u03b2\nkfdsjh[K2005]\\56;fdkj\n \u03b1--\u03b1\n\u03b8var\n\u03b8\n', None, '1.0')
 >>> text.original_text
-u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
+u'.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
 >>> text.original_positions
-{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 12, 37), 2: PositionMarker("test2.rsl", 3, 4, 42), 3: PositionMarker("test2.rsl", 4, 0, 43), 4: PositionMarker("test2.rsl", 5, 0, 44), 5: PositionMarker("test2.rsl", 5, 6, 50), 6: PositionMarker("test2.rsl", 6, 0, 51), 9: PositionMarker("test2.rsl", 6, 8, 59), 13: PositionMarker("test2.rsl", 6, 13, 64), 19: PositionMarker("test2.rsl", 6, 20, 71), 20: PositionMarker("test2.rsl", 6, 22, 73), 25: PositionMarker("test2.rsl", 6, 33, 84), 28: PositionMarker("test2.rsl", 7, 0, 87), 29: PositionMarker("test2.rsl", 7, 3, 90), 30: PositionMarker("test2.rsl", 7, 9, 96), 32: PositionMarker("test2.rsl", 7, 13, 100), 33: PositionMarker("test2.rsl", 7, 19, 106), 34: PositionMarker("test2.rsl", 8, 0, 107), 35: PositionMarker("test2.rsl", 8, 6, 113), 39: PositionMarker("test2.rsl", 9, 0, 117), 40: PositionMarker("test2.rsl", 9, 6, 123), 41: PositionMarker("test2.rsl", 10, 0, 124)}
+{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 13, 38), 2: PositionMarker("test2.rsl", 3, 4, 43), 3: PositionMarker("test2.rsl", 4, 0, 44), 4: PositionMarker("test2.rsl", 5, 0, 45), 5: PositionMarker("test2.rsl", 5, 6, 51), 6: PositionMarker("test2.rsl", 6, 0, 52), 9: PositionMarker("test2.rsl", 6, 8, 60), 13: PositionMarker("test2.rsl", 6, 13, 65), 19: PositionMarker("test2.rsl", 6, 20, 72), 20: PositionMarker("test2.rsl", 6, 22, 74), 25: PositionMarker("test2.rsl", 6, 33, 85), 28: PositionMarker("test2.rsl", 7, 0, 88), 29: PositionMarker("test2.rsl", 7, 3, 91), 30: PositionMarker("test2.rsl", 7, 9, 97), 32: PositionMarker("test2.rsl", 7, 13, 101), 33: PositionMarker("test2.rsl", 7, 19, 107), 34: PositionMarker("test2.rsl", 8, 0, 108), 35: PositionMarker("test2.rsl", 8, 6, 114), 39: PositionMarker("test2.rsl", 9, 0, 118), 40: PositionMarker("test2.rsl", 9, 6, 124), 41: PositionMarker("test2.rsl", 10, 0, 125)}
 >>> text.escaped_positions
 set([32, 6, 12, 18, 25, 29])
 >>> text[-100:-10]
@@ -17,9 +17,9 @@ u'\n\n\n\n\u03b2\nkfdsjh[K2005]\\56;fdkj\n \u03b1-'
 u''
 >>> text = text.apply_postprocessing()
 >>> text.original_text
-u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
+u'.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n.. \\\n\n\\beta\\\nkf\\0x64;sjh[[K2005]]\\\\56;fd\\ \\ \\ kj\n \\ \\alpha--\\ \\alpha\n\\thetavar\n\\theta\n'
 >>> text.original_positions
-{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 12, 37), 2: PositionMarker("test2.rsl", 3, 4, 42), 3: PositionMarker("test2.rsl", 4, 0, 43), 4: PositionMarker("test2.rsl", 5, 0, 44), 5: PositionMarker("test2.rsl", 5, 6, 50), 6: PositionMarker("test2.rsl", 6, 0, 51), 32: PositionMarker("test2.rsl", 7, 19, 106), 9: PositionMarker("test2.rsl", 6, 8, 59), 39: PositionMarker("test2.rsl", 9, 6, 123), 13: PositionMarker("test2.rsl", 6, 13, 64), 34: PositionMarker("test2.rsl", 8, 6, 113), 19: PositionMarker("test2.rsl", 6, 20, 71), 20: PositionMarker("test2.rsl", 6, 22, 73), 25: PositionMarker("test2.rsl", 6, 33, 84), 33: PositionMarker("test2.rsl", 8, 0, 107), 38: PositionMarker("test2.rsl", 9, 0, 117), 28: PositionMarker("test2.rsl", 7, 0, 87), 29: PositionMarker("test2.rsl", 7, 3, 90), 30: PositionMarker("test2.rsl", 7, 9, 96), 31: PositionMarker("test2.rsl", 7, 13, 100)}
+{0: PositionMarker("test2.rsl", 1, 24, 24), 1: PositionMarker("test2.rsl", 2, 13, 38), 2: PositionMarker("test2.rsl", 3, 4, 43), 3: PositionMarker("test2.rsl", 4, 0, 44), 4: PositionMarker("test2.rsl", 5, 0, 45), 5: PositionMarker("test2.rsl", 5, 6, 51), 6: PositionMarker("test2.rsl", 6, 0, 52), 32: PositionMarker("test2.rsl", 7, 19, 107), 9: PositionMarker("test2.rsl", 6, 8, 60), 39: PositionMarker("test2.rsl", 9, 6, 124), 13: PositionMarker("test2.rsl", 6, 13, 65), 34: PositionMarker("test2.rsl", 8, 6, 114), 19: PositionMarker("test2.rsl", 6, 20, 72), 20: PositionMarker("test2.rsl", 6, 22, 74), 25: PositionMarker("test2.rsl", 6, 33, 85), 33: PositionMarker("test2.rsl", 8, 0, 108), 38: PositionMarker("test2.rsl", 9, 0, 118), 28: PositionMarker("test2.rsl", 7, 0, 88), 29: PositionMarker("test2.rsl", 7, 3, 91), 30: PositionMarker("test2.rsl", 7, 9, 97), 31: PositionMarker("test2.rsl", 7, 13, 101)}
 >>> text.escaped_positions
 set([6, 12, 18, 25, 29, 31])
 >>> text = text[4:21]
@@ -65,8 +65,8 @@ IndexError: string index out of range
 >>> #
 >>> #  Now, test the split() method
 >>> #
->>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Gummi 1.0\na, b, c,")
->>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> open("test2.rsl", "w").write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\na, b, c,")
+>>> text, encoding, bobcat_version = load_file("test2.rsl")
 >>> text = text[2:]
 >>> parts = text.split(",")
 >>> parts
@@ -82,8 +82,8 @@ PositionMarker("test2.rsl", 3, 3, 0)
 >>> #
 >>> #  Now, test Excerpt.code_snippets_intervals
 >>> #
->>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n..\n\nThis is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```\n\nAnd here the file ends.\n')
->>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n..\n\nThis is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```\n\nAnd here the file ends.\n')
+>>> text, encoding, bobcat_version = load_file("test2.rsl")
 >>> text, text.code_snippets_intervals
 (u'\n\n\n\nThis is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```\n\nAnd here the file ends.\n', [(31, 38), (91, 100)])
 >>> part1 = text[:34]; part2 = text[34:]
@@ -96,8 +96,8 @@ u'\n\n\n\nThis is a code snippet: ```\x00\x00\x00\x00\x00\x00\x00```.  And this 
 >>> len(text.escaped_text()) == len(text)
 True
 >>> os.remove("test2.rsl")
->>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Gummi 1.0\n..\n\nThis is a code snippet with open ending: ```GOTO 10\n')
->>> text, encoding, gummi_version = load_file("test2.rsl")
+>>> open("test2.rsl", "w").write(u'.. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n..\n\nThis is a code snippet with open ending: ```GOTO 10\n')
+>>> text, encoding, bobcat_version = load_file("test2.rsl")
 >>> len(text) == text.code_snippets_intervals[0][1]
 True
 >>> #

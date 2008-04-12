@@ -1,7 +1,7 @@
 .PHONY: src-doc-sf src-doc tests pylint src-doc-svn
 
 src-doc-sf:
-	rsync --rsh=ssh -avuz homepage/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/gummi/
+	rsync --rsh=ssh -avuz homepage/epydoc/ shell.sourceforge.net:/home/groups/l/la/latex-bronger/htdocs/bobcat/
 
 src-doc:
 	cd src ; epydoc --config=../misc/epydoc.cfg
@@ -22,4 +22,4 @@ tests:
 	python src/tests/test_doctests.py
 
 pylint:
-	cd src/gummi; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log
+	cd src/bobcatlib; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log

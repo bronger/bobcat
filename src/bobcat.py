@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,8 +34,8 @@
 The result should be test1.tex."""
 
 import sys
-from gummi import common, settings, i18n
-from gummi.common import FileError
+from bobcatlib import common, settings, i18n
+from bobcatlib.common import FileError
 _ = i18n.ugettext
 
 import optparse
@@ -57,14 +57,14 @@ option_parser.add_option("-b", "--backend", type="string",
                          default="latex", metavar=_(u"NAME"))
 option_parser.add_option("-l", "--logfile", type="string",
                          dest="logfile",
-                         help=_(u"Name of the log file.  Default: gummi.log"),
-                         default="gummi.log", metavar=_(u"NAME"))
+                         help=_(u"Name of the log file.  Default: bobcat.log"),
+                         default="bobcat.log", metavar=_(u"NAME"))
 option_parser.add_option("--nolog", action="store_false", dest="logging",
                          help=_(u"Switch off logging."), default=True)
 options, filenames = option_parser.parse_args()
 
 if options.version:
-    print u"Gummi 1.0.  Copyright © 2007 Torsten Bronger, bronger@physik.rwth-aachen.de"
+    print u"Bobcat 1.0.  Copyright © 2007 Torsten Bronger, bronger@physik.rwth-aachen.de"
     sys.exit()
 
 if 'epydoc' in sys.modules:
@@ -81,11 +81,11 @@ settings.settings["backend"] = options.backend
 common.setup_logging(options.logfile, options.logging)
 
 
-from gummi import preprocessor, helpers, parser
+from bobcatlib import preprocessor, helpers, parser
 
-text, encoding, gummi_version = preprocessor.load_file(settings.settings["input filename"])
-if gummi_version != "1.0":
-    raise FileError("Gummi version must be 1.0", settings.settings["input filename"])
+text, encoding, bobcat_version = preprocessor.load_file(settings.settings["input filename"])
+if bobcat_version != "1.0":
+    raise FileError("Bobcat version must be 1.0", settings.settings["input filename"])
 
 document = parser.Document()
 document.parse(text)
@@ -94,5 +94,5 @@ document.parse(text)
 document.generate_output()
 
 if 'epydoc' in sys.modules:
-    import gummi.latex_substitutions
-    gummi.latex_substitutions.Substitution.packages = set()
+    import bobcatlib.latex_substitutions
+    bobcatlib.latex_substitutions.Substitution.packages = set()

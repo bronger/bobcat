@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,7 @@
 #
 
 from .common import Node
-from ..gummi import common
+from ..bobcatlib import common
 
 class Label(object):
     """Labels that are given to elements of a document.  A sequence of labels
@@ -267,7 +267,7 @@ class CrossReferencesManager(ReferencesManager):
             characters = list(unicode(part))
             # FixMe: The current implementation treats all occurances of \u0000
             # as ellipses, too.  This means that there must not be any NULL
-            # character in Gummi input source files.
+            # character in Bobcat input source files.
             for position in (i.start() for i in re.finditer(u"…", part.escaped_text())):
                 characters[position] = u"\u0000"
             part = u"".join(characters)

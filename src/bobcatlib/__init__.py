@@ -26,32 +26,3 @@
 #    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #    DEALINGS IN THE SOFTWARE.
 #
-
-import unittest
-import doctest
-
-import sys, os.path
-testmodule_path = os.path.dirname(os.path.abspath(__file__))
-rootpath = os.path.split(testmodule_path)[0]
-sys.path.append(rootpath)
-
-suite = unittest.TestSuite()
-
-suite.addTest(doctest.DocTestSuite("bobcatlib.preprocessor"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.common"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.settings"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.safefilename"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.i18n"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.helpers"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.emitter"))
-suite.addTest(doctest.DocTestSuite("bobcatlib.latex_substitutions"))
-
-suite.addTest(doctest.DocFileSuite("common.txt"))
-suite.addTest(doctest.DocFileSuite("helpers.txt"))
-suite.addTest(doctest.DocFileSuite("safefilename.txt"))
-suite.addTest(doctest.DocFileSuite("settings.txt"))
-suite.addTest(doctest.DocFileSuite("preprocessor.txt"))
-
-runner = unittest.TextTestRunner()
-os.chdir(testmodule_path)
-runner.run(suite)

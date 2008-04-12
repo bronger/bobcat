@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -40,15 +40,15 @@ class Emitter(object):
 
     Additionally, some output types may generate a whole bunch of files
     (e.g. HTML, and even more so if you want to have each chapter in its own
-    file).  Then, generatin the output is more than just concetanating
+    file).  Then, generating the output is more than just concatenating
     `self.output`.
 
-    The emitter is instantiatied in the backend module.  The parser module
+    The emitter is instantiated in the backend module.  The parser module
     copies this into the `parser.Document` object and passes the settings
     to it through `set_settings`.  Then, the actual processing is done on the
     AST, during which the `__call__` method is invoked very often with the
     generated output text (in the correct order).  Finally, the
-    `gummi.parser.sectioning.Document` object in parser.py calls
+    `bobcatlib.parser.sectioning.Document` object in parser.py calls
     `do_final_processing`.  This method must be overridden in the derived class
     in the backend!  It can write self.output to a file for example or more.
 
@@ -60,7 +60,7 @@ class Emitter(object):
     :type settings: dict
     """
     def __init__(self):
-        """Class contructor."""
+        """Class constructor."""
         self.output = u""
         self.settings = None
     def set_settings(self, settings):

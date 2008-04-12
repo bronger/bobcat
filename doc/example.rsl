@@ -1,5 +1,5 @@
 .. -*- coding: utf-8; mode: text; mode: auto-fill -*-
-.. Gummi 1.0
+.. Bobcat 1.0
 
 
 .. Every line starting with ".. " is ignored
@@ -11,7 +11,7 @@
 .. tables and index entries will be used by only a few authors.  The LaTeX
 .. preamble isn't there at all, even for large documents.  And finally, all
 .. characters can be entered as Unicode characters no matter in which “mode”.
-.. Thus, typical Gummi source documents should have a quite lucid look.
+.. Thus, typical Bobcat source documents should have a quite lucid look.
 
 
 0. Structuring and cross referencing
@@ -29,7 +29,7 @@ hyperlink, too.  Internally, only the first 80 characters of whatever are
 stored as a label.  This may lead to ambiguities but only in quite pathological
 cases.
 
-The heading number can be chosen freely.  The Gummi compiler or editor can
+The heading number can be chosen freely.  The Bobcat compiler or editor can
 adjust them to the print output if the author desires this.  This “writeback”
 includes input method substitutions (see below) and the very first line in
 which the encoding must be declared.  If this very first line is missing, this
@@ -118,7 +118,7 @@ year:       2006
 .. brackets.
 
 .. As a second possibility, there is the short form which cannot be combined
-.. with the long form.  It uses “//” instead of line breaks.  If Gummi detects
+.. with the long form.  It uses “//” instead of line breaks.  If Bobcat detects
 .. only one unescaped “//”, it assumes the short form:
 
 [Meier 2004]
@@ -176,7 +176,7 @@ one start with “+” (should be rare):
 3. Escaping
 ===========
 
-Gummi uses the backslash for escaping.  Escaping occurs on two levels, the
+Bobcat uses the backslash for escaping.  Escaping occurs on two levels, the
 input method and the parser.  On the input method level, it prevents “-->” from
 becoming “\→”.  On the parser level, it prevents “\→” from being interpreted as
 a syntactical element.  In the rare case that you want to use the input method
@@ -234,7 +234,7 @@ Figure `LabelForAll`:: This caption will be printed below the whole figure.  By
 default, two subfigures will be set next to each other.  You can override it
 with ```columns: 3``` or ```columns: 2:3:2``` (for the respective rows; the
 last number is used for all subsequent lines, too), as in this example.  The
-widths of the images are – as usual in Gummi – maximal.
+widths of the images are – as usual in Bobcat – maximal.
 ///////////////////////////////////////////////////////////////////////////////
 
 A graphics is included like this:
@@ -251,7 +251,7 @@ You may add parameters:
 
 insertion:: image.png, scaling: 25%, full width
 
-The parameter names are – as usual in Gummi – either in English or the current
+The parameter names are – as usual in Bobcat – either in English or the current
 document language, and they are case-sensitive.  For separating the key and the
 value, you can use a colon or an equal sign.
 
@@ -585,7 +585,7 @@ environment:
 ```
 abstract::
 
-This document is an example file for Gummi.
+This document is an example file for Bobcat.
 
 ::end abstract
 ```

@@ -1,5 +1,5 @@
 .. -*- mode: text; input-method-name: minimal -*-
-.. Gummi input method
+.. Bobcat input method
 .. ..............................................
 
 REGEX::^--(?= )				–

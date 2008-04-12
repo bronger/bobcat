@@ -1,10 +1,10 @@
 .. -*- mode: text; language-code: en -*-
-.. Gummi LaTeX substitutions
+.. Bobcat LaTeX substitutions
 
-.. Languages are given according to RFC 4646.  The name of the gls file must be
+.. Languages are given according to RFC 4646.  The name of the bls file must be
 .. only the first tag of a language code, e.g. “en”, “de” etc.  So mostly, it
 .. is a two-letter name.  This name must be doubled in the local variables line
-.. (the very first line of the file).  The second line must be ".. Gummi LaTeX
+.. (the very first line of the file).  The second line must be ".. Bobcat LaTeX
 .. substitutions".
 .. 
 .. In so-called “mode lines”, you give at least one mode, followed by zero or

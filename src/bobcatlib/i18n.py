@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2007, 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -33,7 +33,7 @@ Part I: Translations of text snippets into various languages
 ============================================================
 
 While is is quite easily possible to translate textual output of the program
-into the language of the computer Gummi is running on, Gummi needs more than
+into the language of the computer Bobcat is running on, Bobcat needs more than
 this: It must generate translations into *arbitrary* languages, for example for
 a German text processed on a French computer.  This is realised in this module,
 for example:
@@ -48,7 +48,7 @@ for example:
 By the way, optionally this module doesn't translate strings if the *exact*
 language is not available as an ``.mo`` file.  The rationale behind this is
 that if sometime in the future, translations for this sub-language are added to
-Gummi, old documents that rely on the fallback may easily break.  In other
+Bobcat, old documents that rely on the fallback may easily break.  In other
 words, this strategy assumes that it is much more probably to have no
 translations at all for a sub-language than to have incomplete ones:
 
@@ -73,7 +73,7 @@ language:
     >>> translate(u"January", "de-ch", strict=True)
     u'Januar'
 
-:var translations: translation container for the root domain of Gummi for
+:var translations: translation container for the root domain of Bobcat for
   unstrict translations (see `Translations.__init__`).  A typical use of it
   is::
 
@@ -135,9 +135,9 @@ preferred_encoding = locale.getpreferredencoding()
 locale.setlocale(locale.LC_ALL, 'C')
 
 if os.name == 'nt':
-    ugettext = gettext.translation('gummi', common.modulepath + "/po", fallback=True).ugettext
+    ugettext = gettext.translation('bobcat', common.modulepath + "/po", fallback=True).ugettext
 else:
-    ugettext = gettext.translation('gummi', fallback=True).ugettext
+    ugettext = gettext.translation('bobcat', fallback=True).ugettext
 if 'epydoc' in sys.modules:
     ugettext = lambda s: s
 
@@ -251,12 +251,12 @@ class Translations(object):
     def __init__(self, subdomain=None, strict=False):
         """
         :Parameters:
-          - `subdomain`: the domain of all Gummi translations must start with
-            "gummi".  However, third-party backends will want to have their own
-            translation (``.mo``) files.  Therefore, they can define their own
-            subdomain.  For example, the subdomain "mybackend" yields the
-            domain name "gummi_mybackend".  If `None`, the resulting domain is
-            the main domain "gummi".
+          - `subdomain`: the domain of all Bobcat translations must start with
+            "bobcat".  However, third-party backends will want to have their
+            own translation (``.mo``) files.  Therefore, they can define their
+            own subdomain.  For example, the subdomain "mybackend" yields the
+            domain name "bobcat_mybackend".  If `None`, the resulting domain is
+            the main domain "bobcat".
           - `strict`: Only important if the target language is a sub-language,
             for example ``de-at``, while only for ``de`` the ``.mo`` file is
             available but not for ``de-at``.  In this case, ``strict=True``
@@ -269,9 +269,9 @@ class Translations(object):
         :type strict: bool
         """
         if not subdomain:
-            self.domain = "gummi"
+            self.domain = "bobcat"
         else:
-            self.domain = "gummi_" + subdomain
+            self.domain = "bobcat_" + subdomain
         self.all_gettext_translations = {}
         self.strict = strict
     def translate(self, text, language):
@@ -304,7 +304,7 @@ class Translations(object):
 translations = Translations()
 translations_strict = Translations(strict=True)
 def translate(text, language, strict=False):
-    """Translate ``text`` to ``language``, using the translations in Gummi's
+    """Translate ``text`` to ``language``, using the translations in Bobcat's
     root gettext domain.  If you want to have an own domain for your
     third-party contribution, make your own instance of `Translations` and use
     its `Translations.translate` method.
@@ -336,7 +336,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
 
         >>> filename = "test2.rsl"
         >>> open(filename, "w").write(\""".. -*- coding: utf-8 -*-
-        ... .. Gummi 1.0
+        ... .. Bobcat 1.0
         ...
         ... Januar
         ... \\January
@@ -355,7 +355,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
 
     :Parameters:
       - `match_string`: the string to test for, in US English
-      - `excerpt`: the Gummi excerpt in which the match should be tested
+      - `excerpt`: the Bobcat excerpt in which the match should be tested
       - `pos`: starting position of the match
       - `language`: :RFC:`4646` code for the current document language
       - `unescaped_only`: if ``True``, match only of all matched characters

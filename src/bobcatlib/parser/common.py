@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Copyright © 2007 Torsten Bronger <bronger@physik.rwth-aachen.de>
+#    Copyright © 2008 Torsten Bronger <bronger@physik.rwth-aachen.de>
 #
-#    This file is part of the Gummi program.
+#    This file is part of the Bobcat program.
 #
-#    Gummi is free software; you can redistribute it and/or modify it under
+#    Bobcat is free software; you can redistribute it and/or modify it under
 #    the terms of the MIT licence:
 #
 #    Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,7 +30,7 @@
 __all__ = ["guarded_match", "guarded_search", "guarded_find", "Node"]
 
 import weakref
-from ..gummi import common
+from ..bobcatlib import common
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.
