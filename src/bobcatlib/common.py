@@ -81,8 +81,7 @@ class PositionMarker(object):
                    (other.url, other.linenumber, other.column))
     def __eq__(self, other):
         """In order to be equal, two ``PositionMarkers`` must point exactly to
-        the same position in the source file.  Additionally, they must have the
-        same index in their `preprocessor.Excerpt`.
+        the same position in the source file.
 
         This is only needed for the unittests."""
         # FixMe: Maybe the URL should be normalised somehow.
