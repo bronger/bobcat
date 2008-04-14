@@ -79,6 +79,17 @@ class PositionMarker(object):
         are the same."""
         return cmp((self.url, self.linenumber, self.column),
                    (other.url, other.linenumber, other.column))
+    def __eq__(self, other):
+        """In order to be equal, two ``PositionMarkers`` must point exactly to
+        the same position in the source file.  Additionally, they must have the
+        same index in their `preprocessor.Excerpt`.
+
+        This is only needed for the unittests."""
+        # FixMe: Maybe the URL should be normalised somehow.
+        return self.url == other.url and self.linenumber == other.linenumber and \
+            self.column == other.column and self.index == other.index
+    def __ne__(self, other):
+        return not self.__eq__(other)
     def transpose(self, offset):
         """Return a new PositionMarker instance in order to get rid of side
         effect problems, by forcing making a *copy*.  Additionally, index
