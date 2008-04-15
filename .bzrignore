@@ -3,5 +3,6 @@ misc/test1.dvi
 misc/test1.log
 misc/test1.out
 misc/test1.tex
-/gummi.log
+/bobcat.log
 homepage/epydoc/
+src/bobcat.log

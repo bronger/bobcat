@@ -1,0 +1,16 @@
+>>> from bobcatlib.common import parse_local_variables
+>>> #
+>>> #  First, let's test "parse_local_variables"
+>>> #
+>>> parse_local_variables("This is not a local variables line", force=True)
+Traceback (most recent call last):
+    ...
+LocalVariablesError: Malformed local variables line
+>>> parse_local_variables(".. -*- coding: utf-8;+ Blah: Blubb -*-\n")
+Traceback (most recent call last):
+    ...
+LocalVariablesError: Malformed key '+ blah' in local variables line
+>>> parse_local_variables("; -*- codiöng: utf-8 -*-\n", comment_marker="(#|;)")
+Traceback (most recent call last):
+    ...
+LocalVariablesError: Malformed key 'codiÃ¶ng' in local variables line
