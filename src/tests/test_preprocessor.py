@@ -7,7 +7,7 @@ from bobcatlib.common import PositionMarker
 
 suite = unittest.TestSuite()
 
-class TextExcerpt(unittest.TestCase):
+class TestExcerpt(unittest.TestCase):
     def setUp(self):
         testfile = open("test.bcat", "w")
         testfile.write(self.sample_text)
@@ -16,7 +16,7 @@ class TextExcerpt(unittest.TestCase):
     def tearDown(self):
         os.remove("test.bcat")
 
-class TestExcerptSlicing(TextExcerpt):
+class TestExcerptSlicing(TestExcerpt):
     sample_text = r""".. -*- coding: utf-8 -*-
 .. Bobcat 1.0
 .. \
@@ -131,7 +131,7 @@ class TestExcerptSlicingAfterPostprocessing(TestExcerptSlicing):
         self.compare_original_positions(sliced_original_positions, sliced_text.original_positions)
         self.assertEqual(sliced_text.escaped_positions, sliced_escaped_positions)
     def test_character_extraction(self):
-        """"normal indexing (no slices) should work as with strings"""
+        """normal indexing (no slices) should work as with strings"""
         character = self.text[10]
         self.assertEqual(character, u"j")
         self.assertEqual(character.original_text, u"j")
@@ -145,10 +145,90 @@ class TestExcerptSlicingAfterPostprocessing(TestExcerptSlicing):
                                         sliced_text.original_positions)
         self.assertEqual(sliced_text.escaped_positions, set())
         self.assertRaises(IndexError, lambda: sliced_text[3])
+    def shortDescription(self):
+        description = super(TestExcerptSlicingAfterPostprocessing, self).shortDescription()
+        return description + " (after post input method applied)"
+
+class TestExcerptSplit(TestExcerpt):
+    sample_text = """.. -*- coding: utf-8 -*-
+.. Bobcat 1.0
+a, b, c,"""
+    def test_split(self):
+        """splitting of preprocessor.Excerpt into parts should work as with strings"""
+        sliced_text = self.text[2:]
+        parts = sliced_text.split(",")
+        self.assertEqual(parts, [u'a', u' b', u' c', u''])
+        self.assertEqual(parts[0].original_position(), PositionMarker("test.bcat", 3, 0, 0))
+        parts = self.text.split()
+        self.assertEqual(parts, [u'a,', u'b,', u'c,'])
+        self.assertEqual(parts[1].original_position(), PositionMarker("test.bcat", 3, 3, 0))
+
+class TestExcerptCodeSnippetsIntervals(TestExcerpt):
+    sample_text = """.. -*- coding: utf-8 -*-
+.. Bobcat 1.0
+..
+
+This is a code snippet: ```GOTO 10```.  And this is one in a paragraph of its
+own:
+
+```
+GOTO 10
+```
+
+And here the file ends.
+"""
+    def test_preprocessing(self):
+        """code snippets should be properly preprocessed"""
+        self.assertEqual(self.text, "\n\n\n\nThis is a code snippet: ```GOTO 10```.  "
+                         "And this is one in a paragraph of its\nown:\n\n```\nGOTO 10\n```"
+                         "\n\nAnd here the file ends.\n")
+        self.assertEqual(self.text.code_snippets_intervals, [(31, 38), (91, 100)])
+    def test_slicing(self):
+        """code snippet intervals should be splitted properly with slicing of """ \
+            """preprocessor.Excerpt"""
+        part1, part2 = self.text[:34], self.text[34:]
+        self.assertEqual(part1.code_snippets_intervals, [(31, 34)])
+        self.assertEqual(part2.code_snippets_intervals, [(0, 4), (57, 66)])
+        self.assertEqual((part1+part2).code_snippets_intervals, [(31, 34), (34, 38), (91, 100)])
+    def test_escaped_text(self):
+        """code snippets should be treated as escaped text"""
+        self.assertEqual(self.text.escaped_text(),
+                         u"\n\n\n\nThis is a code snippet: ```\x00\x00\x00\x00\x00\x00\x00```.  "
+                         u"And this is one in a paragraph of its\nown:\n\n```"
+                         u"\x00\x00\x00\x00\x00\x00\x00\x00\x00```\n\nAnd here the file ends.\n")
+        self.assertEqual(len(self.text.escaped_text()), len(self.text))
+
+class TestExcerptCodeSnippetsIntervalsOpenEnding(TestExcerpt):
+    sample_text = """.. -*- coding: utf-8 -*-
+.. Bobcat 1.0
+..
+
+This is a code snippet with open ending: ```GOTO 10
+"""
+    def test_processing(self):
+        """upper bound of open-ending code snippet should be the end of the preprocessor.Excerpt"""
+        self.assertEqual(len(self.text), self.text.code_snippets_intervals[0][1])
+
+class TestExcerptNormalizeWhitespace(unittest.TestCase):
+    def test_normalize_whitespace(self):
+        """preprocessor.Excerpt.normalize_whitespace should work as for strings"""
+        excerpt = preprocessor.Excerpt(" a\tb\t c  d \n ef \tg \n ", "PRE", "test.bcat", {}, {})
+        self.assertEqual(excerpt.normalize_whitespace(), u"a b c d ef g")
+    def test_whitespace_only(self):
+        """whitespace normalization for whitespace-only preprocessor.Excerpt should yield """ \
+            """an empty preprocessor.Excerpt"""
+        empty_excerpt = preprocessor.Excerpt(" \t\t    \n  \t \n ", "PRE", "test.bcat", {}, {}) \
+            .normalize_whitespace()
+        self.assertEqual(empty_excerpt, u"")
+        self.assertEqual(empty_excerpt.original_position(0), PositionMarker("test.bcat", 1, 0, 0))
 
 suite.addTest(doctest.DocTestSuite("bobcatlib.preprocessor"))
-suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(
-        TestExcerptSlicingBeforePostprocessing))
-suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(
-        TestExcerptSlicingAfterPostprocessing))
+for test_class in (TestExcerptSlicingBeforePostprocessing,
+                   TestExcerptSlicingAfterPostprocessing,
+                   TestExcerptSplit,
+                   TestExcerptCodeSnippetsIntervals,
+                   TestExcerptCodeSnippetsIntervalsOpenEnding,
+                   TestExcerptNormalizeWhitespace):
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
+
 suite.addTest(doctest.DocFileSuite("preprocessor.txt"))
