@@ -13,17 +13,16 @@ import unittest, sys
 from tests import common_test
 
 # Build test suite
-suite = unittest.TestSuite()
 from tests import test_common, test_helpers, test_preprocessor, test_settings, test_safefilename, \
     test_i18n, test_emitter, test_latex_substitutions
-suite.addTests([test_common.suite,
-                test_helpers.suite,
-                test_preprocessor.suite,
-                test_settings.suite,
-                test_safefilename.suite,
-                test_i18n.suite,
-                test_emitter.suite,
-                test_latex_substitutions.suite])
+suite = unittest.TestSuite([test_common.suite,
+                            test_helpers.suite,
+                            test_preprocessor.suite,
+                            test_settings.suite,
+                            test_safefilename.suite,
+                            test_i18n.suite,
+                            test_emitter.suite,
+                            test_latex_substitutions.suite])
 if len(sys.argv) > 1 and sys.argv[1] == "--all":
     from tests import test_doctests
     suite.addTest(test_doctests.suite)
