@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Unit tests for `bobcatlib.preprocessor`.
+
+:var suite: the test suite which is exported by this module, to be used by a
+  higher-level module for inclusion into a testing process.
+
+:type suite: ``unittext.TextSuite``
+"""
+
 import unittest, doctest, os
 from bobcatlib import preprocessor
 from bobcatlib.common import PositionMarker
@@ -8,15 +16,47 @@ from bobcatlib.common import PositionMarker
 suite = unittest.TestSuite()
 
 class TestExcerpt(unittest.TestCase):
+    """Abstract base class for all tests with `preprocessor.Excerpt`.
+
+    :cvar sample_text: The encoded text that should be written to the testbed
+      file.  Note that this is not a Unicode string but an octet string.  It
+      must be specified in derived classes.
+    :ivar text: the Bobcat source text that was read from the file
+    :ivar encoding: the detected encoding of the Bobcat file
+    :ivar bobcat_version: the detected Bobcat version of the Bobcat file
+
+    :type sample_text: str
+    :type text: `preprocessor.Excerpt`
+    :type encoding: str
+    :type bobcat_version: str"""
     def setUp(self):
+        """Write a test Bobcat file to the testbed directory so that it can be
+        read immediately, in order to create a `preprocessor.Excerpt` instance,
+        and in order to be able to test the return values or
+        `preprocessor.load_file`."""
         testfile = open("test.bcat", "w")
         testfile.write(self.sample_text)
         testfile.close()
         self.text, self.encoding, self.bobcat_version = preprocessor.load_file("test.bcat")
     def tearDown(self):
+        """Remove the test Bobcat file from the testbed."""
+        # Actually, this could also be removed already in `setUp` but here, I
+        # find it more logical.  And who knows: Maybe it must be re-read.
         os.remove("test.bcat")
 
 class TestExcerptSlicing(TestExcerpt):
+    """Abstract base class for very basic tests with `preprocessor.Excerpt`:
+    proper preprocessing, slicing, and concatenating.
+
+    :cvar original_positions: the desired values for the original positions in
+      the test excerpt, as to be used in `compare_original_positions`.  This
+      must be set in a derived class.
+    :cvar escaped_positions: the desired value for the escaped positions in the
+      test excerpt.  This must be set in a derived class.
+
+    :type original_positions: dict mapping int to `common.PositionMarker`
+    :type escaped_positions: set of int
+    """
     sample_text = r""".. -*- coding: utf-8 -*-
 .. Bobcat 1.0
 .. \
@@ -28,6 +68,17 @@ kf\0x64;sjh[[K2005]]\\56;fd\ \ \ kj
 \theta
 """
     def compare_original_positions(self, desired, actual):
+        """General check whether the position markers within an excerpt are
+        correct.  The method compares the desired and the actual value and
+        generates detailed error messages if necessary.
+
+        :Parameters:
+          - `desired`: the to-be-expected position markers
+          - `actual`: the actually found positon markers in the excerpt
+
+        :type desired: dict mapping int to `common.PositionMarker`
+        :type actual: dict mapping int to `common.PositionMarker`
+        """
         for position, marker in desired.iteritems():
             self.assert_(position in actual,
                          "missing PositionMarker <pos. %d, %s>" % (position, marker))
@@ -46,6 +97,9 @@ kf\0x64;sjh[[K2005]]\\56;fd\ \ \ kj
         self.assertEqual(self.text.escaped_positions, self.escaped_positions)
 
 class TestExcerptSlicingBeforePostprocessing(TestExcerptSlicing):
+    """Test case class for basic tests with `preprocessor.Excerpt` *before*
+    applying the post input method.
+    """
     original_positions = \
         {0: PositionMarker("test.bcat", 1, 24, 24),
          1: PositionMarker("test.bcat", 2, 13, 38),
@@ -85,6 +139,9 @@ class TestExcerptSlicingBeforePostprocessing(TestExcerptSlicing):
         self.assertEqual(self.text[20:10], u"")
 
 class TestExcerptSlicingAfterPostprocessing(TestExcerptSlicing):
+    """Test case class for basic tests with `preprocessor.Excerpt` *after*
+    applying the post input method.
+    """
     original_positions = \
         {0: PositionMarker("test.bcat", 1, 24, 24),
          1: PositionMarker("test.bcat", 2, 13, 38),
@@ -146,10 +203,15 @@ class TestExcerptSlicingAfterPostprocessing(TestExcerptSlicing):
         self.assertEqual(sliced_text.escaped_positions, set())
         self.assertRaises(IndexError, lambda: sliced_text[3])
     def shortDescription(self):
+        """Additionally to the default message, we append a notice that this is
+        about *postprocessed* excerpts here.
+        """
         description = super(TestExcerptSlicingAfterPostprocessing, self).shortDescription()
         return description + " (after post input method applied)"
 
 class TestExcerptSplit(TestExcerpt):
+    """Test case for the method `preprocessor.Excerpt.split`.
+    """
     sample_text = """.. -*- coding: utf-8 -*-
 .. Bobcat 1.0
 a, b, c,"""
@@ -164,6 +226,9 @@ a, b, c,"""
         self.assertEqual(parts[1].original_position(), PositionMarker("test.bcat", 3, 3, 0))
 
 class TestExcerptCodeSnippetsIntervals(TestExcerpt):
+    """Test case for the handling of code snippets in `preprocessor.Excerpt`.
+    They should be treated as escaped characters, and this is tested here.
+    """
     sample_text = """.. -*- coding: utf-8 -*-
 .. Bobcat 1.0
 ..
@@ -199,6 +264,9 @@ And here the file ends.
         self.assertEqual(len(self.text.escaped_text()), len(self.text))
 
 class TestExcerptCodeSnippetsIntervalsOpenEnding(TestExcerpt):
+    """Test case for the special (unwanted, maybe illegal) case of a code
+    snippet which is not closed in the Bobcat source file.
+    """
     sample_text = """.. -*- coding: utf-8 -*-
 .. Bobcat 1.0
 ..
@@ -210,6 +278,8 @@ This is a code snippet with open ending: ```GOTO 10
         self.assertEqual(len(self.text), self.text.code_snippets_intervals[0][1])
 
 class TestExcerptNormalizeWhitespace(unittest.TestCase):
+    """Test case for `preprocessor.Excerpt.normalize_whitespace`.
+    """
     def test_normalize_whitespace(self):
         """preprocessor.Excerpt.normalize_whitespace should work as for strings"""
         excerpt = preprocessor.Excerpt(" a\tb\t c  d \n ef \tg \n ", "PRE", "test.bcat", {}, {})
@@ -230,5 +300,3 @@ for test_class in (TestExcerptSlicingBeforePostprocessing,
                    TestExcerptCodeSnippetsIntervalsOpenEnding,
                    TestExcerptNormalizeWhitespace):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
-
-suite.addTest(doctest.DocFileSuite("preprocessor.txt"))
