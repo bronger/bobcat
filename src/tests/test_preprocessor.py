@@ -292,7 +292,6 @@ class TestExcerptNormalizeWhitespace(unittest.TestCase):
         self.assertEqual(empty_excerpt, u"")
         self.assertEqual(empty_excerpt.original_position(0), PositionMarker("test.bcat", 1, 0, 0))
 
-suite.addTest(doctest.DocTestSuite("bobcatlib.preprocessor"))
 for test_class in (TestExcerptSlicingBeforePostprocessing,
                    TestExcerptSlicingAfterPostprocessing,
                    TestExcerptSplit,

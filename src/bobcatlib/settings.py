@@ -301,6 +301,7 @@ class Setting(object):
             Traceback (most recent call last):
               ...
             SettingError: setting 'key = []': cannot detect type of empty list
+
         """
         # pylint: disable-msg=R0912
         assert source in ["conf file", "keyval list", "direct", "default"]
@@ -587,6 +588,7 @@ class Setting(object):
             >>> setting.set_value("path/to/something", "default")
             >>> setting.value
             [u'1', u'2', u'3']
+
         """
         if docstring:
             self.docstring = docstring
@@ -806,6 +808,7 @@ class SettingsDict(dict):
                 ...
             SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting
             key; section already closed
+
         """
         assert key not in self or not super(SettingsDict, self).__getitem__(key).has_default, \
             u"setting '%s' has already a default value (%s)" % (key, repr(self[key]))

@@ -6,5 +6,3 @@ from bobcatlib import i18n
 
 suite = unittest.TestSuite()
 
-suite.addTest(doctest.DocTestSuite("bobcatlib.i18n"))
-

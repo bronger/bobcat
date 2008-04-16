@@ -6,5 +6,4 @@ from bobcatlib import common
 
 suite = unittest.TestSuite()
 
-suite.addTest(doctest.DocTestSuite("bobcatlib.helpers"))
 suite.addTest(doctest.DocFileSuite("helpers.txt"))

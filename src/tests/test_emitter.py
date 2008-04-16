@@ -6,5 +6,3 @@ from bobcatlib import emitter
 
 suite = unittest.TestSuite()
 
-suite.addTest(doctest.DocTestSuite("bobcatlib.emitter"))
-

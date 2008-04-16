@@ -1,4 +1,5 @@
 >>> from bobcatlib.settings import *
+>>> warnings.simplefilter("error")  # Turn warnings into errors, just for testing
 >>> settings["General.verbose"] = True
 >>> settings.set_default("General.verbose", None, "bool")
 >>> settings.close_section("General")
