@@ -644,33 +644,36 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         self.assume_wrong_type_error(self.bool_setting, [6, 3, 0])
         self.assume_working_value_setting(self.list_setting, [6, 3, 0], list)
 
-    def test_nonstring_conffile(self):
-        """setting ony other but a string vis source=\"conf file\" should fail"""
-        self.assertRaises(BaseException, lambda: self.int_setting.set_value(1, "conf file"))
-        self.assertRaises(BaseException, lambda: self.int_setting.set_value(1.3, "conf file"))
-        self.assertRaises(BaseException, lambda: self.int_setting.set_value(True, "conf file"))
-        self.assertRaises(BaseException,
-                          lambda: self.int_setting.set_value([2, 4, -6], "conf file"))
-    def test_int_conffile(self):
-        """setting an int to a setting with source=\"conf file\" should work or fail """ \
-            """according to previous type"""
-        self.assume_working_value_setting(self.string_setting, u"1", unicode, "conf file")
-        self.assume_working_value_setting(self.int_setting, u"1", int, "conf file",
-                                          desired_value=1)
-        self.assume_working_value_setting(self.float_setting, u"1", float, "conf file",
-                                          desired_value=1.0)
-        self.assume_wrong_type_error(self.bool_setting, u"1", "conf file")
-        self.assume_working_value_setting(self.list_setting, u"1", int, "conf file",
-                                          desired_value=1)
-    def test_float_conffile(self):
-        """setting a float to a setting with source=\"conf file\" should work or fail """ \
-            """according to previous type"""
-        self.assume_working_value_setting(self.string_setting, u"3.2", unicode, "conf file")
-        self.assume_wrong_type_error(self.int_setting, u"3.2", "conf file")
-        self.assume_working_value_setting(self.float_setting, u"3.2", float, "conf file",
-                                          desired_value=3.2)
-        self.assume_wrong_type_error(self.bool_setting, u"1", "conf file")
-        self.assume_wrong_type_error(self.list_setting, u"3.2", "conf file")
+    def test_nonstring_conffile_keyval(self):
+        """setting ony other but a string vis source=\"conf file\"/\"keyval list\" should fail"""
+        for source in ["conf file", "keyval list"]:
+            self.assertRaises(BaseException, lambda: self.int_setting.set_value(1, source))
+            self.assertRaises(BaseException, lambda: self.int_setting.set_value(1.3, source))
+            self.assertRaises(BaseException, lambda: self.int_setting.set_value(True, source))
+            self.assertRaises(BaseException,
+                              lambda: self.int_setting.set_value([2, 4, -6], source))
+    def test_int_conffile_keyval(self):
+        """setting an int to a setting with source=\"conf file\"/\"keyval list\" should """ \
+            """work or fail according to previous type"""
+        for source in ["conf file", "keyval list"]:
+            self.assume_working_value_setting(self.string_setting, u"1", unicode, source)
+            self.assume_working_value_setting(self.int_setting, u"1", int, source,
+                                              desired_value=1)
+            self.assume_working_value_setting(self.float_setting, u"1", float, source,
+                                              desired_value=1.0)
+            self.assume_wrong_type_error(self.bool_setting, u"1", source)
+            self.assume_working_value_setting(self.list_setting, u"1", int, source,
+                                              desired_value=1)
+    def test_float_conffile_keyval(self):
+        """setting a float to a setting with source=\"conf file\"/\"keyval list\" should """ \
+            """work or fail according to previous type"""
+        for source in ["conf file", "keyval list"]:
+            self.assume_working_value_setting(self.string_setting, u"3.2", unicode, source)
+            self.assume_wrong_type_error(self.int_setting, u"3.2", source)
+            self.assume_working_value_setting(self.float_setting, u"3.2", float, source,
+                                              desired_value=3.2)
+            self.assume_wrong_type_error(self.bool_setting, u"1", source)
+            self.assume_wrong_type_error(self.list_setting, u"3.2", source)
     def test_string_conffile(self):
         """setting a string to a setting with source=\"conf file\" should work or fail """ \
             """according to previous type"""
@@ -692,15 +695,16 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         self.assume_wrong_type_error(self.list_setting, u'"hallo"', "conf file")
         self.assume_wrong_type_error(self.list_setting, u'"1"', "conf file")
         self.assume_wrong_type_error(self.list_setting, u'"yes"', "conf file")
-    def test_bool_conffile(self):
-        """setting a bool to a setting with source=\"conf file\" should work or fail """ \
-            """according to previous type"""
-        self.assume_working_value_setting(self.string_setting, u"no", unicode, "conf file")
-        self.assume_wrong_type_error(self.int_setting, u"no", "conf file")
-        self.assume_wrong_type_error(self.float_setting, u"no", "conf file")
-        self.assume_working_value_setting(self.bool_setting, u"no", bool, "conf file",
-                                          desired_value=False)
-        self.assume_wrong_type_error(self.list_setting, u"no", "conf file")
+    def test_bool_conffile_keyval(self):
+        """setting a bool to a setting with source=\"conf file\"/\"keyval list\" should """ \
+            """work or fail according to previous type"""
+        for source in ["conf file", "keyval list"]:
+            self.assume_working_value_setting(self.string_setting, u"no", unicode, source)
+            self.assume_wrong_type_error(self.int_setting, u"no", source)
+            self.assume_wrong_type_error(self.float_setting, u"no", source)
+            self.assume_working_value_setting(self.bool_setting, u"no", bool, source,
+                                              desired_value=False)
+            self.assume_wrong_type_error(self.list_setting, u"no", source)
     def test_list_conffile(self):
         """setting a list of int to a setting with source=\"conf file\" should work or fail """ \
             """according to previous type"""
@@ -713,6 +717,32 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         self.assume_wrong_type_error(self.bool_setting, u"(6, 3, 0)", "conf file")
         self.assume_working_value_setting(self.list_setting, u"(6, 3, 0)", list, "conf file",
                                           desired_value=[6, 3, 0])
+
+    def test_string_keyval(self):
+        """setting a string to a setting with source=\"keyval list\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u'"hallo"', unicode, "keyval list")
+        self.assume_working_value_setting(self.string_setting, u'"yes"', unicode, "keyval list")
+        self.assume_working_value_setting(self.string_setting, u'"1"', unicode, "keyval list")
+        self.assume_wrong_type_error(self.int_setting, u'"hallo"', "keyval list")
+        self.assume_wrong_type_error(self.int_setting, u'"1"', "keyval list")
+        self.assume_wrong_type_error(self.int_setting, u'"yes"', "keyval list")
+        self.assume_wrong_type_error(self.float_setting, u'"hallo"', "keyval list")
+        self.assume_wrong_type_error(self.float_setting, u'"1"', "keyval list")
+        self.assume_wrong_type_error(self.float_setting, u'"yes"', "keyval list")
+        self.assume_wrong_type_error(self.bool_setting, u'"hallo"', "keyval list")
+        self.assume_wrong_type_error(self.bool_setting, u'"1"', "keyval list")
+        self.assume_wrong_type_error(self.bool_setting, u'"yes"', "keyval list")
+        self.assume_wrong_type_error(self.list_setting, u'"hallo"', "keyval list")
+        self.assume_wrong_type_error(self.list_setting, u'"1"', "keyval list")
+        self.assume_wrong_type_error(self.list_setting, u'"yes"', "keyval list")
+    def test_list_keyval(self):
+        """setting a list of int to a setting with source=\"keyval list\" should work as string"""
+        self.assume_working_value_setting(self.string_setting, u"(6, 3, 0)", unicode, "keyval list")
+        self.assume_wrong_type_error(self.int_setting, u"(6, 3, 0)", "keyval list")
+        self.assume_wrong_type_error(self.float_setting, u"(6, 3, 0)", "keyval list")
+        self.assume_wrong_type_error(self.bool_setting, u"(6, 3, 0)", "keyval list")
+        self.assume_wrong_type_error(self.list_setting, u"(6, 3, 0)", "keyval list")
 
     def shortDescription(self):
         description = super(TestSetValueDefaultFirst, self).shortDescription()
