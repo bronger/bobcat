@@ -124,7 +124,8 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
             self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type(source))
 # The following is a spurious test, see above
     def test_adjust_float_direct_default(self):
-        """with source direct/default, trying to adjust a float to int should convert to int"""
+        """with source direct/default, trying to adjust a float to int should convert to int """ \
+            """(spurious)"""
         for source in ("direct", "default"):
             self.setting.value = 2.1
             self.setting.adjust_value_to_type(source)
@@ -137,7 +138,8 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
             self.assertEqual(self.setting.value, 2)
 # The following is a spurious test, see above
     def test_adjust_bool_direct_default(self):
-        """with source direct/default, trying to adjust a bool to int should convert to int"""
+        """with source direct/default, trying to adjust a bool to int should convert to int """ \
+            """(spurious)"""
         for source in ("direct", "default"):
             self.setting.value = True
             self.setting.adjust_value_to_type(source)
@@ -145,7 +147,7 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
 # The following is a spurious test, see above
     def test_adjust_list_direct_default(self):
         """with source direct/default, trying to adjust a list of float to int should """ \
-            """convert to list of int"""
+            """convert to list of int (spurious)"""
         for source in ("direct", "default"):
             self.setting.value = [1.3, 4.3, "6"]
             self.setting.adjust_value_to_type(source)
@@ -188,7 +190,7 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
         self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
 
     def test_non_string_keyval(self):
-        """with source keyval list, trying to adjust a non-string with "keyval list" should fail"""
+        """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = 1
         self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
@@ -240,15 +242,17 @@ class TestAdjustValueToTypeFloat(unittest.TestCase):
             self.assert_(isinstance(self.setting.value, float))
 # The following is a spurious test, see above
     def test_adjust_bool_direct_default(self):
-        """with source direct/default, trying to adjust a bool to float should convert to float"""
+        """with source direct/default, trying to adjust a bool to float should convert to """ \
+            """float (spurious)"""
         for source in ("direct", "default"):
             self.setting.value = True
             self.setting.adjust_value_to_type(source)
             self.assertEqual(self.setting.value, 1.0)
             self.assert_(isinstance(self.setting.value, float))
+# The following is a spurious test, see above
     def test_adjust_list_direct_default(self):
         """with source direct/default, trying to adjust a list of float to float should """ \
-            """convert to list of float"""
+            """convert to list of float (spurious)"""
         for source in ("direct", "default"):
             self.setting.value = [1.3, 4.3, "6"]
             self.setting.adjust_value_to_type(source)
@@ -295,7 +299,7 @@ class TestAdjustValueToTypeFloat(unittest.TestCase):
         self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
 
     def test_non_string_keyval(self):
-        """with source keyval list, trying to adjust a non-string with "keyval list" should fail"""
+        """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = 1.0
         self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
@@ -320,7 +324,7 @@ class TestAdjustValueToTypeFloat(unittest.TestCase):
         self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_list_keyval(self):
         """with source keyval list, trying to convert lists should fail"""
-        self.setting.value = '(1.0, 4.2, 6.1)'
+        self.setting.value = "(1.0, 4.2, 6.1)"
         self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
 
     def shortDescription(self):
@@ -387,7 +391,7 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
 # The following is a spurious test, see above
     def test_adjust_list_float_conffile(self):
         """with source conf file, trying to adjust a list of float to bool should convert """ \
-            """to a list of bool"""
+            """to a list of bool (spurious)"""
         self.setting.value = "(1.2, 4.4, 6.3)"
         self.setting.adjust_value_to_type("conf file")
         self.assertEqual(self.setting.value, [True, True, True])
@@ -403,7 +407,7 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
         self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
 
     def test_non_string_keyval(self):
-        """with source keyval list, trying to adjust a non-string with "keyval list" should fail"""
+        """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = False
         self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
@@ -425,15 +429,148 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
         self.assertEqual(self.setting.value, False)
     def test_adjust_list_keyval(self):
         """with source keyval list, trying to convert lists should fail"""
-        self.setting.value = '(1.0, 4.2, 6.1)'
+        self.setting.value = "(1.0, 4.2, 6.1)"
         self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
 
     def shortDescription(self):
         description = super(TestAdjustValueToTypeBool, self).shortDescription()
         return "settings.Setting.adjust_value_to_type: " + (description or "")
     
+class TestAdjustValueToTypeUnicode(unittest.TestCase):
+    def setUp(self):
+        self.setting = settings.Setting("key", u"super")
+    def test_adjust_string_direct_default(self):
+        """with source direct/default, trying to adjust a string to string type should """ \
+            """convert to string"""
+        for source in ("direct", "default"):
+            self.setting.value = u"hello"
+            self.setting.adjust_value_to_type(source)
+            self.assertEqual(self.setting.value, u"hello")
+# The following is a spurious test, see above
+    def test_adjust_float_direct_default(self):
+        """with source direct/default, trying to adjust a float to string should convert to """ \
+            """string (spurious)"""
+        for source in ("direct", "default"):
+            self.setting.value = 2.1
+            self.setting.adjust_value_to_type(source)
+            self.assertEqual(self.setting.value, u"2.1")
+            self.assert_(isinstance(self.setting.value, unicode))
+# The following is a spurious test, see above
+    def test_adjust_int_direct_default(self):
+        """with source direct/default, trying to adjust an int to string should convert to """ \
+            """string (spurious)"""
+        for source in ("direct", "default"):
+            self.setting.value = 2
+            self.setting.adjust_value_to_type(source)
+            self.assertEqual(self.setting.value, u"2")
+            self.assert_(isinstance(self.setting.value, unicode))
+# The following is a spurious test, see above
+    def test_adjust_bool_direct_default(self):
+        """with source direct/default, trying to adjust a bool to string should convert to """ \
+            """string (spurious)"""
+        for source in ("direct", "default"):
+            self.setting.value = True
+            self.setting.adjust_value_to_type(source)
+            self.assertEqual(self.setting.value, u"True")
+            self.assert_(isinstance(self.setting.value, unicode))
+# The following is a spurious test, see above
+    def test_adjust_list_direct_default(self):
+        """with source direct/default, trying to adjust a list of float to string should """ \
+            """convert to list of string (spurious)"""
+        for source in ("direct", "default"):
+            self.setting.value = [1.3, 4.3, "6"]
+            self.setting.adjust_value_to_type(source)
+            self.assertEqual(self.setting.value, ["1.3", "4.3", "6"])
+
+    def test_adjust_string_conffile(self):
+        """with source conf file, trying to adjust a string to string type should convert """ \
+            """to string"""
+        self.setting.value = u"hello"
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, u"hello")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_float_conffile(self):
+        """with source conf file, trying to adjust a float to string should convert to string"""
+        self.setting.value = "2.1"
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, u"2.1")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_int_conffile(self):
+        """with source conf file, trying to adjust an int to string should convert to string"""
+        self.setting.value = "2"
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, u"2")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_bool_conffile(self):
+        """with source conf file, trying to adjust a bool to string should convert to string"""
+        self.setting.value = "true"
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, u"true")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_list_conffile(self):
+        """with source conf file, trying to adjust a list of int to string should convert """ \
+            """to list of string"""
+        self.setting.value = '(1, 4, 6)'
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, [u"1", u"4", u"6"])
+        for element in self.setting.value:
+            self.assert_(isinstance(element, unicode))
+    def test_adjust_list_float_conffile(self):
+        """with source conf file, trying to adjust a list of float to string should convert """ \
+            """to a list of string"""
+        self.setting.value = "(1.2, 4.4, 6.3)"
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, ["1.2", "4.4", "6.3"])
+        for element in self.setting.value:
+            self.assert_(isinstance(element, unicode))
+    def test_adjust_list_mixed_conffile(self):
+        """with source conf file, trying to adjust a list of mixed values to string """\
+            """should convert to list of string"""
+        self.setting.value = '(1, 4, "6")'
+        self.setting.adjust_value_to_type("conf file")
+        self.assertEqual(self.setting.value, ["1", "4", "6"])
+        for element in self.setting.value:
+            self.assert_(isinstance(element, unicode))
+
+    def test_adjust_string_keyval(self):
+        """with source keyval list, trying to adjust a string to string type should """ \
+            """convert to string"""
+        self.setting.value = u"hello"
+        self.setting.adjust_value_to_type("keyval list")
+        self.assertEqual(self.setting.value, u"hello")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_float_keyval(self):
+        """with source keyval list, trying to adjust a float to string should convert to string"""
+        self.setting.value = "2.1"
+        self.setting.adjust_value_to_type("keyval list")
+        self.assertEqual(self.setting.value, u"2.1")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_int_keyval(self):
+        """with source keyval list, trying to adjust an int to string should convert to string"""
+        self.setting.value = "2"
+        self.setting.adjust_value_to_type("keyval list")
+        self.assertEqual(self.setting.value, u"2")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_bool_keyval(self):
+        """with source keyval list, trying to adjust a bool to string should convert to string"""
+        self.setting.value = "true"
+        self.setting.adjust_value_to_type("keyval list")
+        self.assertEqual(self.setting.value, u"true")
+        self.assert_(isinstance(self.setting.value, unicode))
+    def test_adjust_list_keyval(self):
+        """with source keyval list, trying to convert lists should convert to string"""
+        self.setting.value = "(1.0, 4.2, 6.1)"
+        self.setting.adjust_value_to_type("keyval list")
+        self.assertEqual(self.setting.value, u"(1.0, 4.2, 6.1)")
+        self.assert_(isinstance(self.setting.value, unicode))
+
+    def shortDescription(self):
+        description = super(TestAdjustValueToTypeUnicode, self).shortDescription()
+        return "settings.Setting.adjust_value_to_type: " + (description or "")
+    
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
-                   TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool):
+                   TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
+                   TestAdjustValueToTypeUnicode):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
