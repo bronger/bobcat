@@ -567,10 +567,162 @@ class TestAdjustValueToTypeUnicode(unittest.TestCase):
     def shortDescription(self):
         description = super(TestAdjustValueToTypeUnicode, self).shortDescription()
         return "settings.Setting.adjust_value_to_type: " + (description or "")
+
+class TestAdjustValueToTypeInvalidSource(unittest.TestCase):
+    def setUp(self):
+        self.setting = settings.Setting("key", u"super")
+    def test_invalid_source(self):
+        """passing an invalid source should fail"""
+        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("foobar"))
+    def shortDescription(self):
+        description = super(TestAdjustValueToTypeInvalidSource, self).shortDescription()
+        return "settings.Setting.adjust_value_to_type: " + (description or "")
+    
+class TestSetValueDefaultFirst(unittest.TestCase):
+    def setUp(self):
+        self.string_setting = settings.Setting("key", u"value", source="default")
+        self.int_setting = settings.Setting("key", 1, source="default")
+        self.float_setting = settings.Setting("key", 3.14, source="default")
+        self.bool_setting = settings.Setting("key", True, source="default")
+        self.list_setting = settings.Setting("key", [2, 3, -4], source="default")
+    def assume_wrong_type_error(self, setting, value, source="direct"):
+        self.assertRaises(settings.SettingWrongTypeError, lambda: setting.set_value(value, source))
+    def assume_working_value_setting(self, setting, value, type_, source="direct",
+                                     desired_value=None):
+        setting.set_value(value, source)
+        self.assertEqual(setting.value, desired_value if desired_value is not None else value)
+        self.assert_(isinstance(setting.value, type_))
+
+    def test_int_direct(self):
+        """setting an int to a setting with source=direct should work or fail according to """ \
+            """previous type"""
+        self.assume_wrong_type_error(self.string_setting, 1)
+        self.assume_working_value_setting(self.int_setting, 1, int)
+        self.assume_working_value_setting(self.float_setting, 1, float)
+        self.assume_wrong_type_error(self.bool_setting, 1)
+        self.assume_working_value_setting(self.list_setting, 1, int)
+    def test_float_direct(self):
+        """setting a float to a setting with source=direct should work or fail according to """ \
+            """previous type"""
+        self.assume_wrong_type_error(self.string_setting, 3.2)
+        self.assume_wrong_type_error(self.int_setting, 3.2)
+        self.assume_working_value_setting(self.float_setting, 3.2, float)
+        self.assume_wrong_type_error(self.bool_setting, 1)
+        self.assume_wrong_type_error(self.list_setting, 3.2)
+    def test_string_direct(self):
+        """setting a string to a setting with source=direct should work or fail according to """ \
+            """previous type"""
+        self.assume_working_value_setting(self.string_setting, u"hallo", unicode)
+        self.assume_working_value_setting(self.string_setting, u"yes", unicode)
+        self.assume_working_value_setting(self.string_setting, u"1", unicode)
+        self.assume_wrong_type_error(self.int_setting, u"hallo")
+        self.assume_wrong_type_error(self.int_setting, u"1")
+        self.assume_wrong_type_error(self.int_setting, u"yes")
+        self.assume_wrong_type_error(self.float_setting, u"hallo")
+        self.assume_wrong_type_error(self.float_setting, u"1")
+        self.assume_wrong_type_error(self.float_setting, u"yes")
+        self.assume_wrong_type_error(self.bool_setting, u"hallo")
+        self.assume_wrong_type_error(self.bool_setting, u"1")
+        self.assume_wrong_type_error(self.bool_setting, u"yes")
+        self.assume_wrong_type_error(self.list_setting, u"hallo")
+        self.assume_wrong_type_error(self.list_setting, u"1")
+        self.assume_wrong_type_error(self.list_setting, u"yes")
+    def test_bool_direct(self):
+        """setting a bool to a setting with source=direct should work or fail according to """ \
+            """previous type"""
+        self.assume_wrong_type_error(self.string_setting, False)
+        self.assume_wrong_type_error(self.int_setting, False)
+        self.assume_wrong_type_error(self.float_setting, False)
+        self.assume_working_value_setting(self.bool_setting, False, bool)
+        self.assume_wrong_type_error(self.list_setting, False)
+    def test_list_direct(self):
+        """setting an list of int to a setting with source=direct should work or fail """ \
+            """according to previous type"""
+        self.assume_wrong_type_error(self.string_setting, [6, 3, 0])
+        self.assume_working_value_setting(self.int_setting, [6, 3, 0], list)
+        self.assume_working_value_setting(self.float_setting, [6, 3, 0], list)
+        self.assume_wrong_type_error(self.bool_setting, [6, 3, 0])
+        self.assume_working_value_setting(self.list_setting, [6, 3, 0], list)
+
+    def test_nonstring_conffile(self):
+        """setting ony other but a string vis source=\"conf file\" should fail"""
+        self.assertRaises(BaseException, lambda: self.int_setting.set_value(1, "conf file"))
+        self.assertRaises(BaseException, lambda: self.int_setting.set_value(1.3, "conf file"))
+        self.assertRaises(BaseException, lambda: self.int_setting.set_value(True, "conf file"))
+        self.assertRaises(BaseException,
+                          lambda: self.int_setting.set_value([2, 4, -6], "conf file"))
+    def test_int_conffile(self):
+        """setting an int to a setting with source=\"conf file\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u"1", unicode, "conf file")
+        self.assume_working_value_setting(self.int_setting, u"1", int, "conf file",
+                                          desired_value=1)
+        self.assume_working_value_setting(self.float_setting, u"1", float, "conf file",
+                                          desired_value=1.0)
+        self.assume_wrong_type_error(self.bool_setting, u"1", "conf file")
+        self.assume_working_value_setting(self.list_setting, u"1", int, "conf file",
+                                          desired_value=1)
+    def test_float_conffile(self):
+        """setting a float to a setting with source=\"conf file\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u"3.2", unicode, "conf file")
+        self.assume_wrong_type_error(self.int_setting, u"3.2", "conf file")
+        self.assume_working_value_setting(self.float_setting, u"3.2", float, "conf file",
+                                          desired_value=3.2)
+        self.assume_wrong_type_error(self.bool_setting, u"1", "conf file")
+        self.assume_wrong_type_error(self.list_setting, u"3.2", "conf file")
+    def test_string_conffile(self):
+        """setting a string to a setting with source=\"conf file\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u'"hallo"', unicode, "conf file",
+                                          desired_value=u"hallo")
+        self.assume_working_value_setting(self.string_setting, u'"yes"', unicode, "conf file",
+                                          desired_value=u"yes")
+        self.assume_working_value_setting(self.string_setting, u'"1"', unicode, "conf file",
+                                          desired_value=u"1")
+        self.assume_wrong_type_error(self.int_setting, u'"hallo"', "conf file")
+        self.assume_wrong_type_error(self.int_setting, u'"1"', "conf file")
+        self.assume_wrong_type_error(self.int_setting, u'"yes"', "conf file")
+        self.assume_wrong_type_error(self.float_setting, u'"hallo"', "conf file")
+        self.assume_wrong_type_error(self.float_setting, u'"1"', "conf file")
+        self.assume_wrong_type_error(self.float_setting, u'"yes"', "conf file")
+        self.assume_wrong_type_error(self.bool_setting, u'"hallo"', "conf file")
+        self.assume_wrong_type_error(self.bool_setting, u'"1"', "conf file")
+        self.assume_wrong_type_error(self.bool_setting, u'"yes"', "conf file")
+        self.assume_wrong_type_error(self.list_setting, u'"hallo"', "conf file")
+        self.assume_wrong_type_error(self.list_setting, u'"1"', "conf file")
+        self.assume_wrong_type_error(self.list_setting, u'"yes"', "conf file")
+    def test_bool_conffile(self):
+        """setting a bool to a setting with source=\"conf file\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u"no", unicode, "conf file")
+        self.assume_wrong_type_error(self.int_setting, u"no", "conf file")
+        self.assume_wrong_type_error(self.float_setting, u"no", "conf file")
+        self.assume_working_value_setting(self.bool_setting, u"no", bool, "conf file",
+                                          desired_value=False)
+        self.assume_wrong_type_error(self.list_setting, u"no", "conf file")
+    def test_list_conffile(self):
+        """setting a list of int to a setting with source=\"conf file\" should work or fail """ \
+            """according to previous type"""
+        self.assume_working_value_setting(self.string_setting, u"(6, 3, 0)", list, "conf file",
+                                          desired_value=[u"6", u"3", u"0"])
+        self.assume_working_value_setting(self.int_setting, u"(6, 3, 0)", list, "conf file",
+                                          desired_value=[6, 3, 0])
+        self.assume_working_value_setting(self.float_setting, u"(6, 3, 0)", list, "conf file",
+                                          desired_value=[6.0, 3.0, 0.0])
+        self.assume_wrong_type_error(self.bool_setting, u"(6, 3, 0)", "conf file")
+        self.assume_working_value_setting(self.list_setting, u"(6, 3, 0)", list, "conf file",
+                                          desired_value=[6, 3, 0])
+
+    def shortDescription(self):
+        description = super(TestSetValueDefaultFirst, self).shortDescription()
+        return "settings.Setting.set_value with default first: " + (description or "")
+
     
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
-                   TestAdjustValueToTypeUnicode):
+                   TestAdjustValueToTypeUnicode, TestAdjustValueToTypeInvalidSource,
+                   TestSetValueDefaultFirst):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
