@@ -748,11 +748,75 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         description = super(TestSetValueDefaultFirst, self).shortDescription()
         return "settings.Setting.set_value with default first: " + (description or "")
 
+class TestSetValueDefaultSecond(unittest.TestCase):
+    def setUp(self):
+        self.string_setting = settings.Setting("key", u"value")
+        self.int_setting = settings.Setting("key", 1)
+        self.float_setting = settings.Setting("key", 3.14)
+        self.bool_setting = settings.Setting("key", True)
+        self.list_setting = settings.Setting("key", [2, 3, -4])
+
+        self.string_setting_conf = settings.Setting("key", u"value", source="conf file")
+        self.int_setting_conf = settings.Setting("key", "2", source="conf file")
+        self.float_setting_conf = settings.Setting("key", "3.14", source="conf file")
+        self.bool_setting_conf = settings.Setting("key", "yes", source="conf file")
+        self.list_setting_conf = settings.Setting("key", "(2, 3, -4)", source="conf file")
+
+        self.string_setting_keyval = settings.Setting("key", u"value", source="keyval list")
+        self.int_setting_keyval = settings.Setting("key", "2", source="keyval list")
+        self.float_setting_keyval = settings.Setting("key", "3.14", source="keyval list")
+        self.bool_setting_keyval = settings.Setting("key", "yes", source="keyval list")
+    def assume_wrong_type_error(self, setting, value):
+        self.assertRaises(settings.SettingWrongTypeError,
+                          lambda: setting.set_value(value, "default"))
+    def assume_working_value_setting(self, setting, value, type_, desired_value=None):
+        old_value = setting.value
+        setting.set_value(value, "default")
+        self.assertEqual(setting.value, desired_value if desired_value is not None else old_value)
+        self.assert_(isinstance(setting.value, type_))
+    def test_int(self):
+        self.assume_wrong_type_error(self.string_setting, 1)
+        self.assume_working_value_setting(self.int_setting, 1, int)
+        self.assume_wrong_type_error(self.float_setting, 1)
+        self.assume_wrong_type_error(self.bool_setting, 1)
+        self.assume_working_value_setting(self.list_setting, 1, list)
     
+        self.assume_wrong_type_error(self.string_setting_conf, 1)
+        self.assume_working_value_setting(self.int_setting_conf, 1, int)
+        self.assume_wrong_type_error(self.float_setting_conf, 1)
+        self.assume_wrong_type_error(self.bool_setting_conf, 1)
+        self.assume_working_value_setting(self.list_setting_conf, 1, list)
+    
+        self.assume_wrong_type_error(self.string_setting_keyval, 1)
+        self.assume_working_value_setting(self.int_setting_keyval, 1, int)
+        self.assume_wrong_type_error(self.float_setting_keyval, 1)
+        self.assume_wrong_type_error(self.bool_setting_keyval, 1)
+    def test_float(self):
+        self.assume_wrong_type_error(self.string_setting, 3.24)
+        self.assume_working_value_setting(self.int_setting, 3.24, float)
+        self.assume_working_value_setting(self.float_setting, 3.24, float)
+        self.assume_wrong_type_error(self.bool_setting, 3.24)
+        self.assume_working_value_setting(self.list_setting, 3.24, list, [2.0, 3.0, -4.0])
+    
+        self.assume_wrong_type_error(self.string_setting_conf, 3.24)
+        self.assume_working_value_setting(self.int_setting_conf, 3.24, float)
+        self.assume_working_value_setting(self.float_setting_conf, 3.24, float)
+        self.assume_wrong_type_error(self.bool_setting_conf, 3.24)
+        self.assume_working_value_setting(self.list_setting_conf, 3.24, list, [2.0, 3.0, -4.0])
+    
+        self.assume_wrong_type_error(self.string_setting_keyval, 3.24)
+        self.assume_working_value_setting(self.int_setting_keyval, 3.24, float)
+        self.assume_working_value_setting(self.float_setting_keyval, 3.24, float)
+        self.assume_wrong_type_error(self.bool_setting_keyval, 3.24)
+    
+    def shortDescription(self):
+        description = super(TestSetValueDefaultSecond, self).shortDescription()
+        return "settings.Setting.set_value with default first: " + (description or "")
+
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
                    TestAdjustValueToTypeUnicode, TestAdjustValueToTypeInvalidSource,
-                   TestSetValueDefaultFirst):
+                   TestSetValueDefaultFirst, TestSetValueDefaultSecond):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
