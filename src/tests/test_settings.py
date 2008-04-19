@@ -748,24 +748,13 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         description = super(TestSetValueDefaultFirst, self).shortDescription()
         return "settings.Setting.set_value with default first: " + (description or "")
 
-class TestSetValueDefaultSecond(unittest.TestCase):
+class TestSetValueDefaultSecondDirect(unittest.TestCase):
     def setUp(self):
         self.string_setting = settings.Setting("key", u"value")
         self.int_setting = settings.Setting("key", 1)
         self.float_setting = settings.Setting("key", 3.14)
         self.bool_setting = settings.Setting("key", True)
         self.list_setting = settings.Setting("key", [2, 3, -4])
-
-        self.string_setting_conf = settings.Setting("key", u"value", source="conf file")
-        self.int_setting_conf = settings.Setting("key", "2", source="conf file")
-        self.float_setting_conf = settings.Setting("key", "3.14", source="conf file")
-        self.bool_setting_conf = settings.Setting("key", "yes", source="conf file")
-        self.list_setting_conf = settings.Setting("key", "(2, 3, -4)", source="conf file")
-
-        self.string_setting_keyval = settings.Setting("key", u"value", source="keyval list")
-        self.int_setting_keyval = settings.Setting("key", "2", source="keyval list")
-        self.float_setting_keyval = settings.Setting("key", "3.14", source="keyval list")
-        self.bool_setting_keyval = settings.Setting("key", "yes", source="keyval list")
     def assume_wrong_type_error(self, setting, value):
         self.assertRaises(settings.SettingWrongTypeError,
                           lambda: setting.set_value(value, "default"))
@@ -774,49 +763,96 @@ class TestSetValueDefaultSecond(unittest.TestCase):
         setting.set_value(value, "default")
         self.assertEqual(setting.value, desired_value if desired_value is not None else old_value)
         self.assert_(isinstance(setting.value, type_))
+    def test_string(self):
+        """setting a string default should work or fail depending of previous type"""
+        self.assume_working_value_setting(self.string_setting, u"3", unicode)
+        self.assume_wrong_type_error(self.int_setting, u"3")
+        self.assume_wrong_type_error(self.float_setting, u"3")
+        self.assume_wrong_type_error(self.bool_setting, u"3")
+        if self.list_setting:
+            self.assume_wrong_type_error(self.list_setting, u"3")
     def test_int(self):
+        """setting an int default should work or fail depending of previous type"""
         self.assume_wrong_type_error(self.string_setting, 1)
         self.assume_working_value_setting(self.int_setting, 1, int)
         self.assume_wrong_type_error(self.float_setting, 1)
         self.assume_wrong_type_error(self.bool_setting, 1)
-        self.assume_working_value_setting(self.list_setting, 1, list)
-    
-        self.assume_wrong_type_error(self.string_setting_conf, 1)
-        self.assume_working_value_setting(self.int_setting_conf, 1, int)
-        self.assume_wrong_type_error(self.float_setting_conf, 1)
-        self.assume_wrong_type_error(self.bool_setting_conf, 1)
-        self.assume_working_value_setting(self.list_setting_conf, 1, list)
-    
-        self.assume_wrong_type_error(self.string_setting_keyval, 1)
-        self.assume_working_value_setting(self.int_setting_keyval, 1, int)
-        self.assume_wrong_type_error(self.float_setting_keyval, 1)
-        self.assume_wrong_type_error(self.bool_setting_keyval, 1)
+        if self.list_setting:
+            self.assume_working_value_setting(self.list_setting, 1, list)
     def test_float(self):
+        """setting a float default should work or fail depending of previous type"""
         self.assume_wrong_type_error(self.string_setting, 3.24)
         self.assume_working_value_setting(self.int_setting, 3.24, float)
         self.assume_working_value_setting(self.float_setting, 3.24, float)
         self.assume_wrong_type_error(self.bool_setting, 3.24)
-        self.assume_working_value_setting(self.list_setting, 3.24, list, [2.0, 3.0, -4.0])
-    
-        self.assume_wrong_type_error(self.string_setting_conf, 3.24)
-        self.assume_working_value_setting(self.int_setting_conf, 3.24, float)
-        self.assume_working_value_setting(self.float_setting_conf, 3.24, float)
-        self.assume_wrong_type_error(self.bool_setting_conf, 3.24)
-        self.assume_working_value_setting(self.list_setting_conf, 3.24, list, [2.0, 3.0, -4.0])
-    
-        self.assume_wrong_type_error(self.string_setting_keyval, 3.24)
-        self.assume_working_value_setting(self.int_setting_keyval, 3.24, float)
-        self.assume_working_value_setting(self.float_setting_keyval, 3.24, float)
-        self.assume_wrong_type_error(self.bool_setting_keyval, 3.24)
-    
+        if self.list_setting:
+            self.assume_working_value_setting(self.list_setting, 3.24, list, [2.0, 3.0, -4.0])
+    def test_bool(self):
+        """setting a bool default should work or fail depending of previous type"""
+        self.assume_wrong_type_error(self.string_setting, False)
+        self.assume_wrong_type_error(self.int_setting, False)
+        self.assume_wrong_type_error(self.float_setting, False)
+        self.assume_working_value_setting(self.bool_setting, False, bool)
+        if self.list_setting:
+            self.assume_wrong_type_error(self.list_setting, False)
+    def test_list(self):
+        """setting a list of int default should work or fail depending of previous type"""
+        self.assume_wrong_type_error(self.string_setting, [6, -3, 0])
+        self.assume_working_value_setting(self.int_setting, [6, -3, 0], int)
+        self.assume_wrong_type_error(self.float_setting, [6, -3, 0])
+        self.assume_wrong_type_error(self.bool_setting, [6, -3, 0])
+        if self.list_setting:
+            self.assume_working_value_setting(self.list_setting, [6, -3, 0], list, [2, 3, -4])
     def shortDescription(self):
-        description = super(TestSetValueDefaultSecond, self).shortDescription()
-        return "settings.Setting.set_value with default first: " + (description or "")
+        description = super(TestSetValueDefaultSecondDirect, self).shortDescription()
+        return 'settings.Setting.set_value with default first, source="direct": ' + \
+            (description or "")
+
+class TestSetValueDefaultSecondConf(TestSetValueDefaultSecondDirect):
+    def setUp(self):
+        self.string_setting = settings.Setting("key", u"value", source="conf file")
+        self.int_setting = settings.Setting("key", u"2", source="conf file")
+        self.float_setting = settings.Setting("key", u"3.14", source="conf file")
+        self.bool_setting = settings.Setting("key", u"yes", source="conf file")
+        self.list_setting = settings.Setting("key", u"(2, 3, -4)", source="conf file")
+    def test_string(self):
+        """setting a string default should work or fail depending of previous type"""
+        self.assume_working_value_setting(self.string_setting, u"3", unicode)
+        self.assume_working_value_setting(self.int_setting, u"3", unicode, u"2")
+        self.assume_working_value_setting(self.float_setting, u"3", unicode, u"3.14")
+        self.assume_working_value_setting(self.bool_setting, u"3", unicode, u"yes")
+        if self.list_setting:
+            self.assume_working_value_setting(self.list_setting, u"3", unicode, u"(2, 3, -4)")
+    def shortDescription(self):
+        description = super(TestSetValueDefaultSecondConf, self).shortDescription()
+        return 'settings.Setting.set_value with default first, source="conf file": ' + \
+            (description or "")
+
+class TestSetValueDefaultSecondKeyval(TestSetValueDefaultSecondDirect):
+    def setUp(self):
+        self.string_setting = settings.Setting("key", u"value", source="keyval list")
+        self.int_setting = settings.Setting("key", u"2", source="keyval list")
+        self.float_setting = settings.Setting("key", u"3.14", source="keyval list")
+        self.bool_setting = settings.Setting("key", u"yes", source="keyval list")
+        self.list_setting = None
+    def test_string(self):
+        """setting a string default should work or fail depending of previous type"""
+        self.assume_working_value_setting(self.string_setting, u"3", unicode)
+        self.assume_working_value_setting(self.int_setting, u"3", unicode, u"2")
+        self.assume_working_value_setting(self.float_setting, u"3", unicode, u"3.14")
+        self.assume_working_value_setting(self.bool_setting, u"3", unicode, u"yes")
+    def shortDescription(self):
+        description = super(TestSetValueDefaultSecondKeyval, self).shortDescription()
+        return 'settings.Setting.set_value with default first, source="keyval list": ' + \
+            (description or "")
 
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
                    TestAdjustValueToTypeUnicode, TestAdjustValueToTypeInvalidSource,
-                   TestSetValueDefaultFirst, TestSetValueDefaultSecond):
+                   TestSetValueDefaultFirst,
+                   TestSetValueDefaultSecondDirect,
+                   TestSetValueDefaultSecondConf,
+                   TestSetValueDefaultSecondKeyval):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
