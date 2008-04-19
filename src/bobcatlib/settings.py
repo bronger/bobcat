@@ -162,17 +162,17 @@ class Setting(object):
       also be ``None``.
     :ivar type: the type of this Setting.  It must be either ``"float"``,
       ``"int"``, ``"unicode"``, or ``"bool"``.
-    :ivar __initial_source: the source that was given when the setting was
-      created
-    :ivar __initial_value: The value that was given when the setting was
-      created.  It extists only if `__initial_source` equals ``"conf file"`` or
-      ``"keyval list"``.
+    :ivar __previous_source: the source that was given when the setting was
+      created, or after the last call to `set_value`.
+    :ivar __preliminarily_detected_value: The value that was given when the setting was
+      created.  It extists only if the source during initialisation was ``"conf
+      file"`` or ``"keyval list"``.
 
     :type key: unicode
     :type value: unicode, float, int, bool, list, NoneType
     :type type: str
-    :type __initial_source: str
-    :type __initial_value: unicode
+    :type __previous_source: str
+    :type __preliminarily_detected_value: unicode
 
     """
     def get_boolean(self, value):
@@ -498,11 +498,13 @@ class Setting(object):
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
-        self.key, self.value, self.type, self.docstring, self.__initial_source = \
+        self.key, self.value, self.type, self.docstring, self.__previous_source = \
             key, value, explicit_type, docstring, source
-        if self.__initial_source in ["conf file", "keyval list"]:
+        if self.__previous_source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
-            self.__initial_value = self.value
+            self.__preliminarily_detected_value = self.value
+        else:
+            self.__preliminarily_detected_value = None
         self.has_default = source == "default"
         assert self.type in ["int", "float", "bool", "unicode"] or self.type is None
         if not self.type:
@@ -601,15 +603,25 @@ class Setting(object):
             [u'1', u'2', u'3']
 
         """
+        def type_actually_unicode():
+            """Returns ``True`` if the new type of the setting is supposed to
+            be unicode, however, the old type way detected from the value from
+            a configuration file or a key/value list so it may have been
+            unicode in the first place, just improperly auto-detected.
+
+            In this case, no error should be generated but just converted to
+            the initial(!) unicode values as it was in the configuration file
+            or the key/value list.
+            """
+            return source in ["default", "direct"] and \
+                self.__preliminarily_detected_value is not None and new_type == "unicode"
         if docstring:
             self.docstring = docstring
         if value is not None:
             new_type = self.detect_type(value, source)
             if new_type != self.type \
                     and not (source in ["conf file", "keyval list"] and self.type == "unicode") \
-                    and not (source == "default" and
-                             self.__initial_source in ["conf file", "keyval list"]
-                             and new_type == "unicode") \
+                    and not type_actually_unicode() \
                     and not (source == "default" and self.type == "int" and new_type == "float") \
                     and not (source != "default" and self.type == "float" and new_type == "int"):
                 raise SettingWrongTypeError(self.key, value, self.type, new_type)
@@ -620,11 +632,14 @@ class Setting(object):
             self.has_default = True
             if self.type == "int" and new_type == "float":
                 self.type = new_type
-            elif self.__initial_source in ["conf file", "keyval list"] and new_type == "unicode":
-                self.type = new_type
-                self.value = self.__initial_value
         else:
             self.value = value
+        if type_actually_unicode():
+            self.type = new_type  # always "unicode"
+            if source == "default":
+                self.value = self.__preliminarily_detected_value
+        if source in ["default", "direct"]:
+            self.__preliminarily_detected_value = None
         self.adjust_value_to_type(source)
 
 class SettingsDict(dict):
