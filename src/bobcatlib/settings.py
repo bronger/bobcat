@@ -162,10 +162,17 @@ class Setting(object):
       also be ``None``.
     :ivar type: the type of this Setting.  It must be either ``"float"``,
       ``"int"``, ``"unicode"``, or ``"bool"``.
+    :ivar __initial_source: the source that was given when the setting was
+      created
+    :ivar __initial_value: The value that was given when the setting was
+      created.  It extists only if `__initial_source` equals ``"conf file"`` or
+      ``"keyval list"``.
 
     :type key: unicode
     :type value: unicode, float, int, bool, list, NoneType
     :type type: str
+    :type __initial_source: str
+    :type __initial_value: unicode
 
     """
     def get_boolean(self, value):
@@ -260,7 +267,7 @@ class Setting(object):
             >>> setting.detect_type(True, "direct")
             'bool'
 
-        Lists also work:
+        Lists also work, here the first element is used for the detection:
         
             >>> setting.detect_type([1, 2, 3], "direct")
             'int'
@@ -401,9 +408,9 @@ class Setting(object):
             >>> setting.value
             3.3999999999999999
 
-        Examples for things that don't work:
         """
         # pylint: disable-msg=R0912
+        assert source in ["direct", "default", "conf file", "keyval list"]
         if self.value is None:
             # In this case, typecasting is delayed until the setting gets a
             # proper value
@@ -424,8 +431,9 @@ class Setting(object):
             elif type_ == "float":
                 return float(value)
 
-        if source == "conf file":
+        if source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
+        if source == "conf file":
             self.value = self.value.strip()
             if "," in self.value and self.value.startswith("(") and self.value.endswith(")"):
                 # Okay, we have a list
@@ -490,11 +498,11 @@ class Setting(object):
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
-        self.key, self.value, self.type, self.docstring, self.initial_source = \
+        self.key, self.value, self.type, self.docstring, self.__initial_source = \
             key, value, explicit_type, docstring, source
-        if self.initial_source in ["conf file", "keyval list"]:
+        if self.__initial_source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
-            self.initial_value = self.value
+            self.__initial_value = self.value
         self.has_default = source == "default"
         assert self.type in ["int", "float", "bool", "unicode"] or self.type is None
         if not self.type:
@@ -519,6 +527,9 @@ class Setting(object):
         :Exceptions:
           - `SettingError`: if the data type cannot be detected because it is
             not one of the allowed types, or if `value` is an empty list.
+          - `SettingWrongTypeError`: if the new value is incompatible with the
+            already stored one, including the case if the new value is the
+            default value
           - `ValueError`: if the value cannot be converted to the
             `self.type`.
 
@@ -597,16 +608,11 @@ class Setting(object):
             if new_type != self.type \
                     and not (source in ["conf file", "keyval list"] and self.type == "unicode") \
                     and not (source == "default" and
-                             self.initial_source in ["conf file", "keyval list"]
+                             self.__initial_source in ["conf file", "keyval list"]
                              and new_type == "unicode") \
                     and not (source == "default" and self.type == "int" and new_type == "float") \
                     and not (source != "default" and self.type == "float" and new_type == "int"):
-                if source == "default":
-                    raise SettingError("default value of type '%s' is incompatible "
-                                       "with previous type '%s'" %
-                                       (new_type, self.type), self.key, value)
-                else:
-                    raise SettingWrongTypeError(self.key, value, self.type, new_type)
+                raise SettingWrongTypeError(self.key, value, self.type, new_type)
         else:
             new_type = None
         if source == "default":
@@ -614,8 +620,9 @@ class Setting(object):
             self.has_default = True
             if self.type == "int" and new_type == "float":
                 self.type = new_type
-            elif self.initial_source in ["conf file", "keyval list"] and new_type == "unicode":
+            elif self.__initial_source in ["conf file", "keyval list"] and new_type == "unicode":
                 self.type = new_type
+                self.value = self.__initial_value
         else:
             self.value = value
         self.adjust_value_to_type(source)
