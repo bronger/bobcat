@@ -153,10 +153,11 @@ class Setting(object):
     methods are for internal use only.  For examples for using this class, see
     `__init__` and `set_value`.
 
-    :ivar key: the key of this Setting.  This may be an arbitrary non-empty
+    :ivar key: The key of this Setting.  It is stored in this class only for
+      gernerating proper error messages.  This may be an arbitrary non-empty
       string.  It may be divided by a dot into a section and an option part,
-      where the option doesn't contain a dot, and both parts must not be
-      empty.  If there is no dot, the section is ``u""``.
+      where the option doesn't contain a dot, and both parts must not be empty.
+      If there is no dot, the section is ``u""``.
     :ivar value: the value of this Setting.  Must be of the type described in
       `self.type`.  It may also be a list with values of that type.  It may
       also be ``None``.
@@ -777,6 +778,15 @@ class SettingsDict(dict):
             raise SettingUnknownKeyError(key, value)
         if self.__new_sections_inhibited and section not in self.sections:
             raise SettingInvalidSectionError(key, value, section)
+    def __eq__(self, other):
+        # For comparison, we have to normalise both operands first by replacing
+        # the values (which are `Setting` objects) by their "effective" value
+        # (the result of `Setting.value`).
+        if isinstance(other, SettingsDict):
+            other = dict((key, other[key]) for key in other)
+        return dict((key, self[key]) for key in self) == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
     def set_default(self, key, value, explicit_type=None, docstring=None):
         """Set the default value of a setting.  It may already exist or not.
 
