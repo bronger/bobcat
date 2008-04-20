@@ -74,11 +74,12 @@ class SettingError(common.Error):
         self.key, self.value = key, value
 
 class SettingUnknownKeyError(SettingError):
+    """Error class for invalid keys.  A key is invalid if the section it
+    belongs to has been closed already, and it was not previously defined in
+    this section.
+    """
     def __init__(self, key, value):
-        """Error class for invalid keys.  A key is invalid if the section it
-        belongs to has been closed already, and it was not previously defined
-        in this section.
-        
+        """
         :Parameters:
           - `key`: key of the setting
           - `value`: value of the setting
@@ -90,11 +91,12 @@ class SettingUnknownKeyError(SettingError):
             u"unknown setting key; section already closed", key, value)
 
 class SettingInvalidKeyValueListError(SettingError):
+    """Error class for invalid syntaxes in key/value lists.  Note that this is
+    raised only in case of a bad list syntax, not if there was a problem with
+    adding a parsed key/value pair to the `SettingsDict`.
+    """
     def __init__(self, excerpt):
-        """Error class for invalid syntaxes in key/value lists.  Note that this
-        is raised only in case of a bad list syntax, not if there was a problem
-        with adding a parsed key/value pair to the `SettingsDict`.
-        
+        """
         :Parameters:
           - `excerpt`: the part of the list that couldn't be parsed
 
