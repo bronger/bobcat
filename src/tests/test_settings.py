@@ -641,6 +641,10 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         self.assertEqual(setting.value, desired_value if desired_value is not None else value)
         self.assert_(isinstance(setting.value, type_))
 
+    def test_double_default(self):
+        """setting a default twice for a setting should fail"""
+        self.assertRaises(AssertionError,
+                          lambda: self.string_setting.set_value(u"hallo", "default"))
     def test_int_direct(self):
         """setting an int to a setting with source=direct should work or fail according to """ \
             """previous type"""
