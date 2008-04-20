@@ -163,8 +163,8 @@ class Setting(object):
       also be ``None``.
     :ivar type: the type of this Setting.  It must be either ``"float"``,
       ``"int"``, ``"unicode"``, or ``"bool"``.
-    :ivar __previous_source: the source that was given when the setting was
-      created, or after the last call to `set_value`.
+    :ivar __initial_source: the source that was given when the setting was
+      created
     :ivar __preliminarily_detected_value: The value that was given when the setting was
       created.  It extists only if the source during initialisation was ``"conf
       file"`` or ``"keyval list"``.
@@ -172,7 +172,7 @@ class Setting(object):
     :type key: unicode
     :type value: unicode, float, int, bool, list, NoneType
     :type type: str
-    :type __previous_source: str
+    :type __initial_source: str
     :type __preliminarily_detected_value: unicode
 
     """
@@ -502,9 +502,9 @@ class Setting(object):
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
-        self.key, self.value, self.type, self.docstring, self.__previous_source = \
+        self.key, self.value, self.type, self.docstring, self.__initial_source = \
             key, value, explicit_type, docstring, source
-        if self.__previous_source in ["conf file", "keyval list"]:
+        if self.__initial_source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
             self.__preliminarily_detected_value = self.value
         else:
@@ -578,8 +578,8 @@ class Setting(object):
             >>> setting.set_value(1, "default")  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingError: setting 'key = 1': default value of type 'int' is
-            incompatible with previous type 'unicode'
+            SettingWrongTypeError: setting 'key = 1': new value of type 'int'
+            is unequal to previous type 'unicode'
             >>> setting.value
             u'1'
         
@@ -642,7 +642,9 @@ class Setting(object):
             self.type = new_type  # always "unicode"
             if source == "default":
                 self.value = self.__preliminarily_detected_value
-        if source in ["default", "direct"]:
+                # because the new value must be completely re-parsed
+                source = self.__initial_source
+        if source == "direct":
             self.__preliminarily_detected_value = None
         self.adjust_value_to_type(source)
 
@@ -745,7 +747,9 @@ class SettingsDict(dict):
         :type value: unicode, int, float, bool, list
 
         :Exceptions:
-          - `SettingError`: if the key belongs to a closed section
+          - `SettingUnknownKeyError`: if the key belongs to a closed section
+          - `SettingInvalidSectionError`: if the section hasn't existed yet,
+            and no new sections are allowed
 
         Example:
         
@@ -1046,7 +1050,7 @@ class SettingsDict(dict):
                     start, end = next_item_match.span("value")
                     value = unicode(excerpt[start:end].apply_postprocessing()).strip()
                 else:
-                    value = True
+                    value = u"true"
                 try:
                     self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
