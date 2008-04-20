@@ -207,7 +207,7 @@ class TestExcerptSlicingAfterPostprocessing(TestExcerptSlicing):
         about *postprocessed* excerpts here.
         """
         description = super(TestExcerptSlicingAfterPostprocessing, self).shortDescription()
-        return description + " (after post input method applied)"
+        return (description or "") + " (after post input method applied)"
 
 class TestExcerptSplit(TestExcerpt):
     """Test case for the method `preprocessor.Excerpt.split`.
