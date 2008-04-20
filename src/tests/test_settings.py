@@ -9,8 +9,11 @@
 :type suite: ``unittext.TextSuite``
 """
 
-import unittest, doctest
-from bobcatlib import settings
+import unittest, doctest, os, warnings
+from bobcatlib import settings, common
+
+common.setup_logging()
+settings.settings["quiet"] = True
 
 suite = unittest.TestSuite()
 
@@ -902,8 +905,7 @@ class TestSetValueDefaultSecondConf(TestSetValueDefaultSecondDirect):
         self.assume_working_value_setting(self.int_setting, u"3", unicode, u"2")
         self.assume_working_value_setting(self.float_setting, u"3", unicode, u"3.14")
         self.assume_working_value_setting(self.bool_setting, u"3", unicode, u"yes")
-        if self.list_setting:
-            self.assume_working_value_setting(self.list_setting, u"3", unicode, u"(2, 3, -4)")
+        self.assume_working_value_setting(self.list_setting, u"3", list, [u"2", u"3", u"-4"])
     def shortDescription(self):
         description = super(TestSetValueDefaultSecondConf, self).shortDescription()
         return 'settings.Setting.set_value with default first, source="conf file": ' + \
@@ -928,6 +930,10 @@ class TestSetValueDefaultSecondKeyval(TestSetValueDefaultSecondDirect):
         self.assume_working_value_setting(self.int_setting, u"3", unicode, u"2")
         self.assume_working_value_setting(self.float_setting, u"3", unicode, u"3.14")
         self.assume_working_value_setting(self.bool_setting, u"3", unicode, u"yes")
+    def test_string_list(self):
+        """setting a string default should leave a previous value with list syntax unchanged"""
+        list_setting = settings.Setting(u"key", u"(2, 3, -4)", source="keyval list")
+        self.assume_working_value_setting(list_setting, u"3", unicode, u"(2, 3, -4)")
     def shortDescription(self):
         description = super(TestSetValueDefaultSecondKeyval, self).shortDescription()
         return 'settings.Setting.set_value with default first, source="keyval list": ' + \
@@ -1056,45 +1062,181 @@ class TestSettingInitExplicitType(unittest.TestCase):
     """
     def test_explicit_type_unicode(self):
         """giving an explicit type argument should work always for "unicode\""""
-        setting = settings.Setting("key", [1, 2, 3], "unicode")
+        setting = settings.Setting(u"key", [1, 2, 3], "unicode")
         self.assertEqual(setting.value, [u"1", u"2", u"3"])
-        setting = settings.Setting("key", "(1, 2, 3)", "unicode", source="conf file")
+        setting = settings.Setting(u"key", u"(1, 2, 3)", "unicode", source="conf file")
         self.assertEqual(setting.value, [u"1", u"2", u"3"])
     def test_explicit_type_bool(self):
         """giving an explicit type argument should work or fail for "bool" depending on """ \
             """whether it is exactly a bool string or not"""
-        self.assertRaises(ValueError, lambda: settings.Setting("key", "un", "bool"))
-        self.assertRaises(ValueError, lambda: settings.Setting("key", 1, "bool"))
-        setting = settings.Setting("key", True, "bool")
+        self.assertRaises(ValueError, lambda: settings.Setting(u"key", u"un", "bool"))
+        self.assertRaises(ValueError, lambda: settings.Setting(u"key", 1, "bool"))
+        setting = settings.Setting(u"key", True, "bool")
         self.assertEqual(setting.value, True)
-        setting = settings.Setting("key", "no", "bool")
+        setting = settings.Setting(u"key", u"no", "bool")
         self.assertEqual(setting.value, False)
     def test_explicit_type_int(self):
         """giving an explicit type argument should work or fail for "int" depending on """ \
             """whether or not it can be converted"""
-        self.assertRaises(ValueError, lambda: settings.Setting("key", "1.0", "int"))
-        setting = settings.Setting("key", False, "int")
+        self.assertRaises(ValueError, lambda: settings.Setting(u"key", u"1.0", "int"))
+        setting = settings.Setting(u"key", False, "int")
         self.assertEqual(setting.value, 0)
-        setting = settings.Setting("key", 1, "int")
+        setting = settings.Setting(u"key", 1, "int")
         self.assertEqual(setting.value, 1)
-        setting = settings.Setting("key", "1", "int")
+        setting = settings.Setting(u"key", u"1", "int")
         self.assertEqual(setting.value, 1)
     def test_explicit_type_float(self):
         """giving an explicit type argument should work or fail for "float" depending on """ \
             """whether or not it can be converted"""
-        self.assertRaises(ValueError, lambda: settings.Setting("key", "un", "float"))
-        setting = settings.Setting("key", 1, "float")
+        self.assertRaises(ValueError, lambda: settings.Setting(u"key", "un", "float"))
+        setting = settings.Setting(u"key", 1, "float")
         self.assertEqual(setting.value, 1.0)
         self.assert_(isinstance(setting.value, float))
-        setting = settings.Setting("key", True, "float")
+        setting = settings.Setting(u"key", True, "float")
         self.assertEqual(setting.value, 1.0)
-        self.assertRaises(ValueError, lambda: settings.Setting("key", "no", "float"))
+        self.assertRaises(ValueError, lambda: settings.Setting(u"key", u"no", "float"))
     def shortDescription(self):
         description = super(TestSettingInitExplicitType, self).shortDescription()
         return "settings.Setting.__init__ with explicit type argument (spurious): " + \
             (description or "")
-    
 
+class TestSettingsDict(unittest.TestCase):
+    def test_loading_from_conf_file(self):
+        """Loading a configuration file into a settings dictionary should work"""
+        os.environ["HOME"] = "/home/user"
+        settings_dict = settings.SettingsDict()
+        settings_dict.set_default("General.quiet", True)
+        settings_dict.set_predefined_variable("rootdir", "~/src/bobcat/")
+        self.assertEqual(settings_dict.load_from_files("test.conf"), [u"test.conf"])
+        self.assertEqual(settings_dict, {u'Veröffentlichung.supi': u'toll',
+                                         u'Paths.backends': u'/home/user/src/bobcat/src/backends',
+                                         u'General.quiet': True})
+    def shortDescription(self):
+        description = super(TestSettingsDict, self).shortDescription()
+        return "settings.SettingsDict: " + (description or "")
+
+class TestSettingsDictTestForClosedSection(unittest.TestCase):
+    def setUp(self):
+        self.settings = settings.SettingsDict()
+        self.settings.set_default(u"General.quiet", True)
+        self.settings.close_section(u"General")
+        self.settings.set_predefined_variable("rootdir", "~/src/bobcat/")
+        self.assertEqual(self.settings.load_from_files("test.conf"), [u"test.conf"])
+    def test_add_to_non_closed_section(self):
+        """Adding known keys to an unknown, non-closed section should work"""
+        self.settings.test_for_closed_section("Unknown.section.quiet", False)
+    def test_add_known_option_to_closed_section(self):
+        """Adding known keys to a closed section should fail"""
+        self.assertRaises(settings.SettingUnknownKeyError,
+                          lambda: self.settings.test_for_closed_section(u"General.quiet", False))
+    def test_add_unknown_option_to_closed_section(self):
+        """Adding unknown keys to a closed section should fail"""
+        self.assertRaises(settings.SettingUnknownKeyError,
+                          lambda: self.settings.test_for_closed_section(u"General.quite", False))
+    def shortDescription(self):
+        description = super(TestSettingsDictTestForClosedSection, self).shortDescription()
+        return "settings.SettingsDict.test_for_closed_section: " + (description or "")
+    
+class TestSettingsDictSetDefault(unittest.TestCase):
+    def setUp(self):
+        warnings.simplefilter("error")
+        self.settings = settings.SettingsDict()
+        self.settings.set_default(u"General.a", u"Hallo")
+        self.settings.set_default(u"General.b", u"on")
+        self.settings.set_default(u"General.c", 1)
+        self.settings.set_default(u"General.d", 4.5)
+        self.settings.set_default(u"General.e", None, u"unicode")
+    def test_default_setting(self):
+        """setting defaults should work"""
+        self.assertEqual(self.settings, {u"General.c": 1, u"General.b": u"on", u"General.a": u"Hallo",
+                                         u"General.e": None, u"General.d": 4.5})
+    def test_set_wrong_type(self):
+        """setting a value with another type than its default should fail"""
+        def assignment():
+            self.settings[u"General.b"] = True
+        self.assertRaises(settings.SettingWrongTypeError, assignment)
+    def test_set_unknown_option(self):
+        """setting an unknown option should work"""
+        self.settings[u"General.quiet"] = True
+        self.assertEqual(self.settings["General.quiet"], True)
+    def test_set_close_section_with_unknown_key(self):
+        """closing a section with an option without default should fail """
+        self.settings[u"General.quiet"] = True
+        self.assertRaises(settings.SettingWarning, lambda: self.settings.close_section(u"General"))
+    def test_add_new_key_to_closed_section(self):
+        """adding an unknown key to a closed section should fail"""
+        def assignment():
+            self.settings[u"General.f"] = u"offf"
+        self.settings.close_section(u"General")
+        self.assertRaises(settings.SettingUnknownKeyError, assignment)
+    def test_add_invalid_key(self):
+        """adding an invalid key should fail"""
+        def assignment():
+            self.settings[u"General."] = u"offf"        
+        self.assertRaises(AssertionError, assignment)
+    def test_add_default_to_closed_section(self):
+        """setting a new default in a closed section should fail"""
+        self.settings.close_section(u"General")
+        self.assertRaises(settings.SettingUnknownKeyError,
+                          lambda: self.settings.set_default(u"General.f", [1,2,3,4]))
+    def tearDown(self):
+        warnings.resetwarnings()
+    def shortDescription(self):
+        description = super(TestSettingsDictSetDefault, self).shortDescription()
+        return "settings.SettingsDict.set_default: " + (description or "")
+
+
+class TestSettingsDictInhibitNewSections(unittest.TestCase):
+    def setUp(self):
+        self.settings = settings.SettingsDict()
+        self.settings.set_default("General.quiet", True)
+        self.settings.inhibit_new_sections()
+    def test_set_default_in_known_section(self):
+        """setting a new default in a known section should work"""
+        self.settings.set_default(u"General.outfile", None, "unicode")
+        self.assertEqual(self.settings[u"General.outfile"], None)
+    def test_open_new_section(self):
+        """opening a new section should fail"""
+        self.assertRaises(settings.SettingInvalidSectionError,
+                          lambda: self.settings.set_default(u"Newsection.outfile", None, "unicode"))
+    def test_add_sectionless_key(self):
+        """adding a sectionless option should fail"""
+        def assignment():
+            self.settings[u"sectionlesskey"] = 0
+        self.assertRaises(settings.SettingInvalidSectionError, assignment)
+    def shortDescription(self):
+        description = super(TestSettingsDictInhibitNewSections, self).shortDescription()
+        return "settings.SettingsDict.inhibit_new_sections: " + (description or "")
+
+class TestSettingsDictParseKeyvalueList(unittest.TestCase):
+    def setUp(self):
+        from bobcatlib import preprocessor, parser
+        self.excerpt = preprocessor.Excerpt(u"a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+        self.settings = settings.SettingsDict()
+        self.settings.set_default(u"a", None, "unicode")
+        self.settings.set_default(u"c", None, "int")
+        self.settings.set_default(u"d", False)
+        self.settings.close_section(u"")
+        self.settings.inhibit_new_sections()
+        self.settings.parse_keyvalue_list(self.excerpt, parser.Node(None))
+    def test_parsing(self):
+        """parsing of a key/value list should work"""
+        self.assertEqual(self.settings, {u"a": u"b", u"c": 4, u"d": True})
+        self.assert_(isinstance(self.settings[u"c"], int))
+        self.assertEqual([key.original_position() for key in self.settings.iterkeys()],
+                         [common.PositionMarker("myfile.rsl", 1, 0, 0),
+                          common.PositionMarker("myfile.rsl", 1, 5, 0),
+                          common.PositionMarker("myfile.rsl", 1, 12, 0)])
+    def test_wrong_syntax(self):
+        """parsing key/value lists with invalid syntax should fail"""
+        from bobcatlib import preprocessor, parser
+        self.excerpt = preprocessor.Excerpt(u"a(:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+        self.assertRaises(settings.SettingInvalidKeyValueListError,
+                          lambda: self.settings.parse_keyvalue_list(self.excerpt))
+    def shortDescription(self):
+        description = super(TestSettingsDictParseKeyvalueList, self).shortDescription()
+        return "settings.SettingsDict.parse_keyvalue_list: " + (description or "")
+    
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
                    TestAdjustValueToTypeUnicode, TestAdjustValueToTypeInvalidSource,
@@ -1102,7 +1244,10 @@ for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestSetValueDefaultSecondDirect,
                    TestSetValueDefaultSecondConf,
                    TestSetValueDefaultSecondKeyval,
-                   TestSetValueMisc, TestSettingInit, TestSettingInitExplicitType):
+                   TestSetValueMisc, TestSettingInit, TestSettingInitExplicitType,
+                   TestSettingsDict, TestSettingsDictTestForClosedSection,
+                   TestSettingsDictSetDefault,
+                   TestSettingsDictInhibitNewSections, TestSettingsDictParseKeyvalueList):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
