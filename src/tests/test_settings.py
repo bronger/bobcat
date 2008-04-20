@@ -1233,6 +1233,19 @@ class TestSettingsDictParseKeyvalueList(unittest.TestCase):
         self.excerpt = preprocessor.Excerpt(u"a(:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
         self.assertRaises(settings.SettingInvalidKeyValueListError,
                           lambda: self.settings.parse_keyvalue_list(self.excerpt))
+    def test_invalid_section(self):
+        """parsing key/value lists with a new section where new sections are not allowed """ \
+            """should fail"""
+        from bobcatlib import preprocessor, parser
+        self.excerpt = preprocessor.Excerpt(u"a.wrong:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+        self.assertRaises(settings.SettingInvalidSectionError,
+                          lambda: self.settings.parse_keyvalue_list(self.excerpt))
+    def test_invalid_key(self):
+        """parsing key/value lists with a new key in a closed section should fail"""
+        from bobcatlib import preprocessor, parser
+        self.excerpt = preprocessor.Excerpt(u"wrong:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+        self.assertRaises(settings.SettingUnknownKeyError,
+                          lambda: self.settings.parse_keyvalue_list(self.excerpt))
     def shortDescription(self):
         description = super(TestSettingsDictParseKeyvalueList, self).shortDescription()
         return "settings.SettingsDict.parse_keyvalue_list: " + (description or "")
@@ -1249,5 +1262,3 @@ for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestSettingsDictSetDefault,
                    TestSettingsDictInhibitNewSections, TestSettingsDictParseKeyvalueList):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
-
-suite.addTest(doctest.DocFileSuite("settings.txt"))
