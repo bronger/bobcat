@@ -495,6 +495,9 @@ class Setting(object):
 
         for more examples, see `set_value`.
         """
+        # FixMe: Maybe one should drop the ``explicit_type`` argument because
+        # it forces `adjust_value_to_type` to support spurious cases, see the
+        # unit test file for this module for more information.
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
