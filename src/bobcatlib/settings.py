@@ -89,6 +89,20 @@ class SettingUnknownKeyError(SettingError):
         super(SettingUnknownKeyError, self).__init__(
             u"unknown setting key; section already closed", key, value)
 
+class SettingInvalidKeyValueListError(SettingError):
+    def __init__(self, excerpt):
+        """Error class for invalid syntaxes in key/value lists.  Note that this
+        is raised only in case of a bad list syntax, not if there was a problem
+        with adding a parsed key/value pair to the `SettingsDict`.
+        
+        :Parameters:
+          - `excerpt`: the part of the list that couldn't be parsed
+
+        :type excerpt: `preprocessor.Excerpt`
+        """
+        super(SettingInvalidKeyValueListError, self).__init__(
+            u"unparsable key found in key/value list", key=excerpt, value=None)
+
 class SettingWrongTypeError(SettingError):
     """Error class for invalid types of values in a `SettingsDict`.  A type is
     invalid if there is already a value stored for the respective key in the
@@ -976,7 +990,7 @@ class SettingsDict(dict):
                     self.sections.add(unicode(key)[:dot_position])
                 else:
                     self.sections.add(u"")
-    def parse_keyvalue_list(self, excerpt, parent_element,
+    def parse_keyvalue_list(self, excerpt, parent_element=None,
                             item_separator=u",", key_terminators=u":="):
         """Adds items from a key/value list to the dictionary.  These key/value
         lists are most commonly found in Bobcat source documents, in similar
@@ -995,8 +1009,8 @@ class SettingsDict(dict):
         :Parameters:
           - `excerpt`: the Excerpt which contains the complete key/value list
             to be parsed
-          - `parent_element`: the document element in which this key/value list
-            occurs
+          - `parent_element`: The document element in which this key/value list
+            occurs.  This is used for generating cumulative errors, if given.
           - `item_separator`: the string that divides key/value pairs
             a.k.a. items in the list; it can be a single character or longer.
             It defaults to ``","``.
@@ -1009,6 +1023,15 @@ class SettingsDict(dict):
         :type parent_element: `parser.Node`
         :type item_separator: unicode
         :type key_terminators: unicode
+
+        :Exceptions:
+          - `SettingUnknownKeyError`: raised if a key could not be added to the
+            ``SettingsDict`` due to rules of closed section etc.
+          - `SettingInvalidSectionError`: raised if a section could not be
+            added because new sections are not allowed in this
+            ``SettingsDict``.
+          - `SettingInvalidKeyValueListError`: raised if the synatx of the
+            key/value list was invalid
 
         Example:
 
@@ -1054,20 +1077,29 @@ class SettingsDict(dict):
                 try:
                     self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
-                    parent_element.throw_parse_warning(
-                        "unknown key '%s'" % key, key.original_position())
+                    if parent_element:
+                        parent_element.throw_parse_warning(
+                            "unknown key '%s'" % key, key.original_position())
+                    else:
+                        raise
                 except SettingWrongTypeError, error:
-                    parent_element.throw_parse_warning(
-                        "type of value for '%s' is wrong; expected %s but got %s" %
-                        (key, error.previous_type, error.new_type),
-                        key.original_position())
+                    if parent_element:
+                        parent_element.throw_parse_warning(
+                            "type of value for '%s' is wrong; expected %s but got %s" %
+                            (key, error.previous_type, error.new_type),
+                            key.original_position())
+                    else:
+                        raise
                 current_position = next_item_match.end()
             else:
-                parent_element.throw_parse_error(
-                    "invalid key--value syntax in '%s'" %
-                    excerpt[current_position:].apply_postprocessing().strip(),
-                    excerpt.original_position(current_position))
-                break
+                erroneous_excerpt = excerpt[current_position:].apply_postprocessing().strip()
+                if parent_element:
+                    parent_element.throw_parse_error(
+                        "invalid key--value syntax in '%s'" %
+                        erroneous_excerpt, excerpt.original_position(current_position))
+                    break
+                else:
+                    raise SettingInvalidKeyValueListError(erroneous_excerpt)
         warnings.resetwarnings()
             
     def load_from_files(self, filenames, forbidden_sections=frozenset()):
