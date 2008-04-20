@@ -159,7 +159,7 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
     def test_non_string_conffile(self):
         """with source conf file, trying to adjust a non-string with "conf-file" should fail"""
         self.setting.value = 1
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_string_conffile(self):
         """with source conf file, trying to adjust a string to int type should fail"""
         self.setting.value = u"hello"
@@ -195,7 +195,7 @@ class TestAdjustValueToTypeInt(unittest.TestCase):
     def test_non_string_keyval(self):
         """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = 1
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
         """with source keyval list, trying to adjust a string to int type should fail"""
         self.setting.value = u"hello"
@@ -267,7 +267,7 @@ class TestAdjustValueToTypeFloat(unittest.TestCase):
     def test_non_string_conffile(self):
         """with source conf file, trying to adjust a non-string with "conf-file" should fail"""
         self.setting.value = 1.0
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_string_conffile(self):
         """with source conf file, trying to adjust a string to float type should fail"""
         self.setting.value = u"hello"
@@ -307,7 +307,7 @@ class TestAdjustValueToTypeFloat(unittest.TestCase):
     def test_non_string_keyval(self):
         """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = 1.0
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
         """with source keyval list, trying to adjust a string to float type should fail"""
         self.setting.value = u"hello"
@@ -347,17 +347,17 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
         """with source direct/default, trying to adjust a string to bool type should fail"""
         for source in ("direct", "default"):
             self.setting.value = u"hello"
-            self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type(source))
+            self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type(source))
     def test_adjust_float_direct_default(self):
         """with source direct/default, trying to adjust a float to bool should fail"""
         for source in ("direct", "default"):
             self.setting.value = 2.1
-            self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type(source))
+            self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type(source))
     def test_adjust_int_direct_default(self):
         """with source direct/default, trying to adjust an int to bool should fail"""
         for source in ("direct", "default"):
             self.setting.value = 2
-            self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type(source))
+            self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type(source))
     def test_adjust_bool_direct_default(self):
         """with source direct/default, trying to adjust a bool to bool should convert to bool"""
         for source in ("direct", "default"):
@@ -375,19 +375,19 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
     def test_non_string_conffile(self):
         """with source conf file, trying to adjust a non-string with "conf-file" should fail"""
         self.setting.value = True
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_string_conffile(self):
         """with source conf file, trying to adjust a string to bool type should fail"""
         self.setting.value = u"hello"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_float_conffile(self):
         """with source conf file, trying to adjust a float to bool should fail"""
         self.setting.value = u"2.1"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_int_conffile(self):
         """with source conf file, trying to adjust an int to bool should fail"""
         self.setting.value = u"2"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
     def test_adjust_bool_conffile(self):
         """with source conf file, trying to adjust a bool to bool should convert to bool"""
         self.setting.value = u"false"
@@ -396,7 +396,7 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
     def test_adjust_list_conffile(self):
         """with source conf file, trying to adjust a list of int to bool should fail"""
         self.setting.value = u'(1, 0, 6)'
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
 # The following is a spurious test, see above
     def test_adjust_list_float_conffile(self):
         """with source conf file, trying to adjust a list of float to bool should convert """ \
@@ -413,24 +413,24 @@ class TestAdjustValueToTypeBool(unittest.TestCase):
     def test_adjust_list_mixed_conffile(self):
         """with source conf file, trying to adjust a list of mixed values to bool should fail"""
         self.setting.value = u'(1, 4, u"6")'
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("conf file"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("conf file"))
 
     def test_non_string_keyval(self):
         """with source keyval list, trying to adjust a non-string should fail"""
         self.setting.value = False
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_string_keyval(self):
         """with source keyval list, trying to adjust a string to bool type should fail"""
         self.setting.value = u"hello"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_float_keyval(self):
         """with source keyval list, trying to adjust a float to bool should fail"""
         self.setting.value = u"2.1"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_int_keyval(self):
         """with source keyval list, trying to adjust an int to bool should convert to bool"""
         self.setting.value = u"2"
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("keyval list"))
+        self.assertRaises(ValueError, lambda: self.setting.adjust_value_to_type("keyval list"))
     def test_adjust_bool_keyval(self):
         """with source keyval list, trying to adjust a bool to bool should convert to bool"""
         self.setting.value = u"no"
@@ -588,7 +588,7 @@ class TestAdjustValueToTypeInvalidSource(unittest.TestCase):
         self.setting = settings.Setting(u"key", u"super")
     def test_invalid_source(self):
         """passing an invalid source should fail"""
-        self.assertRaises(BaseException, lambda: self.setting.adjust_value_to_type("foobar"))
+        self.assertRaises(AssertionError, lambda: self.setting.adjust_value_to_type("foobar"))
     def shortDescription(self):
         description = super(TestAdjustValueToTypeInvalidSource, self).shortDescription()
         return "settings.Setting.adjust_value_to_type: " + (description or "")
@@ -630,6 +630,7 @@ class TestSetValueDefaultFirst(unittest.TestCase):
 
         :type setting: `settings.Setting`
         :type value: float, unicode, bool, int, or list
+        :type type_: type
         :type source: str
         :type desired_value: float, unicode, bool, int, or list
         """
@@ -689,12 +690,14 @@ class TestSetValueDefaultFirst(unittest.TestCase):
         self.assume_working_value_setting(self.list_setting, [6, 3, 0], list)
 
     def test_nonstring_conffile_keyval(self):
-        """setting ony other but a string vis source="conf file"/"keyval list" should fail"""
+        """setting ony other but a string with source="conf file"/"keyval list" should fail"""
         for source in ["conf file", "keyval list"]:
-            self.assertRaises(BaseException, lambda: self.int_setting.set_value(1, source))
-            self.assertRaises(BaseException, lambda: self.int_setting.set_value(1.3, source))
-            self.assertRaises(BaseException, lambda: self.int_setting.set_value(True, source))
-            self.assertRaises(BaseException,
+            self.assertRaises(AssertionError, lambda: self.int_setting.set_value(1, source))
+            self.assertRaises(settings.SettingWrongTypeError,
+                              lambda: self.int_setting.set_value(1.3, source))
+            self.assertRaises(settings.SettingWrongTypeError,
+                              lambda: self.int_setting.set_value(True, source))
+            self.assertRaises(AssertionError,
                               lambda: self.int_setting.set_value([2, 4, -6], source))
     def test_int_conffile_keyval(self):
         """setting an int to a setting with source="conf file"/"keyval list" should """ \
@@ -973,6 +976,125 @@ class TestSetValueMisc(unittest.TestCase):
         description = super(TestSetValueMisc, self).shortDescription()
         return "settings.Setting.set_value: " + (description or "")
 
+class TestSettingInit(unittest.TestCase):
+    """Test case for `settings.Setting.__init__`.  I test the correct
+    auto-detection of types here, and invalid parameter values."""
+    def assume_working_instantiation(self, value, type_, source="direct", desired_value=None):
+        """Called for instantiation a new setting and looking whether the
+        auto-detection has worked.
+
+        :Parameters:
+          - `value`: the new value
+          - `type_`: the expected new type after the instantiation
+          - `source`: the source, as used in `settings.Setting.set_value`
+          - `desired_value`: The expected new value in the setting.  If not
+            given, `value` itself is assumed.
+
+        :type value: float, unicode, bool, int, or list
+        :type type_: type
+        :type source: str
+        :type desired_value: float, unicode, bool, int, or list
+        """
+        setting = settings.Setting(u"key", value, source=source)
+        self.assertEqual(setting.value, desired_value if desired_value is not None else value)
+        self.assert_(isinstance(setting.value, type_))
+    def test_auto_detection_int(self):
+        """int values should be properly auto-detected"""
+        self.assume_working_instantiation(1, int)
+    def test_auto_detection_float(self):
+        """float values should be properly auto-detected"""
+        self.assume_working_instantiation(1.0, float)
+    def test_auto_detection_bool(self):
+        """bool values should be properly auto-detected"""
+        self.assume_working_instantiation(False, bool)
+    def test_auto_detection_string(self):
+        """string values should be properly auto-detected"""
+        self.assume_working_instantiation(u"", unicode)
+        self.assume_working_instantiation(u"no", unicode)
+        self.assume_working_instantiation(u"1", unicode)
+    def test_auto_detection_conf_keyval(self):
+        """string values from configuration files and key/value lists should be properly """ \
+            """auto-detected"""
+        for source in ["conf file", "keyval list"]:
+            self.assume_working_instantiation(u"", unicode, source)
+            self.assume_working_instantiation(u"no", bool, source, False)
+            self.assume_working_instantiation(u"1", int, source, 1)
+            self.assume_working_instantiation(u"1.", float, source, 1.0)
+            self.assume_working_instantiation(u"2.0", float, source, 2.0)
+            self.assume_working_instantiation(u"-2.3e-16", float, source, -2.3e-16)
+    def test_auto_detection_conf_special_syntax(self):
+        """string values with the special list and string syntax from configuration files """ \
+            """should be properly auto-detected"""
+        self.assume_working_instantiation(u'"1"', unicode, "conf file", u"1")
+        self.assume_working_instantiation(u"(1, 2, 3)", list, "conf file", [1, 2, 3])
+        self.assume_working_instantiation(u'("1", "2", "3")', list, "conf file",
+                                          [u"1", u"2", u"3"])
+    def test_auto_detection_keyval_special_syntax(self):
+        """string values with the special list and string syntax from key/value lists """ \
+            """should remain as is"""
+        self.assume_working_instantiation(u'"1"', unicode, "keyval list")
+        self.assume_working_instantiation(u"(1, 2, 3)", unicode, "keyval list")
+        self.assume_working_instantiation(u'("1", "2", "3")', unicode, "keyval list")
+    def test_invalid_source(self):
+        """passing an invalid source parameter should fail"""
+        self.assertRaises(AssertionError, lambda: settings.Setting(u"key", 1, source="tralala"))
+    def test_invalid_explicit_type(self):
+        """passing an invalid explicit type parameter should fail"""
+        self.assertRaises(AssertionError,
+                          lambda: settings.Setting(u"key", 1, explicit_type="tralala"))
+    def shortDescription(self):
+        description = super(TestSettingInit, self).shortDescription()
+        return "settings.Setting.__init__: " + (description or "")
+
+class TestSettingInitExplicitType(unittest.TestCase):
+    """Test case for constructing `settings.Setting` objects with an explicit
+    type argument.
+
+    All of these tests have to be considered spurious as those for
+    ``adjust_value_to_type`` above.  Maybe it would be a good decision to drop
+    the ``explicit_type`` argument completely.
+    """
+    def test_explicit_type_unicode(self):
+        """giving an explicit type argument should work always for "unicode\""""
+        setting = settings.Setting("key", [1, 2, 3], "unicode")
+        self.assertEqual(setting.value, [u"1", u"2", u"3"])
+        setting = settings.Setting("key", "(1, 2, 3)", "unicode", source="conf file")
+        self.assertEqual(setting.value, [u"1", u"2", u"3"])
+    def test_explicit_type_bool(self):
+        """giving an explicit type argument should work or fail for "bool" depending on """ \
+            """whether it is exactly a bool string or not"""
+        self.assertRaises(ValueError, lambda: settings.Setting("key", "un", "bool"))
+        self.assertRaises(ValueError, lambda: settings.Setting("key", 1, "bool"))
+        setting = settings.Setting("key", True, "bool")
+        self.assertEqual(setting.value, True)
+        setting = settings.Setting("key", "no", "bool")
+        self.assertEqual(setting.value, False)
+    def test_explicit_type_int(self):
+        """giving an explicit type argument should work or fail for "int" depending on """ \
+            """whether or not it can be converted"""
+        self.assertRaises(ValueError, lambda: settings.Setting("key", "1.0", "int"))
+        setting = settings.Setting("key", False, "int")
+        self.assertEqual(setting.value, 0)
+        setting = settings.Setting("key", 1, "int")
+        self.assertEqual(setting.value, 1)
+        setting = settings.Setting("key", "1", "int")
+        self.assertEqual(setting.value, 1)
+    def test_explicit_type_float(self):
+        """giving an explicit type argument should work or fail for "float" depending on """ \
+            """whether or not it can be converted"""
+        self.assertRaises(ValueError, lambda: settings.Setting("key", "un", "float"))
+        setting = settings.Setting("key", 1, "float")
+        self.assertEqual(setting.value, 1.0)
+        self.assert_(isinstance(setting.value, float))
+        setting = settings.Setting("key", True, "float")
+        self.assertEqual(setting.value, 1.0)
+        self.assertRaises(ValueError, lambda: settings.Setting("key", "no", "float"))
+    def shortDescription(self):
+        description = super(TestSettingInitExplicitType, self).shortDescription()
+        return "settings.Setting.__init__ with explicit type argument (spurious): " + \
+            (description or "")
+    
+
 for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestAdjustValueToTypeFloat, TestAdjustValueToTypeBool,
                    TestAdjustValueToTypeUnicode, TestAdjustValueToTypeInvalidSource,
@@ -980,7 +1102,7 @@ for test_class in (TestGetBoolean, TestDetectType, TestAdjustValueToTypeInt,
                    TestSetValueDefaultSecondDirect,
                    TestSetValueDefaultSecondConf,
                    TestSetValueDefaultSecondKeyval,
-                   TestSetValueMisc):
+                   TestSetValueMisc, TestSettingInit, TestSettingInitExplicitType):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
 
 suite.addTest(doctest.DocFileSuite("settings.txt"))
