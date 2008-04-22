@@ -39,5 +39,3 @@ class TestParseLocalVariables(unittest.TestCase):
 
 for test_class in (TestParseLocalVariables,):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
-
-suite.addTest(doctest.DocFileSuite("common.txt"))

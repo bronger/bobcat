@@ -96,7 +96,8 @@ def load_backend_module(name, directory):
 modules_found = False
 for directory, __, filenames in os.walk(os.path.join(common_test.rootpath, "bobcatlib")):
     module_names = [filename[:-3] for filename in filenames
-                    if filename.endswith(".py") and filename != "__init__.py"]
+                    if filename.endswith(".py") and filename != "__init__.py"
+                    and "#" not in filename]
     # Now I create "modules".  Note that this can be a list of *names* or a
     # list of *modules*.  "doctest.DocTestSuite" can handle both, so this is no
     # problem.
