@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import unittest, doctest
-from bobcatlib import common
+import unittest, doctest, os
+from bobcatlib import common, preprocessor, parser, settings
 
 suite = unittest.TestSuite()
 
 class TestParseLocalVariables(unittest.TestCase):
+    """Test case for `common.parse_local_variables`.
+    """
     def test_valid_line(self):
         """parsing a valid local variables line should work"""
         self.assertEqual(common.parse_local_variables(".. -*- coding: utf-8; Blah: Blubb -*-\n"),
@@ -37,5 +39,30 @@ class TestParseLocalVariables(unittest.TestCase):
         description = super(TestParseLocalVariables, self).shortDescription()
         return "common.parse_local_variables: " + (description or "")
 
-for test_class in (TestParseLocalVariables,):
+class TestAddParseError(unittest.TestCase):
+    def setUp(self):
+        testfile = open("test.bcat", "w")
+        testfile.write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\nDummy document.\n")
+        testfile.close()
+        text, __, __ = preprocessor.load_file("test.bcat")
+        self.document = parser.Document()
+        self.assertEqual(self.document.parse(text, 0), 18)
+    def test_parse_error(self):
+        self.document.throw_parse_error("test error message")
+        self.assertEqual(repr(common.ParseError.parse_errors),
+                         '[<ParseError file "test.bcat", line 1, column 24>]')
+        self.assertEqual(common.ParseError.parse_errors[0].position,
+                         common.PositionMarker("test.bcat", 1, 24, 24))
+        # Necessary because "index" is not tested by `PositionMarker.__cmp__`.
+        self.assertEqual(common.ParseError.parse_errors[0].position.index, 24)
+        self.assertEqual(unicode(common.ParseError.parse_errors[0]),
+                         u'file "test.bcat", line 1, column 24: test error message')
+    def tearDown(self):
+        os.remove("test.bcat")
+        del common.ParseError.parse_errors[:]
+    def shortDescription(self):
+        description = super(TestAddParseError, self).shortDescription()
+        return "common.add_parse_error: " + (description or "")
+
+for test_class in (TestParseLocalVariables, TestAddParseError):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
