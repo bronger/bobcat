@@ -11,6 +11,9 @@ all test suites for the modules.
 
 import unittest, sys
 from tests import common_test
+from bobcatlib.settings import settings
+
+settings["quiet"] = True
 
 # Build test suite
 from tests import test_common, test_helpers, test_preprocessor, test_settings, test_safefilename, \

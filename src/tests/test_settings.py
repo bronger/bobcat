@@ -13,7 +13,6 @@ import unittest, doctest, os, warnings
 from bobcatlib import settings, common
 
 common.setup_logging()
-settings.settings["quiet"] = True
 
 suite = unittest.TestSuite()
 
