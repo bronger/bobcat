@@ -334,7 +334,7 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
     """Test whether a string, or its translation into the current document
     language, matches a certain part of the input script.
 
-        >>> filename = "test2.rsl"
+        >>> filename = "test.bcat"
         >>> open(filename, "w").write(\""".. -*- coding: utf-8 -*-
         ... .. Bobcat 1.0
         ...
@@ -364,6 +364,12 @@ def match_language_dependently(match_string, excerpt, pos, language, unescaped_o
         for the name to be escaped, in order to have names that are built-ins
         at the same time.  Thus, the parser will first test for built-ins, and
         then for user-provided environments.
+
+    :type match_string: unicode
+    :type excerpt: `Preprocessor.Excerpt`
+    :type pos: int
+    :type language: str
+    :type unescaped_only: bool
 
     :Return:
       ``True`` if there was a match, ``False`` otherwise
