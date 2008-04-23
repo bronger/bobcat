@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Unit tests for `bobcatlib.common`.
+
+:var suite: the test suite which is exported by this module, to be used by a
+  higher-level module for inclusion into a testing process.
+
+:type suite: ``unittext.TextSuite``
+"""
+
 import unittest, doctest, os
 from bobcatlib import common, preprocessor, parser, settings
 
@@ -48,6 +56,8 @@ class TestAddParseError(unittest.TestCase):
         self.document = parser.Document()
         self.assertEqual(self.document.parse(text, 0), 18)
     def test_parse_error(self):
+        """generating a parse error should result in the proper parse error object being """ \
+            """appended to `common.ParseError.parse_errors`."""
         self.document.throw_parse_error("test error message")
         self.assertEqual(repr(common.ParseError.parse_errors),
                          '[<ParseError file "test.bcat", line 1, column 24>]')
