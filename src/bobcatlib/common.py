@@ -77,18 +77,9 @@ class PositionMarker(object):
     def __cmp__(self, other):
         """The `index` must not be included in the decision whether two PositionMarkers
         are the same."""
+        # FixMe: Maybe the URL should be normalised somehow.
         return cmp((self.url, self.linenumber, self.column),
                    (other.url, other.linenumber, other.column))
-    def __eq__(self, other):
-        """In order to be equal, two ``PositionMarkers`` must point exactly to
-        the same position in the source file.
-
-        This is only needed for the unittests."""
-        # FixMe: Maybe the URL should be normalised somehow.
-        return self.url == other.url and self.linenumber == other.linenumber and \
-            self.column == other.column and self.index == other.index
-    def __ne__(self, other):
-        return not self.__eq__(other)
     def transpose(self, offset):
         """Return a new PositionMarker instance in order to get rid of side
         effect problems, by forcing making a *copy*.  Additionally, index
@@ -213,7 +204,7 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
         which marks comment lines.  Since the local variables are stored
         technically in a comment line, this routine must know it.
 
-    :type first_line: string
+    :type first_line: str
     :type force: bool
     :type comment_marker: str
 
@@ -350,6 +341,8 @@ class ParseError(Error):
     def __str__(self):
         # FixMe: The following must be made OS-dependent
         return unicode(self).encode("utf-8")
+    def __repr__(self):
+        return "<ParseError %s>" % self.position
     def __unicode__(self):
         return u"%s: %s" % (self.position, self.description)
 
@@ -361,19 +354,19 @@ def add_parse_error(parse_error):
         >>> from bobcatlib import parser, preprocessor, settings
         >>> import os.path
         >>> setup_logging()
-        >>> testfile = open("test2.rsl", "w")
+        >>> testfile = open("test2.bcat", "w")
         >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n"
         ... "Dummy document.\n")
         >>> testfile.close()
-        >>> text, __, __ = preprocessor.load_file("test2.rsl")
-        >>> os.remove("test2.rsl")
-        >>> node = parser.Node(None)
-        >>> node.parse(text, 0)
-        0
+        >>> text, __, __ = preprocessor.load_file("test2.bcat")
+        >>> os.remove("test2.bcat")
+        >>> document = parser.Document()
+        >>> document.parse(text, 0)
+        18
         >>> settings.settings["quiet"] = True
-        >>> node.throw_parse_error("test error message")
+        >>> document.throw_parse_error("test error message")
         >>> ParseError.parse_errors
-        [ParseError('test error message',)]
+        [<ParseError file "test2.bcat", line 1, column 24>]
 
     :Parameters:
       - `parse_error`: the actual parse error
