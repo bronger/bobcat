@@ -109,6 +109,7 @@ And this is _definitely the last one_.
                          "Graphviz generated a plot which was different from the expected one")
     def tearDown(self):
         os.remove("test.bcat")
+        os.remove("test.plain")
     def shortDescription(self):
         description = super(TestVisualizeTree, self).shortDescription()
         return "helpers.visualize_tree: " + (description or "")
