@@ -5,26 +5,11 @@
 #
 #    This file is part of the Bobcat program.
 #
-#    Bobcat is free software; you can redistribute it and/or modify it under
-#    the terms of the MIT licence:
+#    Bobcat is free software; you can use it, redistribute it and/or modify it
+#    under the terms of the MIT license.
 #
-#    Permission is hereby granted, free of charge, to any person obtaining a
-#    copy of this software and associated documentation files (the "Software"),
-#    to deal in the Software without restriction, including without limitation
-#    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#    and/or sell copies of the Software, and to permit persons to whom the
-#    Software is furnished to do so, subject to the following conditions:
-#
-#    The above copyright notice and this permission notice shall be included in
-#    all copies or substantial portions of the Software.
-#
-#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-#    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#    DEALINGS IN THE SOFTWARE.
+#    You should have received a copy of the MIT license with Bobcat.  If not,
+#    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
 """Module for things that are used by (almost) all parts of Bobcat.  This is
@@ -77,6 +62,7 @@ class PositionMarker(object):
     def __cmp__(self, other):
         """The `index` must not be included in the decision whether two PositionMarkers
         are the same."""
+        # FixMe: Maybe the URL should be normalised somehow.
         return cmp((self.url, self.linenumber, self.column),
                    (other.url, other.linenumber, other.column))
     def transpose(self, offset):
@@ -203,7 +189,7 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
         which marks comment lines.  Since the local variables are stored
         technically in a comment line, this routine must know it.
 
-    :type first_line: string
+    :type first_line: str
     :type force: bool
     :type comment_marker: str
 
@@ -340,6 +326,8 @@ class ParseError(Error):
     def __str__(self):
         # FixMe: The following must be made OS-dependent
         return unicode(self).encode("utf-8")
+    def __repr__(self):
+        return "<ParseError %s>" % self.position
     def __unicode__(self):
         return u"%s: %s" % (self.position, self.description)
 
@@ -351,19 +339,19 @@ def add_parse_error(parse_error):
         >>> from bobcatlib import parser, preprocessor, settings
         >>> import os.path
         >>> setup_logging()
-        >>> testfile = open("test2.rsl", "w")
+        >>> testfile = open("test2.bcat", "w")
         >>> testfile.write(".. -*- coding: utf-8 -*-\n.. Bobcat 1.0\n"
         ... "Dummy document.\n")
         >>> testfile.close()
-        >>> text, __, __ = preprocessor.load_file("test2.rsl")
-        >>> os.remove("test2.rsl")
-        >>> node = parser.Node(None)
-        >>> node.parse(text, 0)
-        0
+        >>> text, __, __ = preprocessor.load_file("test2.bcat")
+        >>> os.remove("test2.bcat")
+        >>> document = parser.Document()
+        >>> document.parse(text, 0)
+        18
         >>> settings.settings["quiet"] = True
-        >>> node.throw_parse_error("test error message")
+        >>> document.throw_parse_error("test error message")
         >>> ParseError.parse_errors
-        [ParseError('test error message',)]
+        [<ParseError file "test2.bcat", line 1, column 24>]
 
     :Parameters:
       - `parse_error`: the actual parse error
