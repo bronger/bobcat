@@ -15,6 +15,7 @@ from bobcatlib import latex_substitutions
 suite = unittest.TestSuite()
 
 class TestProcessTest(unittest.TestCase):
+    """Test case for `latex_substitutions.process_text`."""
     def test(self):
         """converting a Unicode codepoint to a LaTeX macro should work"""
         self.assertEqual(latex_substitutions.process_text(u"→", "de", "TEXT"), ur"$\rightarrow${}")
@@ -39,11 +40,13 @@ class TestProcessTest(unittest.TestCase):
         self.assertEqual(latex_substitutions.process_text(u"a € € a", "de", "TEXT"),
                          ur"a \texteuro\ \texteuro\ a")
     def test_special_characters_text(self):
+        """characters that have a special meaning in LaTeX should work in text mode"""
         self.assertEqual(
             latex_substitutions.process_text(u"!^°$%&{}\\`´?#~<>|'@"+'"', "de", "TEXT"),
             ur"!{}\textasciicircum\textdegree\textdollar\%\&\{\}\textbackslash"
             ur"`{}\textasciiacute?{}\#\textasciitilde<{}>{}|'{}@\char34{}")
     def test_special_characters_math(self):
+        """characters that have a special meaning in LaTeX should work in math mode"""
         self.assertEqual(
             latex_substitutions.process_text(u"!^°$%&{}\\`´?#~<>|'@"+'"', "de", "MATH"),
             ur"!{\char94}^\circ \$\%\&\{ \} \backslash \grave{\hspace*{0.5em}} "
@@ -51,8 +54,6 @@ class TestProcessTest(unittest.TestCase):
     def shortDescription(self):
         description = super(TestProcessTest, self).shortDescription()
         return "latex_substitutions.process_test: " + (description or "")
-    def toll(spitze):
-        get_boolean
 
 for test_class in (TestProcessTest,):
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_class))
