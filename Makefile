@@ -19,7 +19,7 @@ src-doc-svn:
 	rm -Rf src-doc
 
 tests:
-	python src/tests/test_doctests.py
+	python src/test_all.py
 
 pylint:
 	cd src/bobcatlib; pylint --rcfile=../misc/pylint.cfg *.py > pylint.log

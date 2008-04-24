@@ -5,26 +5,11 @@
 #
 #    This file is part of the Bobcat program.
 #
-#    Bobcat is free software; you can redistribute it and/or modify it under
-#    the terms of the MIT licence:
+#    Bobcat is free software; you can use it, redistribute it and/or modify it
+#    under the terms of the MIT license.
 #
-#    Permission is hereby granted, free of charge, to any person obtaining a
-#    copy of this software and associated documentation files (the "Software"),
-#    to deal in the Software without restriction, including without limitation
-#    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#    and/or sell copies of the Software, and to permit persons to whom the
-#    Software is furnished to do so, subject to the following conditions:
-#
-#    The above copyright notice and this permission notice shall be included in
-#    all copies or substantial portions of the Software.
-#
-#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-#    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#    DEALINGS IN THE SOFTWARE.
+#    You should have received a copy of the MIT license with Bobcat.  If not,
+#    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
 """Handling of global and local settings dictionaries.  This includes
@@ -74,11 +59,12 @@ class SettingError(common.Error):
         self.key, self.value = key, value
 
 class SettingUnknownKeyError(SettingError):
+    """Error class for invalid keys.  A key is invalid if the section it
+    belongs to has been closed already, and it was not previously defined in
+    this section.
+    """
     def __init__(self, key, value):
-        """Error class for invalid keys.  A key is invalid if the section it
-        belongs to has been closed already, and it was not previously defined
-        in this section.
-        
+        """
         :Parameters:
           - `key`: key of the setting
           - `value`: value of the setting
@@ -88,6 +74,21 @@ class SettingUnknownKeyError(SettingError):
         """
         super(SettingUnknownKeyError, self).__init__(
             u"unknown setting key; section already closed", key, value)
+
+class SettingInvalidKeyValueListError(SettingError):
+    """Error class for invalid syntaxes in key/value lists.  Note that this is
+    raised only in case of a bad list syntax, not if there was a problem with
+    adding a parsed key/value pair to the `SettingsDict`.
+    """
+    def __init__(self, excerpt):
+        """
+        :Parameters:
+          - `excerpt`: the part of the list that couldn't be parsed
+
+        :type excerpt: `preprocessor.Excerpt`
+        """
+        super(SettingInvalidKeyValueListError, self).__init__(
+            u"unparsable key found in key/value list", key=excerpt, value=None)
 
 class SettingWrongTypeError(SettingError):
     """Error class for invalid types of values in a `SettingsDict`.  A type is
@@ -153,19 +154,27 @@ class Setting(object):
     methods are for internal use only.  For examples for using this class, see
     `__init__` and `set_value`.
 
-    :ivar key: the key of this Setting.  This may be an arbitrary non-empty
+    :ivar key: The key of this Setting.  It is stored in this class only for
+      gernerating proper error messages.  This may be an arbitrary non-empty
       string.  It may be divided by a dot into a section and an option part,
-      where the option doesn't contain a dot, and both parts must not be
-      empty.  If there is no dot, the section is ``u""``.
+      where the option doesn't contain a dot, and both parts must not be empty.
+      If there is no dot, the section is ``u""``.
     :ivar value: the value of this Setting.  Must be of the type described in
       `self.type`.  It may also be a list with values of that type.  It may
       also be ``None``.
     :ivar type: the type of this Setting.  It must be either ``"float"``,
       ``"int"``, ``"unicode"``, or ``"bool"``.
+    :ivar __initial_source: the source that was given when the setting was
+      created
+    :ivar __preliminarily_detected_value: The value that was given when the setting was
+      created.  It extists only if the source during initialisation was ``"conf
+      file"`` or ``"keyval list"``.
 
     :type key: unicode
     :type value: unicode, float, int, bool, list, NoneType
     :type type: str
+    :type __initial_source: str
+    :type __preliminarily_detected_value: unicode
 
     """
     def get_boolean(self, value):
@@ -260,7 +269,7 @@ class Setting(object):
             >>> setting.detect_type(True, "direct")
             'bool'
 
-        Lists also work:
+        Lists also work, here the first element is used for the detection:
         
             >>> setting.detect_type([1, 2, 3], "direct")
             'int'
@@ -301,6 +310,7 @@ class Setting(object):
             Traceback (most recent call last):
               ...
             SettingError: setting 'key = []': cannot detect type of empty list
+
         """
         # pylint: disable-msg=R0912
         assert source in ["conf file", "keyval list", "direct", "default"]
@@ -400,9 +410,9 @@ class Setting(object):
             >>> setting.value
             3.3999999999999999
 
-        Examples for things that don't work:
         """
         # pylint: disable-msg=R0912
+        assert source in ["direct", "default", "conf file", "keyval list"]
         if self.value is None:
             # In this case, typecasting is delayed until the setting gets a
             # proper value
@@ -423,8 +433,9 @@ class Setting(object):
             elif type_ == "float":
                 return float(value)
 
-        if source == "conf file":
+        if source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
+        if source == "conf file":
             self.value = self.value.strip()
             if "," in self.value and self.value.startswith("(") and self.value.endswith(")"):
                 # Okay, we have a list
@@ -486,14 +497,19 @@ class Setting(object):
 
         for more examples, see `set_value`.
         """
+        # FixMe: Maybe one should drop the ``explicit_type`` argument because
+        # it forces `adjust_value_to_type` to support spurious cases, see the
+        # unit test file for this module for more information.
         dot_position = key.rfind(".")
         assert 0 < dot_position < len(key) - 1 or dot_position == -1, \
             u"invalid setting key '%s', either section or option is empty" % key
-        self.key, self.value, self.type, self.docstring, self.initial_source = \
+        self.key, self.value, self.type, self.docstring, self.__initial_source = \
             key, value, explicit_type, docstring, source
-        if self.initial_source in ["conf file", "keyval list"]:
+        if self.__initial_source in ["conf file", "keyval list"]:
             assert isinstance(self.value, basestring)
-            self.initial_value = self.value
+            self.__preliminarily_detected_value = self.value
+        else:
+            self.__preliminarily_detected_value = None
         self.has_default = source == "default"
         assert self.type in ["int", "float", "bool", "unicode"] or self.type is None
         if not self.type:
@@ -518,6 +534,9 @@ class Setting(object):
         :Exceptions:
           - `SettingError`: if the data type cannot be detected because it is
             not one of the allowed types, or if `value` is an empty list.
+          - `SettingWrongTypeError`: if the new value is incompatible with the
+            already stored one, including the case if the new value is the
+            default value
           - `ValueError`: if the value cannot be converted to the
             `self.type`.
 
@@ -560,8 +579,8 @@ class Setting(object):
             >>> setting.set_value(1, "default")  #doctest:+NORMALIZE_WHITESPACE
             Traceback (most recent call last):
               ...
-            SettingError: setting 'key = 1': default value of type 'int' is
-            incompatible with previous type 'unicode'
+            SettingWrongTypeError: setting 'key = 1': new value of type 'int'
+            is unequal to previous type 'unicode'
             >>> setting.value
             u'1'
         
@@ -587,24 +606,30 @@ class Setting(object):
             >>> setting.set_value("path/to/something", "default")
             >>> setting.value
             [u'1', u'2', u'3']
+
         """
+        def type_actually_unicode():
+            """Returns ``True`` if the new type of the setting is supposed to
+            be unicode, however, the old type way detected from the value from
+            a configuration file or a key/value list so it may have been
+            unicode in the first place, just improperly auto-detected.
+
+            In this case, no error should be generated but just converted to
+            the initial(!) unicode values as it was in the configuration file
+            or the key/value list.
+            """
+            return source in ["default", "direct"] and \
+                self.__preliminarily_detected_value is not None and new_type == "unicode"
         if docstring:
             self.docstring = docstring
         if value is not None:
             new_type = self.detect_type(value, source)
             if new_type != self.type \
                     and not (source in ["conf file", "keyval list"] and self.type == "unicode") \
-                    and not (source == "default" and
-                             self.initial_source in ["conf file", "keyval list"]
-                             and new_type == "unicode") \
+                    and not type_actually_unicode() \
                     and not (source == "default" and self.type == "int" and new_type == "float") \
                     and not (source != "default" and self.type == "float" and new_type == "int"):
-                if source == "default":
-                    raise SettingError("default value of type '%s' is incompatible "
-                                       "with previous type '%s'" %
-                                       (new_type, self.type), self.key, value)
-                else:
-                    raise SettingWrongTypeError(self.key, value, self.type, new_type)
+                raise SettingWrongTypeError(self.key, value, self.type, new_type)
         else:
             new_type = None
         if source == "default":
@@ -612,10 +637,16 @@ class Setting(object):
             self.has_default = True
             if self.type == "int" and new_type == "float":
                 self.type = new_type
-            elif self.initial_source in ["conf file", "keyval list"] and new_type == "unicode":
-                self.type = new_type
         else:
             self.value = value
+        if type_actually_unicode():
+            self.type = new_type  # always "unicode"
+            if source == "default":
+                self.value = self.__preliminarily_detected_value
+                # because the new value must be completely re-parsed
+                source = self.__initial_source
+        if source == "direct":
+            self.__preliminarily_detected_value = None
         self.adjust_value_to_type(source)
 
 class SettingsDict(dict):
@@ -717,7 +748,9 @@ class SettingsDict(dict):
         :type value: unicode, int, float, bool, list
 
         :Exceptions:
-          - `SettingError`: if the key belongs to a closed section
+          - `SettingUnknownKeyError`: if the key belongs to a closed section
+          - `SettingInvalidSectionError`: if the section hasn't existed yet,
+            and no new sections are allowed
 
         Example:
         
@@ -750,6 +783,15 @@ class SettingsDict(dict):
             raise SettingUnknownKeyError(key, value)
         if self.__new_sections_inhibited and section not in self.sections:
             raise SettingInvalidSectionError(key, value, section)
+    def __eq__(self, other):
+        # For comparison, we have to normalise both operands first by replacing
+        # the values (which are `Setting` objects) by their "effective" value
+        # (the result of `Setting.value`).
+        if isinstance(other, SettingsDict):
+            other = dict((key, other[key]) for key in other)
+        return dict((key, self[key]) for key in self) == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
     def set_default(self, key, value, explicit_type=None, docstring=None):
         """Set the default value of a setting.  It may already exist or not.
 
@@ -806,6 +848,7 @@ class SettingsDict(dict):
                 ...
             SettingUnknownKeyError: setting 'General.f = [1, 2, 3, 4]': unknown setting
             key; section already closed
+
         """
         assert key not in self or not super(SettingsDict, self).__getitem__(key).has_default, \
             u"setting '%s' has already a default value (%s)" % (key, repr(self[key]))
@@ -934,7 +977,7 @@ class SettingsDict(dict):
                     self.sections.add(unicode(key)[:dot_position])
                 else:
                     self.sections.add(u"")
-    def parse_keyvalue_list(self, excerpt, parent_element,
+    def parse_keyvalue_list(self, excerpt, parent_element=None,
                             item_separator=u",", key_terminators=u":="):
         """Adds items from a key/value list to the dictionary.  These key/value
         lists are most commonly found in Bobcat source documents, in similar
@@ -953,8 +996,8 @@ class SettingsDict(dict):
         :Parameters:
           - `excerpt`: the Excerpt which contains the complete key/value list
             to be parsed
-          - `parent_element`: the document element in which this key/value list
-            occurs
+          - `parent_element`: The document element in which this key/value list
+            occurs.  This is used for generating cumulative errors, if given.
           - `item_separator`: the string that divides key/value pairs
             a.k.a. items in the list; it can be a single character or longer.
             It defaults to ``","``.
@@ -968,10 +1011,20 @@ class SettingsDict(dict):
         :type item_separator: unicode
         :type key_terminators: unicode
 
+        :Exceptions:
+          - `SettingUnknownKeyError`: raised if a key could not be added to the
+            ``SettingsDict`` due to rules of closed section etc.
+          - `SettingInvalidSectionError`: raised if a section could not be
+            added because new sections are not allowed in this
+            ``SettingsDict``.
+          - `SettingInvalidKeyValueListError`: raised if the synatx of the
+            key/value list was invalid
+
         Example:
 
             >>> from . import preprocessor, parser
-            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE", "myfile.rsl", {}, {})
+            >>> excerpt = preprocessor.Excerpt("a:b, c = 4, d", "PRE",
+            ...                                "myfile.bcat", {}, {})
             >>> settings = SettingsDict()
             >>> settings.set_default("a", None, "unicode")
             >>> settings.set_default("c", None, "int")
@@ -984,9 +1037,9 @@ class SettingsDict(dict):
             >>> type(settings["c"])
             <type 'int'>
             >>> for key in settings.iterkeys(): print key.original_position()
-            file "myfile.rsl", line 1, column 0
-            file "myfile.rsl", line 1, column 5
-            file "myfile.rsl", line 1, column 12
+            file "myfile.bcat", line 1, column 0
+            file "myfile.bcat", line 1, column 5
+            file "myfile.bcat", line 1, column 12
 
         """
         # In the current Bobcat source code, no warnings should happen here but
@@ -1008,24 +1061,33 @@ class SettingsDict(dict):
                     start, end = next_item_match.span("value")
                     value = unicode(excerpt[start:end].apply_postprocessing()).strip()
                 else:
-                    value = True
+                    value = u"true"
                 try:
                     self.store_new_value(key, value, "keyval list")
                 except (SettingUnknownKeyError, SettingInvalidSectionError), error:
-                    parent_element.throw_parse_warning(
-                        "unknown key '%s'" % key, key.original_position())
+                    if parent_element:
+                        parent_element.throw_parse_warning(
+                            "unknown key '%s'" % key, key.original_position())
+                    else:
+                        raise
                 except SettingWrongTypeError, error:
-                    parent_element.throw_parse_warning(
-                        "type of value for '%s' is wrong; expected %s but got %s" %
-                        (key, error.previous_type, error.new_type),
-                        key.original_position())
+                    if parent_element:
+                        parent_element.throw_parse_warning(
+                            "type of value for '%s' is wrong; expected %s but got %s" %
+                            (key, error.previous_type, error.new_type),
+                            key.original_position())
+                    else:
+                        raise
                 current_position = next_item_match.end()
             else:
-                parent_element.throw_parse_error(
-                    "invalid key--value syntax in '%s'" %
-                    excerpt[current_position:].apply_postprocessing().strip(),
-                    excerpt.original_position(current_position))
-                break
+                erroneous_excerpt = excerpt[current_position:].apply_postprocessing().strip()
+                if parent_element:
+                    parent_element.throw_parse_error(
+                        "invalid key--value syntax in '%s'" %
+                        erroneous_excerpt, excerpt.original_position(current_position))
+                    break
+                else:
+                    raise SettingInvalidKeyValueListError(erroneous_excerpt)
         warnings.resetwarnings()
             
     def load_from_files(self, filenames, forbidden_sections=frozenset()):
