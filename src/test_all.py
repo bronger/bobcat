@@ -9,7 +9,7 @@ all source code files and does further things.  Without ``--all``, it just runs
 all test suites for the modules.
 """
 
-import unittest, sys, subprocess
+import unittest, sys, subprocess, os
 from tests import common_test
 from bobcatlib.settings import settings
 
@@ -26,6 +26,23 @@ class TestSampleDocument(unittest.TestCase):
         desired_output = open("test1-desired.tex").read()
         self.assertEqual(actual_output, desired_output,
                          "result of sample document was not the expected result")
+        os.remove("test1.tex")
+        os.remove("bobcat.log")
+
+class TestDocumentation(unittest.TestCase):
+    """Test case for the Epydoc documentation, whether it is correct.
+    """
+    def setUp(self):
+        os.chdir("..")
+    def test(self):
+        """docstrings for Epydoc documentation should be correct"""
+        epydoc = subprocess.Popen(["epydoc", "--config=../misc/epydoc.cfg"], stdout=subprocess.PIPE)
+        result = epydoc.wait()
+        self.assertEqual(result, 0, "Epydoc had errors")
+        os.remove("tests/test1.tex")
+        os.remove("bobcat.log")
+    def tearDown(self):
+        os.chdir("tests")
 
 # Build test suite
 from tests import test_common, test_helpers, test_preprocessor, test_settings, test_safefilename, \
@@ -42,7 +59,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--all":
     from tests import test_doctests
     suite.addTest(test_doctests.suite)
     suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestSampleDocument))
-    # FixMe: Add epydoc generating test, and document processing tests
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestDocumentation))
 
 # Run the tests
 common_test.chdir_to_testbed()
