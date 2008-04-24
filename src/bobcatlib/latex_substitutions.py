@@ -298,13 +298,20 @@ def process_text(text, language, mode, packages=None):
     :rtype: unicode
     """
     # pylint: disable-msg=C0103
-    def get_TEXT_substitution(substitutions, is_whitespace_following):
+    def get_TEXT_substitution(substitutions, following_character):
         """Assume that you are in LaTeX's text mode (horizontal mode) and
-        generate a replacement for it."""
+        generate a replacement for it.  `following_character` must be ``None``
+        or the empty string of there is no following character."""
         if "TEXT" in substitutions:
             substitution = unicode(substitutions["TEXT"])
-            if substitution[-1] == "\\" and not is_whitespace_following:
-                substitution = substitution[:-1] + "{}"
+            if substitution[-1] == "\\":
+                if not following_character:
+                    substitution = substitution[:-1] + "{}"
+                elif following_character not in " \t\r\n":
+                    if following_character in string.ascii_letters:
+                        substitution = substitution[:-1] + " "
+                    else:
+                        substitution = substitution[:-1]
         elif "MATH" in substitutions:
             substitution = u"$" + unicode(substitutions["MATH"]) + "${}"
         else:
@@ -325,7 +332,7 @@ def process_text(text, language, mode, packages=None):
         else:
             return replacement_macro
 
-    Substitution.reset_packages(packages)
+    Substitution.reset_packages(packages or set())
     language_substitutions = build_language_substitutions(language)
     processed_text = u""
     for i, char in enumerate(text):
@@ -341,9 +348,10 @@ def process_text(text, language, mode, packages=None):
         if char in language_substitutions and \
                 (unicode_number >= 256 or mode in language_substitutions[char]):
             substitutions = language_substitutions[char]
-            is_whitespace_following = text[i+1:i+2] in " \t\r\n"
+            following_character = text[i+1:i+2]
+            is_whitespace_following = following_character and following_character in " \t\r\n"
             if mode == "TEXT":
-                substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
+                substitution = get_TEXT_substitution(substitutions, following_character)
             elif mode == "MATH":
                 if "MATH" in substitutions:
                     substitution = unicode(substitutions["MATH"])
@@ -359,7 +367,7 @@ def process_text(text, language, mode, packages=None):
                     if not is_whitespace_following:
                         substitution += " "
                 else:
-                    substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
+                    substitution = get_TEXT_substitution(substitutions, following_character)
                 if substitution.startswith("$"):
                     substitution = u"??"
                 substitution = ur"\texorpdfstring{%s}{%s}" % (process_text(char, language, "TEXT"),
@@ -370,12 +378,12 @@ def process_text(text, language, mode, packages=None):
                     if not is_whitespace_following:
                         substitution += " "
                 else:
-                    substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
+                    substitution = get_TEXT_substitution(substitutions, following_character)
             elif mode == "BIBTEX":
                 if "BIBTEX" in substitutions:
                     substitution = unicode(substitutions["BIBTEX"])
                 else:
-                    substitution = get_TEXT_substitution(substitutions, is_whitespace_following)
+                    substitution = get_TEXT_substitution(substitutions, following_character)
                 substitution = u"{" + substitution + "}"
             else:
                 raise Error("INTERNAL ERROR: invalid mode %s in line '%s'" % (mode, text))
