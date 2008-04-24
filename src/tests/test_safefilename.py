@@ -48,6 +48,37 @@ class TestDecoding(unittest.TestCase):
     def test_uppercase_and_spaces(self):
         """decoding a filename with encoded uppercase letters and spaces should work"""
         self.assertEqual(u"{mit}_{t}hesis".decode("safefilename"), u"MIT Thesis")
+    def test_unclosed_brace(self):
+        """decoding a filename with an unclosed curly brace should fail"""
+        self.assertRaises(UnicodeDecodeError, lambda: "{a".decode("safefilename"))
+    def test_unmatched_parenthesis(self):
+        """decoding a filename with an unmatched parenthesis should fail"""
+        self.assertRaises(UnicodeDecodeError, lambda: "1(5g2".decode("safefilename"))
+    def test_parentheses_with_invalid_code(self):
+        """decoding a filename with parentheses containing invalid code should fail"""
+        self.assertRaises(UnicodeDecodeError, lambda: "1(5g)2".decode("safefilename"))
+    def test_uppercase_within_braces(self):
+        """decoding a filename with an uppercase letter in curly braces should fail"""
+        self.assertRaises(UnicodeDecodeError, lambda: "{H}allo".decode("safefilename"))
+    def test_invalid_character(self):
+        """decoding a filename with an invalid character should fail"""
+        self.assertRaises(UnicodeDecodeError, lambda: "}allo".decode("safefilename"))
+        self.assertRaises(UnicodeDecodeError, lambda: ")allo".decode("safefilename"))
+        self.assertRaises(UnicodeDecodeError, lambda: chr(170)+"allo".decode("safefilename"))
+    def test_errors_replace(self):
+        """decoding a filename with errors="replace" should work"""
+        self.assertEqual(u"{H}allo".decode("safefilename", "replace"), u"??allo")
+        self.assertEqual(u"{".decode("safefilename", "replace"), u"")
+        self.assertEqual(u"{Aallo".decode("safefilename", "replace"), u"?allo")
+        self.assertEqual(u"1(rt)2".decode("safefilename", "replace"), u"1?2")
+        self.assertEqual(u"1(rt2".decode("safefilename", "replace"), u"1?rt2")
+    def test_errors_ignore(self):
+        """decoding a filename with errors="ignore" should work"""
+        self.assertEqual(u"{H}allo".decode("safefilename", "ignore"), u"allo")
+        self.assertEqual(u"{allo".decode("safefilename", "ignore"), u"ALLO")
+        self.assertEqual(u"{Aallo".decode("safefilename", "ignore"), u"allo")
+        self.assertEqual(u"1(rt)2".decode("safefilename", "ignore"), u"12")
+        self.assertEqual(u"1(rt2".decode("safefilename", "ignore"), u"1rt2")
     def shortDescription(self):
         description = super(TestDecoding, self).shortDescription()
         return "safefilename.decode: " + (description or "")
