@@ -693,6 +693,7 @@ MATH
 
 \		\backslash
 
+`		\grave{\hspace*{0.5em}}
 
 {		\{
 
@@ -707,7 +708,7 @@ MATH
 °		^\circ
 ±		\pm
 
-´		\acute
+´		\acute{\hspace*{0.5em}}
 
 ·		\cdot
 
