@@ -62,6 +62,7 @@ class PositionMarker(object):
     def __cmp__(self, other):
         """The `index` must not be included in the decision whether two PositionMarkers
         are the same."""
+        # FixMe: Maybe the URL should be normalised somehow.
         return cmp((self.url, self.linenumber, self.column),
                    (other.url, other.linenumber, other.column))
     def transpose(self, offset):
@@ -188,7 +189,7 @@ def parse_local_variables(first_line, force=False, comment_marker=r"\.\. "):
         which marks comment lines.  Since the local variables are stored
         technically in a comment line, this routine must know it.
 
-    :type first_line: string
+    :type first_line: str
     :type force: bool
     :type comment_marker: str
 
@@ -325,6 +326,8 @@ class ParseError(Error):
     def __str__(self):
         # FixMe: The following must be made OS-dependent
         return unicode(self).encode("utf-8")
+    def __repr__(self):
+        return "<ParseError %s>" % self.position
     def __unicode__(self):
         return u"%s: %s" % (self.position, self.description)
 
@@ -342,13 +345,13 @@ def add_parse_error(parse_error):
         >>> testfile.close()
         >>> text, __, __ = preprocessor.load_file("test2.bcat")
         >>> os.remove("test2.bcat")
-        >>> node = parser.Node(None)
-        >>> node.parse(text, 0)
-        0
+        >>> document = parser.Document()
+        >>> document.parse(text, 0)
+        18
         >>> settings.settings["quiet"] = True
-        >>> node.throw_parse_error("test error message")
+        >>> document.throw_parse_error("test error message")
         >>> ParseError.parse_errors
-        [ParseError('test error message',)]
+        [<ParseError file "test2.bcat", line 1, column 24>]
 
     :Parameters:
       - `parse_error`: the actual parse error

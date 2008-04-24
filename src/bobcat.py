@@ -53,7 +53,7 @@ if options.version:
     sys.exit()
 
 if 'epydoc' in sys.modules:
-    filenames = ["../misc/test1.bcat"]
+    filenames = ["tests/test1.bcat"]
 if len(filenames) != 1:
     print u"Please specify exactly one input file."
     sys.exit()
