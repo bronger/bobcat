@@ -15,6 +15,9 @@ from bobcatlib.settings import settings
 
 settings["quiet"] = True
 
+class TestSampleDocument(unittest.TestCase):
+    
+
 # Build test suite
 from tests import test_common, test_helpers, test_preprocessor, test_settings, test_safefilename, \
     test_i18n, test_emitter, test_latex_substitutions
