@@ -46,8 +46,6 @@ module for the LaTeX backend.
   copied into the LaTeX file safely under all circumstances, contexts and
   languages.
 :var replacement_macro: LaTeX macro for the Unicode replacement character
-:var basic_substitutions: substitutions for characters that are special in
-  LaTeX like ~ or _ but can't be escaped with backslash
 :var combining_diacritical_marks: list of Unicode characters that are combining
   diacritical marks
 
@@ -55,7 +53,6 @@ module for the LaTeX backend.
 :type cached_substitutions: dict
 :type undangerous_characters: str
 :type replacement_macro: str
-:type basic_substitutions: dict
 :type combining_diacritical_marks: list of unicode
 """
 
@@ -254,9 +251,6 @@ def build_language_substitutions(language_code):
 
 undangerous_characters = string.ascii_letters + string.digits + " \t\r\n"
 replacement_macro = ur"\replacecharacter{}"
-basic_substitutions = {'"': ur"\mbox{\char34}}", "\\": ur"\textbackslash{}",
-                       "_": ur"\textunderscore{}",
-                       "^": ur"\textasciicircum{}", "~": ur"\textasciitilde{}"}
 # FixMe: The combining diacritical marks CDM are not yet handled in this
 # module.  Eventually, the current character can be identified as a CDM by
 # testing membership in one of the two following lists.  Then, it must step
@@ -326,8 +320,8 @@ def process_text(text, language, mode, packages=None):
         elif character in "$%&{}#":
             return "\\" + character
         elif character in r'"\_^~':
-            return basic_substitutions[character]
-        elif 32 <= unicode_number <= 127 or character in "\t\r\n" or 161 <= unicode_number <= 255:
+            return ur"{\char%d}" % ord(character)
+        elif 32 <= ord(character) <= 127 or character in "\t\r\n" or 161 <= ord(character) <= 255:
             return character
         else:
             return replacement_macro
@@ -398,7 +392,7 @@ def process_text(text, language, mode, packages=None):
             if char in "$%&{}#":
                 processed_text += "\\" + char
             elif char in r'"\_^~':
-                processed_text += basic_substitutions[char]
+                processed_text += ur"{\char%d}" % ord(char)
             elif 32 <= unicode_number <= 127 or char in "\t\r\n" or 161 <= unicode_number <= 255:
                 processed_text += char
             else:

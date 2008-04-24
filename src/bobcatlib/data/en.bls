@@ -29,8 +29,16 @@ TEXT
 
 0xa		\\\relax\
 
+"		\char34\
 
 $		\textdollar\
+
+\		\textbackslash\			textcomp
+
+^		\textasciicircum\		textcomp
+_		\textunderscore\		textcomp
+
+~		\textasciitilde\		textcomp
 
 
 		\hskip0pt
