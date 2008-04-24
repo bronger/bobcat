@@ -9,14 +9,23 @@ all source code files and does further things.  Without ``--all``, it just runs
 all test suites for the modules.
 """
 
-import unittest, sys
+import unittest, sys, subprocess
 from tests import common_test
 from bobcatlib.settings import settings
 
 settings["quiet"] = True
 
 class TestSampleDocument(unittest.TestCase):
-    
+    """Test case for a sample document run through Bobcat.
+    """
+    def test(self):
+        """sample document should run through with expected output"""
+        result = subprocess.call(["python", "../bobcat.py", "test1.bcat"])
+        self.assertEqual(result, 0, "bobcat process aborted")
+        actual_output = open("test1.tex").read()
+        desired_output = open("test1-desired.tex").read()
+        self.assertEqual(actual_output, desired_output,
+                         "result of sample document was not the expected result")
 
 # Build test suite
 from tests import test_common, test_helpers, test_preprocessor, test_settings, test_safefilename, \
@@ -32,6 +41,7 @@ suite = unittest.TestSuite([test_common.suite,
 if len(sys.argv) > 1 and sys.argv[1] == "--all":
     from tests import test_doctests
     suite.addTest(test_doctests.suite)
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestSampleDocument))
     # FixMe: Add epydoc generating test, and document processing tests
 
 # Run the tests

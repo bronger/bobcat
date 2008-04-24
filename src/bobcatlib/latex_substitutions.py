@@ -234,7 +234,8 @@ def build_language_substitutions(language_code):
     cached_substitutions_with_fallbacks[language_code] = language_substitutions
     return language_substitutions
 
-undangerous_characters = string.ascii_letters + string.digits + " \t\r\n"
+ascii_letters_digits = string.ascii_letters + string.digits + " \t\r\n"
+undangerous_characters = ascii_letters_digits + " \t\r\n"
 replacement_macro = ur"\replacecharacter{}"
 # FixMe: The combining diacritical marks CDM are not yet handled in this
 # module.  Eventually, the current character can be identified as a CDM by
@@ -287,7 +288,7 @@ def process_text(text, language, mode, packages=None):
                 if not following_character:
                     substitution = substitution[:-1] + "{}"
                 elif following_character not in " \t\r\n":
-                    if following_character in string.ascii_letters:
+                    if following_character in ascii_letters_digits:
                         substitution = substitution[:-1] + " "
                     else:
                         substitution = substitution[:-1]
