@@ -1,0 +1,39 @@
+.. -*- coding: utf-8 -*-
+.. Bobcat 1.0
+
+#. Introduction
+===============
+
+This is the _first_ paragraph.
+
+
+#. Motivation
+=============
+
+This is the _second_ paragraph.
+
+And this is the third one.
+
+
+#.# Acknowledgements
+====================
+
+Yet _another_ text block.
+
+And we go further and further.
+
+
+#.#.# A subsubheading
+=====================
+
+"42" said Deep Thought, with infinite majesty and calm.
+
+It was a long time before anyone spoke.
+
+
+#. Last chapter
+===============
+
+This is almost the last paragraph.
+
+And this is _definitely the last one_.

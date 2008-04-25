@@ -3,10 +3,11 @@ misc/test1.dvi
 misc/test1.log
 misc/test1.out
 misc/test1.tex
-/gummi.log
+/bobcat.log
 homepage/epydoc/
-doc/gummi-spec.aux
-doc/gummi-spec.dvi
-doc/gummi-spec.log
-doc/gummi-spec.out
-doc/gummi-spec.toc
+doc/bobcat-spec.aux
+doc/bobcat-spec.dvi
+doc/bobcat-spec.log
+doc/bobcat-spec.out
+doc/bobcat-spec.toc
+src/bobcat.log
