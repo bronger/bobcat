@@ -12,6 +12,11 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""Very basic inline-level parsing for Bobcat.  Here, I digest the inline
+content model and associated elements.  In particular, text nodes are treated
+here.
+"""
+
 # FixMe: This import should be turned into "import *" once the fix for
 # http://article.gmane.org/gmane.comp.python.python-3000.devel/12267 has
 # arrived here.  (Probably not befor Python 3.0.)  Of course, the __all__
