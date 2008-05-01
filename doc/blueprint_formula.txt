@@ -53,14 +53,14 @@ you have to input:
     ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
 </code>
 
-The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« would have worked, too, because also here, it's just important to break up te pairs.
+The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« would have worked, too, because also here, it's just important to break up the pairs.
 
-By the way, the ''orderding'' within a pair is insignificant.
+By the way, the ''ordering'' within a pair is insignificant.
 
 
 == Whitespace ==
 
-“Whitespace” in this blueprint means “tab, space, line break, or non-breaking space”.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+“Whitespace” in this blueprint means all breaking or non-breaking, non-zero-length whitespace which Unicode offers.  The reason why the non-breaking spaces are included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
 
 
 == Roots ==
@@ -95,7 +95,7 @@ Granted, the middle form (the one that resembles LaTeX) is the best one. Althoug
 
 == Mathematical accents ==
 
-For mathematical accents, Bobcat uses the “combined diacritical marks” from Unicode.  In particular, this means that their use is ''postfix'' (in contrast to LaTeX's prefix notation).  For wide accents, you have to put the accent on the closing brace (which your editor may display as the accents being positioned after the brace):
+For mathematical accents, Bobcat uses the “combining diacritical marks” from Unicode.  In particular, this means that their use is ''postfix'' (in contrast to LaTeX's prefix notation).  For wide accents, you have to put the accent on the closing brace (which your editor may display as the accents being positioned after the brace):
 
 <code>
               ẍ                       \ddot x
@@ -190,13 +190,13 @@ By default, matrices are enclosed with (…).  With the parameters “braces”,
 
 === Vectors ===
 
-Vectors are matrices with a simplified syntax:
+Vectors are slightly different from matrices because autodetecting the size is not feasible:
 
 <code>
-vector:: `size=3` 1 2 3 = …
+vector:: 3, 1 2 3 = …
 </code>
 
-The size parameter is mandatory.  There exist special versions called <code>vector2</code>, <code>vector3</code>, and <code>vector4</code> for 2, 3, and 4 components respectively.  They only carry an optional <code>align</code> attribute, but no size parameter.
+The size parameter is the first, comma-separated argument.
 
 
 == Text blocks ==
@@ -210,6 +210,26 @@ Text blocks are entered as <code>`|name of text block|`</code>, so enclosed in b
 </code>
 
 Note that alignment markers are removed before the insertion.
+
+
+== Physical quantities ==
+
+When the Bobcat parser encounters a non-breaking space of some kind, which doesn't just terminate the current formula element, it tries to parse the surrounding material as a physical quantity, which consists of a number (before the space) and/or a physical unit (after the space).
+
+The number must have the typical format used in programming languages, e.g. <code>1.3e-4</code>.  You may use a decimal point or a decimal comma.
+
+The unit is implicitly a formula (so even outside formulae, you needn't use curly braces), however, if it contains whitespace, you must enclode it with curly braces.  All consecutive Latin letters, as well as µ and Å (and maybe a few others) are interpreted as units, which means that they will be printed upright, among other things.
+
+In the following examples, I use the ~ for the non-breaking space:
+
+<code>
+   2,34e16            $2{,}34\cdot10^{16}$
+     3~m              \unit[3]{m}
+    ~m//s             $\mathrm{\frac{m}{s}}$
+ {A = 3~cm²}          $A = 3\mathrm{cm^2}$
+</code>
+
+The backend or theme may render numbers differently.
 
 
 == Alignment ==
@@ -233,6 +253,17 @@ By default, Bobcat will produce numbering for all displayed equations.  This can
 
 <code>
 {a² + b² = c²}   `pythagoras`
+</code>
+
+
+== Built-in functions ==
+
+Functions such as sin or cos are recognised according to a built-in table.  If you want to write <code lang="latex">$sin$</code>(sic!), you must write <code>{si n}</code> or <code>{s in}</code> or <code>{s i n}</code> in Bobcat.  The author can add new built-ins with a directive:
+
+<code>
+add built-in functions:: glob, blob
+
+{y = glob(x)}
 </code>
 
 
