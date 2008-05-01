@@ -53,7 +53,7 @@ you have to input:
     ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
 </code>
 
-The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« whould have worked, too, beacuse also here, it's just important to break up te pairs.
+The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« would have worked, too, because also here, it's just important to break up te pairs.
 
 By the way, the ''orderding'' within a pair is insignificant.
 
@@ -65,7 +65,7 @@ By the way, the ''orderding'' within a pair is insignificant.
 
 == Roots ==
 
-Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicant for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
 
 <code>
     √2π                    \sqrt{2\pi}
@@ -133,9 +133,9 @@ Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat us
 Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.  However, this may be discussed.
 
 
-=== Strechable braces ===
+=== Stretchable braces ===
 
-In Bobcat, all braces are strechable by default, so LaTeX's <code lange="latex">\left</code> and <code lange="latex">\right</code> are not necessary.  If you want to have a brace non-streched, put curly braces around it.
+In Bobcat, all braces are stretchable by default, so LaTeX's <code lang="latex">\left</code> and <code lang="latex">\right</code> are not necessary.  If you want to have a brace non-stretched, put curly braces around it.
 
 Giving the size of the brace explicitly is not yet planned in Bobcat.
 
@@ -175,7 +175,7 @@ matrix:: `columns=lll` 1   2`c`   3
                        7   8      9  = …
 </code>
 
-This means that all cells are left-aligned (default is centre), and that the second cell in the first row is centred.  You also see a column span. (Rowspans are not possible in matrices.)  Note that cell parameters must follow directly the cell contents without whitespace inbetween.  If a cell contains whitespace, enclose it in {…}.
+This means that all cells are left-aligned (default is centre), and that the second cell in the first row is centred.  You also see a column span. (Rowspans are not possible in matrices.)  Note that cell parameters must follow directly the cell contents without whitespace in between.  If a cell contains whitespace, enclose it in {…}.
 
 If you dislike this line break thing, you can also give the size explicitly:
 
@@ -227,9 +227,9 @@ If you need other alignment, use <code>`c`</code>, <code>`align=.`</code> etc di
 By the way, the empty line between sequenced displayed equations is optional.
 
 
-== Equation labeling and numbering ==
+== Equation labelling and numbering ==
 
-By default, Bobcat will produce numbering for all displayed equations.  This can be changed so that only euqations with a label get a number.  Labels are given in backquotes behind the displayed equation:
+By default, Bobcat will produce numbering for all displayed equations.  This can be changed so that only equations with a label get a number.  Labels are given in backquotes behind the displayed equation:
 
 <code>
 {a² + b² = c²}   `pythagoras`
@@ -251,3 +251,7 @@ m_"Ruhe" // √ {1 - {v² // c²}}
 </code>
 
 in Bobcat.
+
+
+ LocalWords:  sqrt xyz lang frac cdot Ruhe mathrm wenn lll subformulas
+ LocalWords:  pythagoras
