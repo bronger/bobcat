@@ -1,9 +1,11 @@
 == Sub- and superscripts (or indices and exponents) ==
 
-Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by ASCII whitespace rather than braces:
+Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
 
 <code>
     Bobcat                  LaTeX
+   ========                =======
+
     x_12 y                 x_{12}y
     x_12y                  x_{12y}
     x_{12}y                x_{12y}
@@ -17,6 +19,7 @@ Alternatively, they are terminated by another sub-/superscript:
     x_11^22                x_{11}^{22}
     x_1_2                  x_1{}_2
 </code>
+
 
 === Tensors ===
 
@@ -50,11 +53,14 @@ you have to input:
     ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
 </code>
 
-The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space.
-
-In the lower notation, »^« instead of »_« whould have worked, too, beacuse also here, it's just important to break up te pairs.
+The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« whould have worked, too, beacuse also here, it's just important to break up te pairs.
 
 By the way, the ''orderding'' within a pair is insignificant.
+
+
+== Whitespace ==
+
+“Whitespace” in this blueprint means “tab, space, line break, or non-breaking space”.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
 
 
 == Roots ==
@@ -112,6 +118,136 @@ However, the Unicode specs say that it is already in the exponent, as well as it
 </code>
 
 
-== Whitespace ==
+== Fractions ==
 
-“Whitespace” in this specification means “tab, space, line break, or non-breaking space”.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat uses // instead of <code>\over</code>.  If the most inner braces/parentheses/brackets nest neatly, you don't even need the grouping braces:
+
+<code>
+    1 // 2               \frac{1}{2}
+  2 + 3 // 2·4           \frac{2+3}{2\cdot 4}
+   3 {1//2}              3\frac{1}{2}
+  1 // 2 // 3            \frac{1}{\frac{2}{3}}
+  4 + (2 // 3)           4 + \left(\frac{2}{3}\right)
+</code>
+
+Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.  However, this may be discussed.
+
+
+=== Strechable braces ===
+
+In Bobcat, all braces are strechable by default, so LaTeX's <code lange="latex">\left</code> and <code lange="latex">\right</code> are not necessary.  If you want to have a brace non-streched, put curly braces around it.
+
+Giving the size of the brace explicitly is not yet planned in Bobcat.
+
+By the way, the curly braces themselves must be escaped with \ if you want to have them as-is, as in LaTeX.
+
+
+== Text within a formula ==
+
+Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."</code>.  This idea was taken from OpenOffice.org:
+
+<code>
+   m_"Ruhe"              m_\mathrm{Ruhe}
+   a ", wenn " b>0       a \text{, wenn } b>0
+</code>
+
+In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  They must be a plain sequence of characters.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
+
+By the way, the above mathrm/text dichotomy is no error: On the top level, Bobcat will emit a <code lang="latex">\text</code> macro, however anywhere else, it will emit <code lang="latex">\mathrm</code> to prevent it from assuming the markup from the surrounding text (e.g. italics).
+
+== Matrices and vectors ==
+
+A matrix is given in Bobcat by
+
+<code>
+matrix:: 1   2   3   
+         4   2   6   
+         7   8   9  = …
+</code>
+
+So, not only whitespace but also linebreaks are significant here.  However, the horizontal alignment in the source code is not important.
+
+You may give parameters to the matrix as a whole or to single cells in backquotes:
+
+<code>
+matrix:: `columns=lll` 1   2`c`   3   
+                       4      2`span=2`   
+                       7   8      9  = …
+</code>
+
+This means that all cells are left-aligned (default is centre), and that the second cell in the first row is centred.  You also see a column span. (Rowspans are not possible in matrices.)  Note that cell parameters must follow directly the cell contents without whitespace inbetween.  If a cell contains whitespace, enclose it in {…}.
+
+If you dislike this line break thing, you can also give the size explicitly:
+
+<code>
+matrix:: `size=3x3` 1 2 3  4 2 6  7 8 9 = …
+</code>
+
+Instead of “x”, you can also use “×” or »;« to separate the number of rows from the number of columns.
+
+By default, matrices are enclosed with (…).  With the parameters “braces”, “left brace”, and “right brace”, you can change that.
+
+
+=== Vectors ===
+
+Vectors are matrices with a simplified syntax:
+
+<code>
+vector:: `size=3` 1 2 3 = …
+</code>
+
+The size parameter is mandatory.  There exist special versions called <code>vector2</code>, <code>vector3</code>, and <code>vector4</code> for 2, 3, and 4 components respectively.  They only carry an optional <code>align</code> attribute, but no size parameter.
+
+
+== Text blocks ==
+
+Text blocks are entered as <code>`|name of text block|`</code>, so enclosed in backquotes and pipe signs.  This is a handy means to include subformulas:
+
+<code>
+{√ `|radicand|`}
+
+|radicand|:: {2π}
+</code>
+
+Note that alignment markers are removed before the insertion.
+
+
+== Alignment ==
+
+Horizontal alignment over multiple displayed equations is done with the ampersand &.  By default, the parts of the formula are left-aligned.
+
+<code>
+{8.44x &+ 55y  &= 0}
+
+{3.1 x &- 0.7y &= -1.1}
+</code>
+
+If you need other alignment, use <code>`c`</code>, <code>`align=.`</code> etc directly after the ampersands.
+
+By the way, the empty line between sequenced displayed equations is optional.
+
+
+== Equation labeling and numbering ==
+
+By default, Bobcat will produce numbering for all displayed equations.  This can be changed so that only euqations with a label get a number.  Labels are given in backquotes behind the displayed equation:
+
+<code>
+{a² + b² = c²}   `pythagoras`
+</code>
+
+
+== The whole thing in action ==
+
+So, one famous equation of special relativity is
+
+<code lang="latex">
+\frac{m_\mathrm{Ruhe}}{\sqrt{1-\frac{v^2}{c^2}}}
+</code>
+
+in LaTeX and
+
+<code>
+m_"Ruhe" // √ {1 - {v² // c²}}
+</code>
+
+in Bobcat.
