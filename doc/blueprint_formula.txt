@@ -1,0 +1,117 @@
+== Sub- and superscripts (or indices and exponents) ==
+
+Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by ASCII whitespace rather than braces:
+
+<code>
+    Bobcat                  LaTeX
+    x_12 y                 x_{12}y
+    x_12y                  x_{12y}
+    x_{12}y                x_{12y}
+    x_1{2}y                x_{12y}
+</code>
+
+Alternatively, they are terminated by another sub-/superscript:
+
+<code>
+    x_1^2                  x_1^2
+    x_11^22                x_{11}^{22}
+    x_1_2                  x_1{}_2
+</code>
+
+=== Tensors ===
+
+The last line shows tensor notation.  This also allows for prescripts:
+
+<code>
+    _1^3_2^4 x_5^7_6^8     _1^3{}_2^4x_5^7{}_6^8
+    ₁³₂⁴x₅⁷₆⁸              _1^3{}_2^4x_5^7{}_6^8
+</code>
+
+So the space after the “4” is necessary only if no sub/superscript unicode codepoints are used.  This leads in the print output to
+
+<code>
+                     ₃₄ ₇₈
+                       x
+                     ¹² ⁵⁶
+</code>
+
+But, if you want to write something like
+
+<code>
+                      ₃ ₄  ₇ ₈
+                         x
+                     ¹ ²  ⁵ ⁶
+</code>
+
+you have to input:
+
+<code>
+    _1_^3_2_^4 x_5_^7_6_^8        _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+    ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+</code>
+
+The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space.
+
+In the lower notation, »^« instead of »_« whould have worked, too, beacuse also here, it's just important to break up te pairs.
+
+By the way, the ''orderding'' within a pair is insignificant.
+
+
+== Roots ==
+
+Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicant for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+
+<code>
+    √2π                    \sqrt{2\pi}
+    √ 2π                   \sqrt{2\pi}
+    √ {2 π}                \sqrt{2\pi}
+    √^3 {2 π}              \sqrt[3]{2\pi}
+    ³√ {2 π}               \sqrt[3]{2\pi}
+    √³ {2 π}               \sqrt[3]{2\pi}
+    ³ √2π                  ^3\sqrt{2\pi}
+</code>
+
+As a special convenience, superscript Unicode codepoints are allowed immediately before the root symbol.
+
+
+== Big operators ==
+
+Sums, integrals, and the like work accordingly, i. e. their limits have exactly the same syntax as sub-/superscripts:
+
+<code>
+    ∑_i=0^n x_i            \sum_{i=0}^n x_i
+    ∑_{i=0}^n x_i          \sum_{i=0}^n x_i
+    ∑_i=0ⁿ x_i             \sum_{i=0}^n x_i
+</code>
+
+Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
+
+
+== Mathematical accents ==
+
+For mathematical accents, Bobcat uses the “combined diacritical marks” from Unicode.  In particular, this means that their use is ''postfix'' (in contrast to LaTeX's prefix notation).  For wide accents, you have to put the accent on the closing brace (which your editor may display as the accents being positioned after the brace):
+
+<code>
+              ẍ                       \ddot x
+              ẍ̇                     \dot{\ddot x}
+            {xyz}̃                 \widetilde{xyz}
+</code>
+
+=== The “prime” character ===
+
+The prime character »′« seems to be a real issue because some people consider it in the exponent and some do not.
+
+In LaTeX, it is given by <code lang="latex">\prime</code>, however, this is not in the exponent, so you must write <code lang="latex">$f^\prime(x)$</code>.  The same seems to be true for some screen fonts as well as for MathML 2.0.  See
+http://www.albany.edu/~hammond/gellmu/primeaccents2.xhtml for a more detailed discussion.
+
+However, the Unicode specs say that it is already in the exponent, as well as its doubled etc. siblings.  So, Bobcat also treats it as being already in the exponent.  Like LaTeX, you may use the apostrophe »'« (and <code>''</code>, <code>'''</code> etc) as a convenient shortcut:
+
+<code>
+             f'                         f'
+             f′                         f'
+</code>
+
+
+== Whitespace ==
+
+“Whitespace” in this specification means “tab, space, line break, or non-breaking space”.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
