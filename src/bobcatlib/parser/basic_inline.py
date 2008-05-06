@@ -71,8 +71,9 @@ def parse_inline(parent, text, position, end):
     while position < end:
         delimiter_match = guarded_search(inline_delimiter, text, position, end)
         if delimiter_match:
-            textnode = Text(parent)
-            position = textnode.parse(text, position, delimiter_match.start())
+            if position < delimiter_match.start():
+                textnode = Text(parent)
+                position = textnode.parse(text, position, delimiter_match.start())
             delimiter = delimiter_match.group()
             if delimiter == "_":
                 if isinstance(parent, Emphasize):
