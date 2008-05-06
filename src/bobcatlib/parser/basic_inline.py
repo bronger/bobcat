@@ -95,6 +95,6 @@ class Emphasize(Node):
     def parse(self, text, position, end):
         super(Emphasize, self).parse(text, position)
         position = parse_inline(self, text, position, end)
-        if text[position] != "_":
+        if position >= len(text) or text[position] != "_":
             self.throw_parse_error("Emphasize text is not terminated in current block")
         return position + 1
