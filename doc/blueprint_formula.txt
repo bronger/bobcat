@@ -94,6 +94,8 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
 
 Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
 
+Horizontal arrows, relation symbols such as “=”, and horizontal braces are also treated as big operators, i. e., their limits are printed on top of and below them.  In the case of horizontal braces, the limits are not even smaller in point size, and the superscript shares the baseline with the surrounding material.
+
 
 == Mathematical accents ==
 
@@ -104,6 +106,7 @@ For mathematical accents, Bobcat uses the “combining diacritical marks” from
               ẍ̇                     \dot{\ddot x}
             {xyz}̃                 \widetilde{xyz}
 </code>
+
 
 === The “prime” character ===
 
@@ -157,8 +160,8 @@ The pipe sign, when used with subscripts, is interpreted as a deep vertical bar 
 Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."</code>.  This idea was taken from OpenOffice.org:
 
 <code>
-   m_"Ruhe"              m_\mathrm{Ruhe}
-   a ", wenn " b>0       a \text{, wenn } b>0
+   m_"rest"              m_\mathrm{rest}
+   a ", if " b>0       a \text{, if } b>0
 </code>
 
 In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, role, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
@@ -243,17 +246,19 @@ The backend or theme may render numbers differently.
 
 == Alignment ==
 
-Horizontal alignment over multiple displayed equations is done with the ampersand &.  By default, the parts of the formula are left-aligned.
+Horizontal alignment over multiple displayed equations is done with the ampersand &.  By default, the parts of the formula are aligned as AMSmath does it: Every »&« switches between right-aligned and left-aligned, and every odd-numbered »&« additionally adds stretchable space to set apart the next “equation column”.
 
 <code>
-{8.44x &+ 55y  &= 0}
+{8.44x + 55y  &= 0}
 
-{3.1 x &- 0.7y &= -1.1}
+{3.1 x - 0.7y &= -1.1}
 </code>
 
 If you need other alignment, use <code>`c`</code>, <code>`align=.`</code> etc directly after the ampersands.
 
-By the way, the empty line between sequenced displayed equations is optional.
+Within an equation, every sequence of math groups (enclosed with e. g. {…}) with »&« within them is printed on top of each other and aligned according to the ampersands.  The AMSmath environments “split” and “aligned” will be used for realising this in LaTeX.
+
+By the way, the empty line between sequenced displayed equations is optional. Inter-equation alignment takes place as long as the sequence of equation blocks is not interrupted by a non-math block.
 
 
 == Equation labelling and numbering ==
@@ -263,10 +268,6 @@ By default, Bobcat will produce numbering for all displayed equations.  This can
 <code>
 {a² + b² = c²}   `pythagoras`
 </code>
-
-If there are no empty lines between displayed equations, they form one equation array with only one equation number.  Accordingly, there must be only one label at most, at the very end of the block.  If there are more, this is a parse error and all odd labels are discarded.
-
-If there are empty lines, the equations are independent, however, inter-equation alignment takes place as long as the sequence of equation block is not interrupted by a non-math block.
 
 
 == Built-in functions ==
@@ -287,17 +288,17 @@ An analogous directive will exist for multi-character identifiers (which will be
 So, one famous equation of special relativity is
 
 <code lang="latex">
-\frac{m_\mathrm{Ruhe}}{\sqrt{1-\frac{v^2}{c^2}}}
+\frac{m_\mathrm{rest}}{\sqrt{1-\frac{v^2}{c^2}}}
 </code>
 
 in LaTeX and
 
 <code>
-m_"Ruhe" // √ {1 - {v² // c²}}
+m_"rest" // √ {1 - {v² // c²}}
 </code>
 
 in Bobcat.
 
 
- LocalWords:  sqrt xyz lang frac cdot Ruhe mathrm wenn lll subformulas multi
- LocalWords:  pythagoras utf ispell british
+ LocalWords:  sqrt xyz lang frac cdot mathrm wenn lll subformulas multi
+ LocalWords:  pythagoras utf ispell british AMSmath
