@@ -1,3 +1,5 @@
+-*- coding: utf-8; mode: longlines; ispell-local-dictionary: "british" -*-
+
 == Sub- and superscripts (or indices and exponents) ==
 
 Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
@@ -130,16 +132,24 @@ Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat us
   4 + (2 // 3)           4 + \left(\frac{2}{3}\right)
 </code>
 
-Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.  However, this may be discussed.
+Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
 
 
-=== Stretchable braces ===
+== Braces: stretchable and grouping ==
 
 In Bobcat, all braces are stretchable by default, so LaTeX's <code lang="latex">\left</code> and <code lang="latex">\right</code> are not necessary.  If you want to have a brace non-stretched, put curly braces around it.
 
-Giving the size of the brace explicitly is not yet planned in Bobcat.
-
 By the way, the curly braces themselves must be escaped with \ if you want to have them as-is, as in LaTeX.
+
+All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat considers an opening and a closing brace a pair, and nothing else.  So, "(…)" is a group, as is "[…)" or "\{…〉".  But "(…" or "[…[" are not considered as groups, therefore, you must enclose them with curly braces to make the grouping explicit: "{(…}" and "{[…[}".  Un-escaped curly braces must always nest properly.
+
+=== Special case: the vertical line ===
+
+One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.
+
+For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ active.  It doesn't do any grouping.  Without an \{ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
+
+The pipe sign, when used with subscripts, is interpreted as a deep vertical bar with the meaning “at the location …” or “with constant …” (in e. g. thermodynamics).
 
 
 == Text within a formula ==
@@ -151,9 +161,10 @@ Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."
    a ", wenn " b>0       a \text{, wenn } b>0
 </code>
 
-In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  They must be a plain sequence of characters.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
+In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, role, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
 
 By the way, the above mathrm/text dichotomy is no error: On the top level, Bobcat will emit a <code lang="latex">\text</code> macro, however anywhere else, it will emit <code lang="latex">\mathrm</code> to prevent it from assuming the markup from the surrounding text (e.g. italics).
+
 
 == Matrices and vectors ==
 
@@ -209,8 +220,6 @@ Text blocks are entered as <code>`|name of text block|`</code>, so enclosed in b
 |radicand|:: {2π}
 </code>
 
-Note that alignment markers are removed before the insertion.
-
 
 == Physical quantities ==
 
@@ -255,6 +264,10 @@ By default, Bobcat will produce numbering for all displayed equations.  This can
 {a² + b² = c²}   `pythagoras`
 </code>
 
+If there are no empty lines between displayed equations, they form one equation array with only one equation number.  Accordingly, there must be only one label at most, at the very end of the block.  If there are more, this is a parse error and all odd labels are discarded.
+
+If there are empty lines, the equations are independent, however, inter-equation alignment takes place as long as the sequence of equation block is not interrupted by a non-math block.
+
 
 == Built-in functions ==
 
@@ -265,6 +278,8 @@ add built-in functions:: glob, blob
 
 {y = glob(x)}
 </code>
+
+An analogous directive will exist for multi-character identifiers (which will be printed in italics).
 
 
 == The whole thing in action ==
@@ -284,5 +299,5 @@ m_"Ruhe" // √ {1 - {v² // c²}}
 in Bobcat.
 
 
- LocalWords:  sqrt xyz lang frac cdot Ruhe mathrm wenn lll subformulas
- LocalWords:  pythagoras
+ LocalWords:  sqrt xyz lang frac cdot Ruhe mathrm wenn lll subformulas multi
+ LocalWords:  pythagoras utf ispell british
