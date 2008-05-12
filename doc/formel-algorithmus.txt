@@ -1,0 +1,7 @@
+-*- coding: utf-8; mode: text; mode: longlines -*-
+
+Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material und fügt die gefundenen Elemente dem übergebenen Elter hinzu.  Sie hat mindestens zwei Parameter: whitespace_terminated ist True, wenn es sich um Material handelt, das Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).  Und enclose_group is True, wenn, sobald mehr als ein Tochterelement gefunden wird, eine neue MathGroup für alle Tochterelemente begonnen werden soll.
+
+MathGroup hat eine Parse-Methode, die ebenfalls den whitespace-terminated-Parameter hat.  Der Startpunkt für die Parse-Methode ist typischerweise das Zeichen unmittelbar nach einer „{“.  MathGroup muß nach dem Parsing auch die beiden Attribute has_opening_brace und has_closing_brace setzen (erst dann sollten sie gesetzt werden).  True bedeutet hierbei, daß das erste bzw. letzte Element eine Klammer ist, ob schließend oder öffnend, ist egal.
+
+Wenn parse_math_row beispielsweise ein Subskript parsen soll, ist whitespace_terminated und enclose_group beides True.  Das erste Element wird erstmal zwischengespeichert.  Kommt noch eines, wird eine neue MathGroup erzeugt, in die Kinder-Liste des Elter eingetragen und das erste Element direkt in die Kinder-Liste der MathGroup injiziert.  Dann wird deren parse-Methode aufgerufen, mit whitespace_terminated=True.
