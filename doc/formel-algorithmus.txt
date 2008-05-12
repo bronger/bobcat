@@ -4,4 +4,21 @@ Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material un
 
 MathGroup hat eine Parse-Methode, die ebenfalls den whitespace-terminated-Parameter hat.  Der Startpunkt für die Parse-Methode ist typischerweise das Zeichen unmittelbar nach einer „{“.  MathGroup muß nach dem Parsing auch die beiden Attribute has_opening_brace und has_closing_brace setzen (erst dann sollten sie gesetzt werden).  True bedeutet hierbei, daß das erste bzw. letzte Element eine Klammer ist, ob schließend oder öffnend, ist egal.
 
-Wenn parse_math_row beispielsweise ein Subskript parsen soll, ist whitespace_terminated und enclose_group beides True.  Das erste Element wird erstmal zwischengespeichert.  Kommt noch eines, wird eine neue MathGroup erzeugt, in die Kinder-Liste des Elter eingetragen und das erste Element direkt in die Kinder-Liste der MathGroup injiziert.  Dann wird deren parse-Methode aufgerufen, mit whitespace_terminated=True.
+Wenn parse_math_row beispielsweise ein Subskript parsen soll, ist whitespace_terminated und enclose_group beides True.  Das erste Element wird erstmal zwischengespeichert.  Kommt noch eines, wird eine neue MathGroup erzeugt, in die Kinder-Liste des Elter eingetragen und das erste Element direkt in die Kinder-Liste der MathGroup injiziert.  Dann wird deren parse-Methode aufgerufen, mit whitespace_terminated=True.  Die ruft dann wieder parse_math_row auf, diesmal mit enclose_group auf False.  Ist die fertig, bin ich wieder in der parse-Methode der MathGroup, die noch auf öffnende/schließende Klammern schaut und sich dann beendet.  Dann bin ich wieder in der äußeren parse_math_row-Funktion, wird die ebenso direkt beendet und die ganze Sache ist fertig.
+
+Ich brauche ein Set mit sämtlichen öffnenden Unicode-Klammern (inklusive des Pipe-Zeichens und des doppelten vertikalen Strichs), und eines mit sämtlichen schließenden (ohne Pipe-Zeichen & Co). Außerdem benötige ich ein Dictionary, das alle Unicode-Superskripte auf normale Zeichen abbildet, und noch eines, das dasselbe mit Subskripten tut.
+
+Ich brauche einen kompilierten regulären Ausdruck, der Zahlen parsen kann.  Wenn der Autor mit einer Direktiven von Dezimalpunkt auf Dezimalkomma wechselt, muß diese Variable neu berechnet werden.
+
+Außerdem brauche ich ein Set mit allen eingebauten Funktionen, und ein Set mit allen eingebauten Multi-Zeichen-Bezeichnern (letztere werden zwar als Multi-Zeichen-Bezeichner erkannt, aber nicht aufrecht gedruckt).  Beides sind von Set abgeleitete Datentypen, die ein Attribut aktuell halten, welches einen kompilierten regulären Ausdruck enthält von der Form "Element1|Element2|Element3|…".
+
+Ich brauche ein Set mit allen sog. „großen Operatoren“.  Horizontale Klammern werden allerdings extra behandelt.
+
+Ferner brauche ich ein Dictionary, das Unicode-Zeichen mit diakritischen Zeichen auf ein Tupel bestehend aus den Einzelzeichen und den diakritischen Zeichen mappt.  Die diakritischen Zeichen werden dabei durch die „combined diacritical Marks“ ausgedrückt.
+
+
+
+
+ LocalWords:  coding utf mode text longlines parse math row scannt Elter True
+ LocalWords:  whitespace terminated Sub enclose group has opening brace closing
+ LocalWords:  False LocalWords frozenset Pipe mappt combined diacritical Marks
