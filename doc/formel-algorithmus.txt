@@ -1,10 +1,20 @@
 -*- coding: utf-8; mode: text; mode: longlines -*-
 
-Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material und fügt die gefundenen Elemente dem übergebenen Elter hinzu.  Sie hat mindestens zwei Parameter: whitespace_terminated ist True, wenn es sich um Material handelt, das Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).  Und enclose_group is True, wenn, sobald mehr als ein Tochterelement gefunden wird, eine neue MathGroup für alle Tochterelemente begonnen werden soll.
+Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material und gibt exakt ein Mathematik-Element, sowie die aktuelle Parse-Position zurück.
 
-MathGroup hat eine Parse-Methode, die ebenfalls den whitespace-terminated-Parameter hat.  Der Startpunkt für die Parse-Methode ist typischerweise das Zeichen unmittelbar nach einer „{“.  MathGroup muß nach dem Parsing auch die beiden Attribute has_opening_brace und has_closing_brace setzen (erst dann sollten sie gesetzt werden).  True bedeutet hierbei, daß das erste bzw. letzte Element eine Klammer ist, ob schließend oder öffnend, ist egal.
+Die Eingangsparameter sind: excerpt, position, whitespace_terminated.  whitespace_terminated ist True, wenn es sich um Material handelt, das Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).
 
-Wenn parse_math_row beispielsweise ein Subskript parsen soll, ist whitespace_terminated und enclose_group beides True.  Das erste Element wird erstmal zwischengespeichert.  Kommt noch eines, wird eine neue MathGroup erzeugt, in die Kinder-Liste des Elter eingetragen und das erste Element direkt in die Kinder-Liste der MathGroup injiziert.  Dann wird deren parse-Methode aufgerufen, mit whitespace_terminated=True.  Die ruft dann wieder parse_math_row auf, diesmal mit enclose_group auf False.  Ist die fertig, bin ich wieder in der parse-Methode der MathGroup, die noch auf öffnende/schließende Klammern schaut und sich dann beendet.  Dann bin ich wieder in der äußeren parse_math_row-Funktion, wird die ebenso direkt beendet und die ganze Sache ist fertig.
+parse_math_row wird praktisch die gesamte Arbeit machen.  Insbesondere wird die MathGroup-Klasse keine parse-Methode brauchen.  Aber auch MathIdentifier, MathText oder MathOperator werden in parse_math_row komplett gebaut.
+
+Am Anfang muß parse_math_row – neben Whitespace, der u. U. das Parsing sofort beendet – schauen, ob durch eine öffnende Klammer (explizit oder implizit) sofort eine MathGroup gebaut wird.  Ist das der Fall, wird das getan und parse_math_row mit dem folgenden Material nochmal angeworfen (diesmal mit whitespace_terminated auf jeden Fall auf False).
+
+Schritte in parse_math_row, während durch das Excerpt gewandert wird:
+
+  1. Ist whitespace_terminated True und es wird Whitespace gefunden, bricht die Schleife ab.
+
+  2. Wird eine öffnende Klammer gefunden, wird das bisher gefundene Material in eine MathGroup gepackt und die als letztendlicher Rückgabewert gespeichert.  Dann wird parse_math_row für das folgende erneut aufgerufen und das Ergebnis an die Kinderliste des Rückgabewertes angehängt.
+
+  3. Wird ein Bruchstrich gefunden, wird, falls vorhanden, die aktuelle Gruppe geschlossen, der letztendliche Rückgabewert auf eine MathFraction gesetzt, das Einzelelement bzw. die Gruppe als Zähler hinzugefügt, und parse_math_row für das Sammeln des Nenners aufgerufen.
 
 Ich brauche ein Set mit sämtlichen öffnenden Unicode-Klammern (inklusive des Pipe-Zeichens und des doppelten vertikalen Strichs), und eines mit sämtlichen schließenden (ohne Pipe-Zeichen & Co). Außerdem benötige ich ein Dictionary, das alle Unicode-Superskripte auf normale Zeichen abbildet, und noch eines, das dasselbe mit Subskripten tut.
 
@@ -14,11 +24,11 @@ Außerdem brauche ich ein Set mit allen eingebauten Funktionen, und ein Set mit 
 
 Ich brauche ein Set mit allen sog. „großen Operatoren“.  Horizontale Klammern werden allerdings extra behandelt.
 
-Ferner brauche ich ein Dictionary, das Unicode-Zeichen mit diakritischen Zeichen auf ein Tupel bestehend aus den Einzelzeichen und den diakritischen Zeichen mappt.  Die diakritischen Zeichen werden dabei durch die „combined diacritical Marks“ ausgedrückt.
-
 
 
 
  LocalWords:  coding utf mode text longlines parse math row scannt Elter True
  LocalWords:  whitespace terminated Sub enclose group has opening brace closing
  LocalWords:  False LocalWords frozenset Pipe mappt combined diacritical Marks
+ LocalWords:  combining MathFraction MathIdentifier weitergeparst excerpt
+ LocalWords:  position
