@@ -144,13 +144,13 @@ In Bobcat, all braces are stretchable by default, so LaTeX's <code lang="latex">
 
 By the way, the curly braces themselves must be escaped with \ if you want to have them as-is, as in LaTeX.
 
-All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat considers an opening and a closing brace a pair, and nothing else.  So, "(…)" is a group, as is "[…)" or "\{…〉".  But "(…" or "[…[" are not considered as groups, therefore, you must enclose them with curly braces to make the grouping explicit: "{(…}" and "{[…[}".  Un-escaped curly braces must always nest properly.
+All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat considers an opening and a closing brace a pair, and nothing else.  So, "(…)" is a group, as is "[…)" or "\{…⟩".  But "(…" or "[…[" are not considered as groups, therefore, you must enclose them with curly braces to make the grouping explicit: "{(…}" and "{[…[}".  Un-escaped curly braces must always nest properly.
 
 === Special case: the vertical line ===
 
 One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.
 
-For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ active.  It doesn't do any grouping.  Without an \{ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
+For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ or ⟨ active.  It doesn't do any grouping.  Without an \{ or ⟨ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
 
 The pipe sign, when used with subscripts, is interpreted as a deep vertical bar with the meaning “at the location …” or “with constant …” (in e. g. thermodynamics).
 
@@ -164,7 +164,7 @@ Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."
    a ", if " b>0       a \text{, if } b>0
 </code>
 
-In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, role, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
+In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, roles, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
 
 By the way, the above mathrm/text dichotomy is no error: On the top level, Bobcat will emit a <code lang="latex">\text</code> macro, however anywhere else, it will emit <code lang="latex">\mathrm</code> to prevent it from assuming the markup from the surrounding text (e.g. italics).
 
@@ -230,7 +230,7 @@ When the Bobcat parser encounters a non-breaking space of some kind, which doesn
 
 The number must have the typical format used in programming languages, e.g. <code>1.3e-4</code>.  You may use a decimal point or a decimal comma.
 
-The unit is implicitly a formula (so even outside formulae, you needn't use curly braces), however, if it contains whitespace, you must enclode it with curly braces.  All consecutive Latin letters, as well as µ and Å (and maybe a few others) are interpreted as units, which means that they will be printed upright, among other things.
+The unit is implicitly a formula (so even outside formulae, you needn't use curly braces), however, if it contains whitespace, you must enclose it with curly braces.  All consecutive Latin letters, as well as µ and Å (and maybe a few others) are interpreted as units, which means that they will be printed upright, among other things.
 
 In the following examples, I use the ~ for the non-breaking space:
 
@@ -246,7 +246,9 @@ The backend or theme may render numbers differently.
 
 == Alignment ==
 
-Horizontal alignment over multiple displayed equations is done with the ampersand &.  By default, the parts of the formula are aligned as AMSmath does it: Every »&« switches between right-aligned and left-aligned, and every odd-numbered »&« additionally adds stretchable space to set apart the next “equation column”.
+Horizontal alignment over multiple displayed equations is done with the ampersand &.  The parts of the formula are aligned as AMSmath does it: Every »&« switches between right-aligned and left-aligned, and every even-numbered »&« (starting with 1) additionally adds stretchable space to set apart the next “equation column”.
+
+There is one subtle difference though: All odd-numbered »&« centre the following ''group'' after them.  Like in AMSmath, these »&« are usually placed before relational operators.  However in AMSmath, these operators are neatly aligned only if they have the same width.  But if you write e.g. text on top of them, this is not the case anymore.  Bobcat, in contrast, centres the following group, so that it is easy to align operators (or other things) of different widths.
 
 <code>
 {8.44x + 55y  &= 0}
@@ -254,11 +256,9 @@ Horizontal alignment over multiple displayed equations is done with the ampersan
 {3.1 x - 0.7y &= -1.1}
 </code>
 
-If you need other alignment, use <code>`c`</code>, <code>`align=.`</code> etc directly after the ampersands.
-
 Within an equation, every sequence of math groups (enclosed with e. g. {…}) with »&« within them is printed on top of each other and aligned according to the ampersands.  The AMSmath environments “split” and “aligned” will be used for realising this in LaTeX.
 
-By the way, the empty line between sequenced displayed equations is optional. Inter-equation alignment takes place as long as the sequence of equation blocks is not interrupted by a non-math block.
+By the way, the empty line between sequenced displayed equations is optional.  Inter-equation alignment takes place as long as the sequence of equation blocks is not interrupted by a non-math block.
 
 
 == Equation labelling and numbering ==
