@@ -60,6 +60,22 @@ The upper notation shows how the inserting of »_« (»^« would have worked, to
 By the way, the ''ordering'' within a pair is insignificant.
 
 
+== Stacked operators ==
+
+With »__« and »^^«, one can create stacked material.  The “index” or “exponent” is printed in a smaller point size than the base by default (however, this may be decided upon by the backend on a per-case basis).  Additionally, horizontally stretchable single characters (in basis or one argument) are stretched.
+
+There must not be whitespace before »__« or »^^«.  Although it would be syntactically still unambiguous if there was (because we have no prescripts here), it would be too confusing, given the analogy to normal sub/superscripts.  If there is whitespace, it is ignored, with a parse warning being raised.
+
+Sequenced »__« and »^^« are possible.  However, to a given base, you may only add at most ''one'' »^^« sequence and at most ''one'' »__« sequence.  The order of these two is not important (their inner order is, of course).  This can be used for <code lang="latex">\overbrace</code> and <code lang="latex">\underbrace</code> constructs.
+
+<code>
+    x =^^a>b 1             x \stackrel{a>b}{=} 1
+    x =__a<b 0             x \stackrel[a>b]{}{=} 0  % with package "stackrel"
+    A →^^"transform" B     A \xrightarrow{\mathrm{transform}} B
+    {A+B}^^⏞^^"sum"        \overbrace{A+B}^{\mathrm{sum}}
+</code>
+
+
 == Whitespace ==
 
 “Whitespace” in this blueprint means all breaking or non-breaking, non-zero-length whitespace which Unicode offers.  The reason why the non-breaking spaces are included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
@@ -93,8 +109,6 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
 </code>
 
 Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
-
-Horizontal arrows, relation symbols such as “=”, and horizontal braces are also treated as big operators, i. e., their limits are printed on top of and below them.  In the case of horizontal braces, the limits are not even smaller in point size, and the superscript shares the baseline with the surrounding material.
 
 
 == Mathematical accents ==
@@ -164,7 +178,7 @@ Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."
    a ", if " b>0       a \text{, if } b>0
 </code>
 
-In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, roles, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
+In contrast to LaTeX, it is not possible in Bobcat to use arbitrary markup in such text insertions.  Apart from plain sequence of characters, it may contain only few elements, namely emphasis, cross referencing, citations, roles, and index entries.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
 
 By the way, the above mathrm/text dichotomy is no error: On the top level, Bobcat will emit a <code lang="latex">\text</code> macro, however anywhere else, it will emit <code lang="latex">\mathrm</code> to prevent it from assuming the markup from the surrounding text (e.g. italics).
 
@@ -301,4 +315,4 @@ in Bobcat.
 
 
  LocalWords:  sqrt xyz lang frac cdot mathrm wenn lll subformulas multi
- LocalWords:  pythagoras utf ispell british AMSmath
+ LocalWords:  pythagoras utf ispell british AMSmath xrightarrow
