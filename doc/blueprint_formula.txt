@@ -83,7 +83,7 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
 
 === Explicit spacing ===
 
-Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  Subsequent escaped whitespace accumulates.  It doesn't metter whether it is breaking or non-breaking whitespace.  Note that there is also negative whitespace defined in Unicode.
+Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  Subsequent escaped whitespace accumulates.  It doesn't matter whether it is breaking or non-breaking whitespace.  Note that there is also negative whitespace defined in Unicode.
 
 
 == Roots ==
@@ -114,6 +114,14 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
 </code>
 
 Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
+
+Multiple sub/superscripts accumulate:
+
+<code>
+ ∑_0≤i≤m_0<j<n P(i,j)      \sum_{\substack{0\le i\le m\\ 0<j<n}} P(i,j)
+</code>
+
+Note that subscripts pile up downwards but superscripts do it upwards.
 
 
 == Mathematical accents ==
