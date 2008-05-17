@@ -75,6 +75,8 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
     {A+B}^^⏞^^"sum"        \overbrace{A+B}^{\mathrm{sum}}
 </code>
 
+If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come before the first sub/superscript.  If the parser finds stacking whithin or after the sub/superscripts, it is ignored, and a parser error is triggered.
+
 
 == Whitespace ==
 
@@ -116,10 +118,12 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
 
 Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
 
+You may use »__« and »^^« instead of »_« and »^«.  They have exactly the same semantics for big operators, however, for a given big operator, you must not mix both variants.
+
 Multiple sub/superscripts accumulate:
 
 <code>
- ∑_0≤i≤m_0<j<n P(i,j)      \sum_{\substack{0\le i\le m\\ 0<j<n}} P(i,j)
+ ∑__0≤i≤m__0<j<n P(i,j)    \sum_{\substack{0\le i\le m\\ 0<j<n}} P(i,j)
 </code>
 
 Note that subscripts pile up downwards but superscripts do it upwards.
@@ -280,7 +284,7 @@ There is one subtle difference though: All odd-numbered »&« centre the followi
 <code>
 {8.44x + 55y  &= 0}
 
-{3.1 x - 0.7y &= -1.1}
+{3.1 x − 0.7y &= −1.1}
 </code>
 
 Within an equation, every sequence of math groups (enclosed with e. g. {…}) with »&« within them is printed on top of each other and aligned according to the ampersands.  The AMSmath environments “split” and “aligned” will be used for realising this in LaTeX.
@@ -321,7 +325,7 @@ So, one famous equation of special relativity is
 in LaTeX and
 
 <code>
-m_"rest" // √ {1 - {v² // c²}}
+m_"rest" // √ {1 − {v² // c²}}
 </code>
 
 in Bobcat.
