@@ -81,6 +81,11 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
 “Whitespace” in this blueprint means all breaking or non-breaking, non-zero-length whitespace which Unicode offers.  The reason why the non-breaking spaces are included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
 
 
+=== Explicit spacing ===
+
+Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  Subsequent escaped whitespace accumulates.  It doesn't metter whether it is breaking or non-breaking whitespace.  Note that there is also negative whitespace defined in Unicode.
+
+
 == Roots ==
 
 Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
@@ -126,8 +131,7 @@ For mathematical accents, Bobcat uses the “combining diacritical marks” from
 
 The prime character »′« seems to be a real issue because some people consider it in the exponent and some do not.
 
-In LaTeX, it is given by <code lang="latex">\prime</code>, however, this is not in the exponent, so you must write <code lang="latex">$f^\prime(x)$</code>.  The same seems to be true for some screen fonts as well as for MathML 2.0.  See
-http://www.albany.edu/~hammond/gellmu/primeaccents2.xhtml for a more detailed discussion.
+In LaTeX, it is given by <code lang="latex">\prime</code>, however, this is not in the exponent, so you must write <code lang="latex">$f^\prime(x)$</code>.  The same seems to be true for some screen fonts as well as for MathML 2.0.  See http://www.albany.edu/~hammond/gellmu/primeaccents2.xhtml for a more detailed discussion.
 
 However, the Unicode specs say that it is already in the exponent, as well as its doubled etc. siblings.  So, Bobcat also treats it as being already in the exponent.  Like LaTeX, you may use the apostrophe »'« (and <code>''</code>, <code>'''</code> etc) as a convenient shortcut:
 
@@ -249,7 +253,7 @@ The unit is implicitly a formula (so even outside formulae, you needn't use curl
 In the following examples, I use the ~ for the non-breaking space:
 
 <code>
-   2,34e16            $2{,}34\cdot10^{16}$
+   2,34e16~           $2{,}34\cdot10^{16}$
      3~m              \unit[3]{m}
     ~m//s             $\mathrm{\frac{m}{s}}$
  {A = 3~cm²}          $A = 3\mathrm{cm^2}$
@@ -297,7 +301,7 @@ add built-in functions:: glob, blob
 An analogous directive will exist for multi-character identifiers (which will be printed in italics).
 
 
-== The whole thing in action ==
+== The thing in action ==
 
 So, one famous equation of special relativity is
 
