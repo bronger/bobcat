@@ -97,6 +97,7 @@ Roots start with »√« (and only this).  Their radicand is whitespace-terminat
     √^3 {2 π}              \sqrt[3]{2\pi}
     ³√ {2 π}               \sqrt[3]{2\pi}
     √³ {2 π}               \sqrt[3]{2\pi}
+    ∛ 2π                   \sqrt[3]{2\pi}
     ³ √2π                  ^3\sqrt{2\pi}
 </code>
 
@@ -151,17 +152,17 @@ However, the Unicode specs say that it is already in the exponent, as well as it
 
 == Fractions ==
 
-Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat uses // instead of <code>\over</code>.  If the most inner braces/parentheses/brackets nest neatly, you don't even need the grouping braces:
+Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat uses // instead of <code>\over</code>.  One can also use Unicode codepoint 0x2215, or »∕«.  If the most inner braces/parentheses/brackets nest neatly, you don't even need the grouping braces:
 
 <code>
     1 // 2               \frac{1}{2}
   2 + 3 // 2·4           \frac{2+3}{2\cdot 4}
    3 {1//2}              3\frac{1}{2}
-  1 // 2 // 3            \frac{1}{\frac{2}{3}}
-  4 + (2 // 3)           4 + \left(\frac{2}{3}\right)
+  1 ∕ 2 ∕ 3              \frac{1}{\frac{2}{3}}
+  4 + (2 ∕ 3)            4 + \left(\frac{2}{3}\right)
 </code>
 
-Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
+Note that in the last two examples, there are no slashes in the Bobcat code but codepoints 0x2215.  Your display program may render them indistinguishable, though.  An ordinary slash is just a slash in Bobcat.  Rationale for using // instead of just the slash: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
 
 
 == Braces: stretchable and grouping ==
