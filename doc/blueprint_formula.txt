@@ -2,7 +2,7 @@
 
 == Sub- and superscripts (or indices and exponents) ==
 
-Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
+Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
 
 <code>
     Bobcat                  LaTeX
@@ -14,7 +14,9 @@ Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First
     x_1{2}y                x_{12y}
 </code>
 
-Alternatively, they are terminated by another sub-/superscript:
+Such constructs are called “atoms”.  In these examples, their ''base'' is “x”.  Atoms can also have prescripts and stacked material, see below.
+
+Alternatively to whitespace, sub/superscripts are terminated by another sub/superscript:
 
 <code>
     x_1^2                  x_1^2
@@ -75,7 +77,7 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
     {A+B}^^⏞^^"sum"        \overbrace{A+B}^{\mathrm{sum}}
 </code>
 
-If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscript.  Sub/superscripts within or after the stacking refers to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts itself.  “Top-level” in this context means that arbitrary material is allowed in sub-groups anyway.
+If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscripts.  Sub/superscripts within or after the stacking refer to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts themselves.  “Top-level” in this context means that by using subgroups, arbitrary material is allowed in anyway.
 
 
 == Whitespace ==
@@ -119,7 +121,7 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
     ∑_i=0ⁿ x_i             \sum_{i=0}^n x_i
 </code>
 
-Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
+Note that Unicode distinguishes between \sum and \Sigma: ∑ and Σ.
 
 You may use »__« and »^^« instead of »_« and »^«.  They have exactly the same semantics for big operators, however, for a given big operator, you must not mix both variants.  If you use »__« and »^^«, you can use sub/superscripts within their parameters, in accordance with ordinary stacking.
 
@@ -170,6 +172,14 @@ Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat us
 </code>
 
 Note that in the last two examples, there are no slashes in the Bobcat code but codepoints 0x2215.  Your display program may render them indistinguishable, though.  An ordinary slash is just a slash in Bobcat.  Rationale for using // instead of just the slash: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
+
+Alignment markers, relational operators, atoms with a relational operator as their base, general punctuation (full stop, comma, semicolon, and others), and text insertions delimit a fraction.  If you want them as part of the fraction, enclose the (de)nominator in curly braces:
+
+<code>
+    1 // 2 = 0.5         \frac{1}{2} = 0.5
+ 1 // 2 =^^"!" 0.5       \frac{1}{2} \stackrel{\mathrm{!}}{=} 0.5
+   1 // {2 ≠ 0.5}        \frac{1}{2 ≠ 0.5}
+</code>
 
 
 == Braces: stretchable and grouping ==
