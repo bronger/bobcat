@@ -62,7 +62,7 @@ By the way, the ''ordering'' within a pair is insignificant.
 
 == Stacked operators ==
 
-With »__« and »^^«, one can create stacked material.  The “index” or “exponent” is printed in a smaller point size than the base by default (however, this may be decided upon by the backend on a per-case basis).  Additionally, horizontally stretchable single characters (in basis or one argument) are stretched.
+With »__« and »^^«, one can create stacked material.  The “index” or “exponent” is printed in a smaller point size than the base by default (however, this may be decided upon by the backend on a per-case basis).  Additionally, horizontally stretchable single characters (in base or one argument) are stretched.
 
 There must not be whitespace before »__« or »^^«.  Although it would be syntactically still unambiguous if there was (because we have no prescripts here), it would be too confusing, given the analogy to normal sub/superscripts.  If there is whitespace, it is ignored, with a parse warning being raised.
 
@@ -75,17 +75,20 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
     {A+B}^^⏞^^"sum"        \overbrace{A+B}^{\mathrm{sum}}
 </code>
 
-If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come before the first sub/superscript.  If the parser finds stacking whithin or after the sub/superscripts, it is ignored, and a parser error is triggered.
+If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscript.  Sub/superscripts within or after the stacking refers to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts itself.  “Top-level” in this context means that arbitrary material is allowed in sub-groups anyway.
 
 
 == Whitespace ==
 
-“Whitespace” in this blueprint means all breaking or non-breaking, non-zero-length whitespace which Unicode offers.  The reason why the non-breaking spaces are included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+“Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0).  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
 
+Every non-breaking space (0xa0) which doesn't terminate something, and every non-breaking thin space may denote a physical quantity, see below.
 
 === Explicit spacing ===
 
-Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  Subsequent escaped whitespace accumulates.  It doesn't matter whether it is breaking or non-breaking whitespace.  Note that there is also negative whitespace defined in Unicode.
+Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  The same is true for all non-spaces (neither 0x20 nor 0xa0), including the non-breaking thin space if it cannot be interpreted as part of a physical quantity.
+
+Subsequent explicit spacing simply accumulates, no matter how breaking or non-breaking whitespace is mixed.  It leads to explicit horizontal spacing in the output.  Note that there is also negative whitespace defined in Unicode.
 
 
 == Roots ==
@@ -118,12 +121,12 @@ Sums, integrals, and the like work accordingly, i. e. their limits have exactl
 
 Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
 
-You may use »__« and »^^« instead of »_« and »^«.  They have exactly the same semantics for big operators, however, for a given big operator, you must not mix both variants.
+You may use »__« and »^^« instead of »_« and »^«.  They have exactly the same semantics for big operators, however, for a given big operator, you must not mix both variants.  If you use »__« and »^^«, you can use sub/superscripts within their parameters, in accordance with ordinary stacking.
 
 Multiple sub/superscripts accumulate:
 
 <code>
- ∑__0≤i≤m__0<j<n P(i,j)    \sum_{\substack{0\le i\le m\\ 0<j<n}} P(i,j)
+ ∑__0≤i≤m_k__0<j<n P(i,j)    \sum_{\substack{0\le i\le m_k\\ 0<j<n}} P(i,j)
 </code>
 
 Note that subscripts pile up downwards but superscripts do it upwards.
