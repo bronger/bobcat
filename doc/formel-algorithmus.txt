@@ -1,7 +1,12 @@
--*- coding: utf-8; mode: text -*-
+-*- coding: utf-8; mode: text; mode: flyspell; mode: auto-fill -*-
 
 Vorweg zu den Begrifflichkeiten: Explizite Klammerung funktioniert mit den
 unescapierten geschweiften Klammern, implizite Klammerung mit allen anderen.
+
+Alle Node-Elemente müssen eine reroot()-Methode bekommen, damit sie innerhalb
+des Baumes verschoben werden können.  Das sollte auch über Bäume hinweg
+funktionieren.
+
 
 * parse_math_row
 ================
@@ -46,7 +51,10 @@ durchgereicht werden muß).
 
 Schritte in parse_math_row, während durch das Excerpt gewandert wird:
 
-  1. Ist whitespace_terminated True und es wird Whitespace gefunden, bricht die Schleife ab.
+  1. Ist whitespace_terminated=True und es wird Whitespace gefunden, bricht die
+     Schleife ab.  Wird eine schließende Klammer oder ein Betrags- oder
+     Normstrich gefunden, bricht die Schleife ebenso ab.  Das nächste zu
+     parsende Zeichen für die Mutterroutine ist dann diese schließende Klammer.
 
   2. Wird eine öffnende Klammer gefunden, wird parse_math_row für das folgende
      erneut aufgerufen und das Ergebnis an die Kinderliste des Rückgabewertes
@@ -57,7 +65,13 @@ Schritte in parse_math_row, während durch das Excerpt gewandert wird:
      das Einzelelement bzw. die Gruppe als Zähler hinzugefügt, und
      parse_math_row für das Sammeln des Nenners aufgerufen.
 
-  4. Akzente
+  4. Akzente: Zeichen mit diakritischen Zeichen müssen zerlegt werden, und
+     folgende Combining Diacriticals zur Liste der Akzente hinzugefügt werden.
+     Daraus wird dann ein MathAccent-Element gebaut.
+
+     Sind nur Combining Diacriticals vorhanden, machen halt nur sie die Liste
+     aus, und aus ihnen und dem zuletzt hinzugefügten Kind zur aktuellen
+     MathGroup wird ein MathAccent gebaut (Reroot nötig).
 
   5. Skripte: Kritisch sind nur die Präskripte.  Werden sie gefunden, wird ein
      MathTensor angelegt, das abwechselnd die Sub- und Super-Präskripte als
@@ -73,12 +87,8 @@ Schritte in parse_math_row, während durch das Excerpt gewandert wird:
 
 parse_math_row achtet bei der Rückgabe eines Funktionswertes darauf, daß, wenn
 die MathGroup leer geblieben ist, NoneNode zurückgegeben wird, im Falle von
-einem Kind-Element eben dieses Element, und im Falle von mehr Kind-Elementen
-die ganze MathGroup.
-
-Alle Node-Elemente müssen eine reroot()-Methode bekommen, damit sie innerhalb
-des Baumes verschoben werden können.  Das sollte auch über Bäume hinweg
-funktionieren.
+einem Kind-Element eben dieses Element (Achtung, vorher Reroot nötig), und im
+Falle von mehr Kind-Elementen die ganze MathGroup.
 
 
 * Globale Konstanten
@@ -112,5 +122,6 @@ Ich brauche ein Set mit allen Vergleichsoperatoren.
  LocalWords:  whitespace terminated Sub enclose group has opening brace closing
  LocalWords:  False LocalWords frozenset Pipe mappt combined diacritical Marks
  LocalWords:  combining MathFraction MathIdentifier weitergeparst excerpt Loop
- LocalWords:  position NoneNode Klammerung explicit implicit Node reroot
- LocalWords:  Präskripte MathTensor Bottomskripte
+ LocalWords:  position NoneNode Klammerung explicit implicit Node reroot fill
+ LocalWords:  Präskripte MathTensor Bottomskripte Diacriticals MathAccent auto
+ LocalWords:  flyspell
