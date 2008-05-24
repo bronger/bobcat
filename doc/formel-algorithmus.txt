@@ -1,23 +1,44 @@
--*- coding: utf-8; mode: text; mode: longlines -*-
+-*- coding: utf-8; mode: text -*-
 
-Vorweg zu den Begrifflichkeiten: Explizite Klammerung funktioniert mit den unescapierten geschweiften Klammern, implizite Klammerung mit allen anderen.
+Vorweg zu den Begrifflichkeiten: Explizite Klammerung funktioniert mit den
+unescapierten geschweiften Klammern, implizite Klammerung mit allen anderen.
 
 * parse_math_row
 ================
 
-Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle Parse-Position zurück.
+Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material
+und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle
+Parse-Position zurück.
 
-Die Eingangsparameter sind: excerpt, position, whitespace_terminated.  whitespace_terminated ist True, wenn es sich um Material handelt, das Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).
+Die Eingangsparameter sind: excerpt, position, whitespace_terminated.
+whitespace_terminated ist True, wenn es sich um Material handelt, das
+Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).
 
-parse_math_row wird praktisch die gesamte Arbeit machen.  Insbesondere wird die MathGroup-Klasse keine parse-Methode brauchen.  Aber auch MathIdentifier, MathText oder MathOperator werden in parse_math_row komplett gebaut.
+parse_math_row wird praktisch die gesamte Arbeit machen.  Insbesondere wird die
+MathGroup-Klasse keine parse-Methode brauchen.  Aber auch MathIdentifier,
+MathText oder MathOperator werden in parse_math_row komplett gebaut.
 
-Als erstes wird eine MathGroup gebaut, in deren Kinderliste alle eingeparsten Element hinzugefügt werden, und die gleichzeitig als Mutter bei der Erzeugung der Element und rekursiven Aufrufen von parse_math_row dient.
+Als erstes wird eine MathGroup gebaut, in deren Kinderliste alle eingeparsten
+Element hinzugefügt werden, und die gleichzeitig als Mutter bei der Erzeugung
+der Element und rekursiven Aufrufen von parse_math_row dient.
 
-parse_math_row muß bei _jeder_ Klammerung sich selbst rekursiv aufrufen, mit der Klammer als dem nächsten zu parsenden Zeichen, und whitespace_terminated=False.
+parse_math_row muß bei _jeder_ Klammerung sich selbst rekursiv aufrufen, mit
+der Klammer als dem nächsten zu parsenden Zeichen, und
+whitespace_terminated=False.
 
-Ist whitespace_terminated=False, muß parse_math_row als erstes feststellen, mit welcher Klammerart eröffnet wurde (explizit, implizit, »|« oder »‖«).  Im Falle von nicht-expliziter Klammerung wird opening_brace=True gesetzt.
+Ist whitespace_terminated=False, muß parse_math_row als erstes feststellen, mit
+welcher Klammerart eröffnet wurde (explizit, implizit, »|« oder »‖«).  Im Falle
+von nicht-expliziter Klammerung wird opening_brace=True gesetzt.
 
-Wird eine passende schließende Klammer gefunden, wird im Falle einer nicht-expliziten schließenden Klammer closing_brace=True gesetzt, diese Klammer zur MathGroup hinzugefügt und als neue Parse-Position das Zeichen hinter dieser Klammer angegeben.  Im Falle einer »}« hingegen gibt es zwei Möglichkeiten: Wurde die aktuelle MathGroup auch explizit geöffnet, ist die neue Parse-Position das Zeichen hinter der »}«.  Wurde sie implizit geöffnet, ist die neue Parse-Position die »}«, weil sie auch von der aufrufenden parse_math_row verarbeitet werden muß (eventuell sogar noch weiter durchgereicht werden muß).
+Wird eine passende schließende Klammer gefunden, wird im Falle einer
+nicht-expliziten schließenden Klammer closing_brace=True gesetzt, diese Klammer
+zur MathGroup hinzugefügt und als neue Parse-Position das Zeichen hinter dieser
+Klammer angegeben.  Im Falle einer »}« hingegen gibt es zwei Möglichkeiten:
+Wurde die aktuelle MathGroup auch explizit geöffnet, ist die neue
+Parse-Position das Zeichen hinter der »}«.  Wurde sie implizit geöffnet, ist
+die neue Parse-Position die »}«, weil sie auch von der aufrufenden
+parse_math_row verarbeitet werden muß (eventuell sogar noch weiter
+durchgereicht werden muß).
 
 
 *.* Der Central Loop
@@ -27,33 +48,61 @@ Schritte in parse_math_row, während durch das Excerpt gewandert wird:
 
   1. Ist whitespace_terminated True und es wird Whitespace gefunden, bricht die Schleife ab.
 
-  2. Wird eine öffnende Klammer gefunden, wird parse_math_row für das folgende erneut aufgerufen und das Ergebnis an die Kinderliste des Rückgabewertes angehängt.
+  2. Wird eine öffnende Klammer gefunden, wird parse_math_row für das folgende
+     erneut aufgerufen und das Ergebnis an die Kinderliste des Rückgabewertes
+     angehängt.
 
-  3. Wird ein Bruchstrich gefunden, wird, falls vorhanden, die aktuelle Gruppe geschlossen, der letztendliche Rückgabewert auf eine MathFraction gesetzt, das Einzelelement bzw. die Gruppe als Zähler hinzugefügt, und parse_math_row für das Sammeln des Nenners aufgerufen.
+  3. Wird ein Bruchstrich gefunden, wird, falls vorhanden, die aktuelle Gruppe
+     geschlossen, der letztendliche Rückgabewert auf eine MathFraction gesetzt,
+     das Einzelelement bzw. die Gruppe als Zähler hinzugefügt, und
+     parse_math_row für das Sammeln des Nenners aufgerufen.
 
   4. Akzente
 
-  5. Skripte: Kritisch sind nur die Präskripte.  Werden sie gefunden, wird ein MathTensor angelegt, das abwechselnd die Sub- und Super-Präskripte als Kindelemente aufnimmt (können u. U. NoneNode sein).  Sobald die Basis bekannt ist, wird sie angehängt und ihr Index in einem Attribut von MathTensor gespeichert.  Dann werden Top- und Bottomskripte und die „normalen“ Sub/Superskripte eingeparst und angehängt.
+  5. Skripte: Kritisch sind nur die Präskripte.  Werden sie gefunden, wird ein
+     MathTensor angelegt, das abwechselnd die Sub- und Super-Präskripte als
+     Kindelemente aufnimmt (können u. U. NoneNode sein).  Sobald die Basis
+     bekannt ist, wird sie angehängt und ihr Index in einem Attribut von
+     MathTensor gespeichert.  Dann werden Top- und Bottomskripte und die
+     „normalen“ Sub/Superskripte eingeparst und angehängt.
 
      Das Parsen der Top- und Bottomskripte macht leider ein Reroot nötig.
 
-  6. Matrizen, Vektoren und Wurzeln sind trivial, weil sie eine Präfix-Syntax haben.
+  6. Matrizen, Vektoren und Wurzeln sind trivial, weil sie eine Präfix-Syntax
+     haben.
 
-parse_math_row achtet bei der Rückgabe eines Funktionswertes darauf, daß, wenn die MathGroup leer geblieben ist, NoneNode zurückgegeben wird, im Falle von einem Kind-Element eben dieses Element, und im Falle von mehr Kind-Elementen die ganze MathGroup.
+parse_math_row achtet bei der Rückgabe eines Funktionswertes darauf, daß, wenn
+die MathGroup leer geblieben ist, NoneNode zurückgegeben wird, im Falle von
+einem Kind-Element eben dieses Element, und im Falle von mehr Kind-Elementen
+die ganze MathGroup.
 
-Alle Node-Elemente müssen eine reroot()-Methode bekommen, damit sie innerhalb des Baumes verschoben werden können.  Das sollte auch über Bäume hinweg funktionieren.
+Alle Node-Elemente müssen eine reroot()-Methode bekommen, damit sie innerhalb
+des Baumes verschoben werden können.  Das sollte auch über Bäume hinweg
+funktionieren.
 
 
 * Globale Konstanten
 ====================
 
-Ich brauche ein Set mit sämtlichen öffnenden Unicode-Klammern (inklusive des Pipe-Zeichens und des doppelten vertikalen Strichs), und eines mit sämtlichen schließenden (ohne Pipe-Zeichen & Co). Außerdem benötige ich ein Dictionary, das alle Unicode-Superskripte auf normale Zeichen abbildet, und noch eines, das dasselbe mit Subskripten tut.
+Ich brauche ein Set mit sämtlichen öffnenden Unicode-Klammern (inklusive des
+Pipe-Zeichens und des doppelten vertikalen Strichs), und eines mit sämtlichen
+schließenden (ohne Pipe-Zeichen & Co). Außerdem benötige ich ein Dictionary,
+das alle Unicode-Superskripte auf normale Zeichen abbildet, und noch eines, das
+dasselbe mit Subskripten tut.
 
-Ich brauche einen kompilierten regulären Ausdruck, der Zahlen parsen kann.  Wenn der Autor mit einer Direktiven von Dezimalpunkt auf Dezimalkomma wechselt, muß diese Variable neu berechnet werden.
+Ich brauche einen kompilierten regulären Ausdruck, der Zahlen parsen kann.
+Wenn der Autor mit einer Direktiven von Dezimalpunkt auf Dezimalkomma wechselt,
+muß diese Variable neu berechnet werden.
 
-Außerdem brauche ich ein Set mit allen eingebauten Funktionen, und ein Set mit allen eingebauten Multi-Zeichen-Bezeichnern (letztere werden zwar als Multi-Zeichen-Bezeichner erkannt, aber nicht aufrecht gedruckt).  Beides sind von Set abgeleitete Datentypen, die ein Attribut aktuell halten, welches einen kompilierten regulären Ausdruck enthält von der Form "Element1|Element2|Element3|…".
+Außerdem brauche ich ein Set mit allen eingebauten Funktionen, und ein Set mit
+allen eingebauten Multi-Zeichen-Bezeichnern (letztere werden zwar als
+Multi-Zeichen-Bezeichner erkannt, aber nicht aufrecht gedruckt).  Beides sind
+von Set abgeleitete Datentypen, die ein Attribut aktuell halten, welches einen
+kompilierten regulären Ausdruck enthält von der Form
+"Element1|Element2|Element3|…".
 
-Ich brauche ein Set mit allen sog. „großen Operatoren“.  Horizontale Klammern werden allerdings extra behandelt.
+Ich brauche ein Set mit allen sog. „großen Operatoren“.  Horizontale Klammern
+werden allerdings extra behandelt.
 
 Ich brauche ein Set mit allen Vergleichsoperatoren.
 
