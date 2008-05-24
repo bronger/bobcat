@@ -82,7 +82,9 @@ If you want to use »__« and »^^« and sub/superscripts for the same base, »_
 
 == Whitespace ==
 
-“Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0).  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+“Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0), tabs, and line endings.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+
+Terminating whitespace, when not terminating anything, simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
 
 Every non-breaking space (0xa0) which doesn't terminate something, and every non-breaking thin space may denote a physical quantity, see below.
 
@@ -173,7 +175,7 @@ Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat us
 
 Note that in the last two examples, there are no slashes in the Bobcat code but codepoints 0x2215.  Your display program may render them indistinguishable, though.  An ordinary slash is just a slash in Bobcat.  Rationale for using // instead of just the slash: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
 
-Alignment markers, relational operators, atoms with a relational operator as their base, general punctuation (full stop, comma, semicolon, and others), and text insertions delimit a fraction.  If you want them as part of the fraction, enclose the (de)nominator in curly braces:
+Alignment markers, relational operators, atoms with a relational operator as their base, general punctuation (full stop, comma, semicolon, colon), and text insertions delimit a fraction.  If you want them as part of the fraction, enclose the (de)nominator in curly braces:
 
 <code>
     1 // 2 = 0.5         \frac{1}{2} = 0.5
@@ -266,6 +268,8 @@ Text blocks are entered as <code>`|name of text block|`</code>, so enclosed in b
 
 |radicand|:: {2π}
 </code>
+
+They are inserted as a parsed subgroup, and not on the scanner-level.  If the textblock doesn't contain a formula but general inline material, it is implicitly surrounded by "…".
 
 
 == Physical quantities ==
