@@ -16,12 +16,14 @@ Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. Fir
 
 Such constructs are called “atoms”.  In these examples, their ''base'' is “x”.  Atoms can also have prescripts and stacked material, see below.
 
-Alternatively to whitespace, sub/superscripts are terminated by another sub/superscript:
+Alternatively to whitespace, sub/superscripts are terminated by another sub/superscript and by closing braces of any kind:
 
 <code>
     x_1^2                  x_1^2
     x_11^22                x_{11}^{22}
     x_1_2                  x_1{}_2
+    (x_1)y                 (x_1)y
+    |x_1|y                 |x_1|y
 </code>
 
 
@@ -84,7 +86,7 @@ If you want to use »__« and »^^« and sub/superscripts for the same base, »_
 
 “Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0), tabs, and line endings.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
 
-Terminating whitespace, when not terminating anything, simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
+Terminating whitespace simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
 
 Every non-breaking space (0xa0) which doesn't terminate something, and every non-breaking thin space may denote a physical quantity, see below.
 
@@ -97,7 +99,7 @@ Subsequent explicit spacing simply accumulates, no matter how breaking or non-br
 
 == Roots ==
 
-Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+Roots start with »√« (and only this).  Their radicand is whitespace-terminated.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
 
 <code>
     √2π                    \sqrt{2\pi}
@@ -175,7 +177,7 @@ Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat us
 
 Note that in the last two examples, there are no slashes in the Bobcat code but codepoints 0x2215.  Your display program may render them indistinguishable, though.  An ordinary slash is just a slash in Bobcat.  Rationale for using // instead of just the slash: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.
 
-Alignment markers, relational operators, atoms with a relational operator as their base, general punctuation (full stop, comma, semicolon, colon), and text insertions delimit a fraction.  If you want them as part of the fraction, enclose the (de)nominator in curly braces:
+Alignment markers, relational operators, arrows, atoms with a relational operator or an arrow as their base, general punctuation (full stop, comma, semicolon, colon), and text insertions delimit a fraction.  If you want them as part of the fraction, enclose the (de)nominator in curly braces:
 
 <code>
     1 // 2 = 0.5         \frac{1}{2} = 0.5
@@ -194,7 +196,7 @@ All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat c
 
 === Special case: the vertical line ===
 
-One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.
+One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.  However, when parsing sub/superscripts (''not'' top/bottom scripts), single or double vertical bars behave like ''closing'' braces, i. e., they terminate the sub/superscript.
 
 For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ or ⟨ active.  It doesn't do any grouping.  Without an \{ or ⟨ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
 
@@ -300,13 +302,12 @@ There is one subtle difference though: All odd-numbered »&« centre the followi
 
 <code>
 {8.44x + 55y  &= 0}
-
 {3.1 x − 0.7y &= −1.1}
 </code>
 
 Within an equation, every sequence of math groups (enclosed with e. g. {…}) with »&« within them is printed on top of each other and aligned according to the ampersands.  The AMSmath environments “split” and “aligned” will be used for realising this in LaTeX.
 
-By the way, the empty line between sequenced displayed equations is optional.  Inter-equation alignment takes place as long as the sequence of equation blocks is not interrupted by a non-math block.
+Alignment doesn't survive across blocks.  So if you insert an empty line to an equation sequence, the following equations – as long as they form a block of their own – have other alignment points.
 
 
 == Equation labelling and numbering ==
