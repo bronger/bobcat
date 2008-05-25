@@ -15,9 +15,44 @@ Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material
 und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle
 Parse-Position zurück.
 
-Die Eingangsparameter sind: excerpt, position, whitespace_terminated.
-whitespace_terminated ist True, wenn es sich um Material handelt, das
-Whitespace-limitiert ist (also ein Radikand oder ein Sub-/Superskript).
+Die Eingangsparameter sind: excerpt, position, group_type.  group_type kann
+dabei folgende Werte annehmen:
+
+• "explicit": die Gruppe wurde mit einer »{« geöffnet.  Terminierung also nur
+  durch »}«, und das nächste zu parsende Zeichen ist das unmittelbar danach.
+
+• "implicit": die Gruppe wurde mit einer »(«, »[«, »\{« etc. geöffnet.
+  Terminierung durch schließende implizite Klammern exklusive »|« und »‖«, dann
+  ist das nächste zu parsende Zeichen unmittelbar dahinter.  Oder durch eine
+  schließende explizite Klammer, dann ist sie selbst das nächste zu parsende
+  Zeichen.
+
+• "|", "‖": die Gruppe wurde mit eben jenem Zeichen eröffnet.  Terminierung
+  durch schließende implizite Klammern inklusive »|« bzw.(sic!) »‖«, dann ist das
+  nächste zu parsende Zeichen unmittelbar dahinter.  Oder durch eine
+  schließende explizite Klammer, dann ist sie selbst das nächste zu parsende
+  Zeichen.
+
+• "sub/superscript": die Gruppe ist _ein_ Sub-, Super- oder Präskript.
+  Terminierung durch »_«, »^«, »__«, »^^«, schließende explizite oder implizite
+  Klammern inklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0,
+  Zeilenumbruch).  In allen Fällen ist das zum Abbruch geführte Zeichen das
+  nächste, was vom Aufrufer geparst wird.
+
+• "top/bottomscript": die Gruppe ist _ein_ Top- oder Bottomskript.
+  Terminierung durch »__«, »^^«, schließende explizite oder implizite Klammern
+  exklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  In
+  allen Fällen ist das zum Abbruch geführte Zeichen das nächste, was vom
+  Aufrufer geparst wird.
+
+• "radicand": die Gruppe ist ein Wurzel-Radikand.  Terminierung durch
+  schließende explizite oder implizite Klammern exklusive »|« und »‖«, oder
+  Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  In allen Fällen ist das zum
+  Abbruch geführte Zeichen das nächste, was vom Aufrufer geparst wird.
+
+• "matrix element": die Gruppe ist ein Matrix-Element.  Terminierung durch
+  Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  Das zum Abbruch geführte
+  Zeichen das nächste, was vom Aufrufer geparst wird.
 
 parse_math_row wird praktisch die gesamte Arbeit machen.  Insbesondere wird die
 MathGroup-Klasse keine parse-Methode brauchen.  Aber auch MathIdentifier,
@@ -27,23 +62,21 @@ Als erstes wird eine MathGroup gebaut, in deren Kinderliste alle eingeparsten
 Element hinzugefügt werden, und die gleichzeitig als Mutter bei der Erzeugung
 der Element und rekursiven Aufrufen von parse_math_row dient.
 
-parse_math_row muß bei _jeder_ Klammerung sich selbst rekursiv aufrufen, mit
-der Klammer als dem nächsten zu parsenden Zeichen, und
-whitespace_terminated=False.
+parse_math_row muß bei _jeder_ öffnenden Klammerung sich selbst rekursiv
+aufrufen, bei impliziter Klammerung mit der Klammer als dem nächsten zu
+parsenden Zeichen.  Im Falle von impliziter Klammerung _und_ wenn das erste
+Element auch wirklich eine Klammer ist (kann im Nenner vo Brüchen nämlich auch
+nicht der Fall sein) setzt das neue parse_math_row ganz zu Beginn
+opening_brace=True.
 
-Ist whitespace_terminated=False, muß parse_math_row als erstes feststellen, mit
-welcher Klammerart eröffnet wurde (explizit, implizit, »|« oder »‖«).  Im Falle
-von nicht-expliziter Klammerung wird opening_brace=True gesetzt.
-
-Wird eine passende schließende Klammer gefunden, wird im Falle einer
-nicht-expliziten schließenden Klammer closing_brace=True gesetzt, diese Klammer
-zur MathGroup hinzugefügt und als neue Parse-Position das Zeichen hinter dieser
-Klammer angegeben.  Im Falle einer »}« hingegen gibt es zwei Möglichkeiten:
-Wurde die aktuelle MathGroup auch explizit geöffnet, ist die neue
-Parse-Position das Zeichen hinter der »}«.  Wurde sie implizit geöffnet, ist
-die neue Parse-Position die »}«, weil sie auch von der aufrufenden
-parse_math_row verarbeitet werden muß (eventuell sogar noch weiter
-durchgereicht werden muß).
+Wird eine passende schließende Klammer gefunden, wird im Falle einer impliziten
+schließenden Klammer closing_brace=True gesetzt, diese Klammer zur MathGroup
+hinzugefügt und als neue Parse-Position das Zeichen hinter dieser Klammer
+angegeben.  Im Falle einer »}« hingegen gibt es zwei Möglichkeiten: Wurde die
+aktuelle MathGroup auch explizit geöffnet, ist die neue Parse-Position das
+Zeichen hinter der »}«.  Wurde sie implizit geöffnet, ist die neue
+Parse-Position die »}«, weil sie auch von der aufrufenden parse_math_row
+verarbeitet werden muß (eventuell sogar noch weiter durchgereicht werden muß).
 
 
 *.* Der Central Loop
@@ -51,7 +84,7 @@ durchgereicht werden muß).
 
 Schritte in parse_math_row, während durch das Excerpt gewandert wird:
 
-  1. Ist whitespace_terminated=True und es wird Whitespace gefunden, bricht die
+  1. Ist man Whitespace-terminiert und es wird Whitespace gefunden, bricht die
      Schleife ab.  Wird eine schließende Klammer oder ein Betrags- oder
      Normstrich gefunden, bricht die Schleife ebenso ab.  Das nächste zu
      parsende Zeichen für die Mutterroutine ist dann diese schließende Klammer.
@@ -124,4 +157,5 @@ Ich brauche ein Set mit allen Vergleichsoperatoren.
  LocalWords:  combining MathFraction MathIdentifier weitergeparst excerpt Loop
  LocalWords:  position NoneNode Klammerung explicit implicit Node reroot fill
  LocalWords:  Präskripte MathTensor Bottomskripte Diacriticals MathAccent auto
- LocalWords:  flyspell
+ LocalWords:  flyspell type sub superscript Präskript geparst top bottomscript
+   LocalWords:  Bottomskript standalone sic radicand matrix element
