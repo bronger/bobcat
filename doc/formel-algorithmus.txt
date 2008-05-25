@@ -15,8 +15,8 @@ Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material
 und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle
 Parse-Position zurück.
 
-Die Eingangsparameter sind: excerpt, position, group_type.  group_type kann
-dabei folgende Werte annehmen:
+Die Eingangsparameter sind: excerpt, position, group_type, in_denominator.
+group_type kann dabei folgende Werte annehmen:
 
 • "explicit": die Gruppe wurde mit einer »{« geöffnet.  Terminierung also nur
   durch »}«, und das nächste zu parsende Zeichen ist das unmittelbar danach.
@@ -45,10 +45,11 @@ dabei folgende Werte annehmen:
   allen Fällen ist das zum Abbruch geführte Zeichen das nächste, was vom
   Aufrufer geparst wird.
 
-• "radicand": die Gruppe ist ein Wurzel-Radikand.  Terminierung durch
-  schließende explizite oder implizite Klammern exklusive »|« und »‖«, oder
-  Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  In allen Fällen ist das zum
-  Abbruch geführte Zeichen das nächste, was vom Aufrufer geparst wird.
+• "radicand" oder "unit": die Gruppe ist ein Wurzel-Radikand oder eine
+  physikalische Einheit.  Terminierung durch schließende explizite oder
+  implizite Klammern exklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0,
+  Zeilenumbruch).  In allen Fällen ist das zum Abbruch geführte Zeichen das
+  nächste, was vom Aufrufer geparst wird.
 
 • "matrix element": die Gruppe ist ein Matrix-Element.  Terminierung durch
   Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  Das zum Abbruch geführte
@@ -78,12 +79,18 @@ Zeichen hinter der »}«.  Wurde sie implizit geöffnet, ist die neue
 Parse-Position die »}«, weil sie auch von der aufrufenden parse_math_row
 verarbeitet werden muß (eventuell sogar noch weiter durchgereicht werden muß).
 
-Die Variable nominator_index gibt die Position des letzten Kindes der aktuellen
+Die Variable numerator_index gibt die Position des letzten Kindes der aktuellen
 MathGroup an, an der ein Zähler beginnen würde, wenn ein Bruch gefunden würde.
 Beginnt die Gruppe mit einer impliziten Klammer, ist diese Variable erstmal 1,
 denn das nullte Element würde ja nicht zum Zähler des Bruchs dazugehören.  Bei
 Interpunktion, menschlichem Text, Pfeilen und Relationszeichen wird der Wert
 entsprechend auf die aktuelle Kinderlistenlänge + 1 erhöht.
+
+in_denominator=True bedeutet, daß gerade ein Nenner geparst wird.  Das
+bedeutet, daß zusätzlich zu den anderen möglichen Abbruchstellen an den
+typischen Bruch-Terminierungen (z. B. Vergleichsoperatoren) abgebrochen wird,
+und daß grundsätzlich das Abbruch-provozierende Zeichen das nächste zu parsende
+ist.
 
 
 *.* Der Central Loop
@@ -101,10 +108,11 @@ Schritte in parse_math_row, während durch das Excerpt gewandert wird:
      angehängt.
 
   3. Wird ein Bruchstrich gefunden, werden die Kinder der aktuellen Gruppe ab
-     nominator_index in eine eigene, neue Gruppe rerootet und die als Zähler
+     numerator_index in eine eigene, neue Gruppe rerootet und die als Zähler
      einer neuen MathFraction hinzugefügt.  Die MathFraction wird in die
      aktuelle Gruppe eingehängt.  Dann wird parse_math_row zum Sammeln des
-     Nenners aufgerufen, wobei group_type durchgeschliffen wird.
+     Nenners aufgerufen, wobei group_type durchgeschliffen wird und
+     in_denominator=True ist.
 
   4. Akzente: Zeichen mit diakritischen Zeichen müssen zerlegt werden, und
      folgende Combining Diacriticals zur Liste der Akzente hinzugefügt werden.
@@ -166,5 +174,6 @@ Ich brauche ein Set mit allen Vergleichsoperatoren.
  LocalWords:  position NoneNode Klammerung explicit implicit Node reroot fill
  LocalWords:  Präskripte MathTensor Bottomskripte Diacriticals MathAccent auto
  LocalWords:  flyspell type sub superscript Präskript geparst top bottomscript
-   LocalWords:  Bottomskript standalone sic radicand matrix element nominator
- LocalWords:  index nullte Relationszeichen Kinderlistenlänge rerootet
+ LocalWords:  Bottomskript standalone sic radicand matrix element nominator
+ LocalWords:  index nullte Relationszeichen Kinderlistenlänge rerootet unit
+ LocalWords:  denominator numerator
