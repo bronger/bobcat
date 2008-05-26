@@ -1,0 +1,124 @@
+digraph Bobcat_document {
+	graph [ordering=out];
+	node [label="\N", fontname=Helvetica];
+	Node0 [label=<<TABLE BGCOLOR="red"><TR><TD>Document</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node1 [label=<<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>>, shape=plaintext];
+	Node2 [label=<<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node3 [label="Introducti\lon\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node4 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node5 [label="This is\lthe_\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node6 [label=<<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node7 [label=first, fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node8 [label="_paragraph\l.\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node9 [label=<<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>>, shape=plaintext];
+	Node10 [label=<<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node11 [label=Motivation, fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node12 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node13 [label="This is\lthe_\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node14 [label=<<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node15 [label=second, fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node16 [label="_paragraph\l.\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node17 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node18 [label="And this\lis the\lthird one.\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node19 [label=<<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 1</FONT></TD></TR>
+</TABLE>>, shape=plaintext];
+	Node20 [label=<<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node21 [label="Acknowledg\lements\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node22 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node23 [label=Yet_, fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node24 [label=<<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node25 [label=another, fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node26 [label="_text\lblock.\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node27 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node28 [label="And we go\lfurther\land\lfurther.\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node29 [label=<<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 2</FONT></TD></TR>
+</TABLE>>, shape=plaintext];
+	Node30 [label=<<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node31 [label="A subsubhe\lading\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node32 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node33 [label="“42” said\lDeep\lThought,\lwith …\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node34 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node35 [label="It was a\llong time\lbefore\lany…\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node36 [label=<<TABLE BGCOLOR="yellow"><TR><TD>Section</TD></TR>
+<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">level: 0</FONT></TD></TR>
+</TABLE>>, shape=plaintext];
+	Node37 [label=<<TABLE BGCOLOR="goldenrod"><TR><TD>Heading</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node38 [label="Last\lchapter\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node39 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node40 [label="This is\lalmost the\llast\lparag…\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node41 [label=<<TABLE BGCOLOR="green"><TR><TD>Paragraph</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node42 [label="And this\lis_\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node43 [label=<<TABLE BGCOLOR="darkseagreen2"><TR><TD>Emphasize</TD></TR>
+</TABLE>>, shape=plaintext];
+	Node44 [label="definitely\lthe last\lone\l", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node45 [label=".", fontname="Times-Roman", shape=box, fontsize="12pt"];
+	Node0 -> Node1;
+	Node1 -> Node2;
+	Node2 -> Node3;
+	Node1 -> Node4;
+	Node4 -> Node5;
+	Node4 -> Node6;
+	Node6 -> Node7;
+	Node4 -> Node8;
+	Node0 -> Node9;
+	Node9 -> Node10;
+	Node10 -> Node11;
+	Node9 -> Node12;
+	Node12 -> Node13;
+	Node12 -> Node14;
+	Node14 -> Node15;
+	Node12 -> Node16;
+	Node9 -> Node17;
+	Node17 -> Node18;
+	Node9 -> Node19;
+	Node19 -> Node20;
+	Node20 -> Node21;
+	Node19 -> Node22;
+	Node22 -> Node23;
+	Node22 -> Node24;
+	Node24 -> Node25;
+	Node22 -> Node26;
+	Node19 -> Node27;
+	Node27 -> Node28;
+	Node19 -> Node29;
+	Node29 -> Node30;
+	Node30 -> Node31;
+	Node29 -> Node32;
+	Node32 -> Node33;
+	Node29 -> Node34;
+	Node34 -> Node35;
+	Node0 -> Node36;
+	Node36 -> Node37;
+	Node37 -> Node38;
+	Node36 -> Node39;
+	Node39 -> Node40;
+	Node36 -> Node41;
+	Node41 -> Node42;
+	Node41 -> Node43;
+	Node43 -> Node44;
+	Node41 -> Node45;
+}
