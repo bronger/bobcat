@@ -2,7 +2,9 @@
 
 == Sub- and superscripts (or indices and exponents) ==
 
-Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
+Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. In LaTeX, only a single characters makes the sub/superscript.  Anything longer must be embraced with curly braces.
+
+In Bobcat however, it works like in the so-called Linear Formula Syntax by Microsoft (http://www.unicode.org/notes/tn28/UTN28-PlainTextMath.pdf): The first alphanumerical characters make the sub/superscript.  This is, if your subscript consists only of Unicode letters, Unicode digits (including sub/superscript digits), you needn't put it in curly braces:
 
 <code>
     Bobcat                  LaTeX
@@ -10,20 +12,30 @@ Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. Fir
 
     x_12 y                 x_{12}y
     x_12y                  x_{12y}
-    x_{12}y                x_{12y}
-    x_1{2}y                x_{12y}
+    x_12y²                 x_{12y^2}
+    x_α₁β²                 x_{\alpha_1\beta^2}
+    x_α₁β^2                x_{\alpha_1\beta}^2
 </code>
 
-Such constructs are called “atoms”.  In these examples, their ''base'' is “x”.  Atoms can also have prescripts and stacked material, see below.
+When using Unicode sub/superscript digits, note that they form a group that must consists of such sub/superscript glyphs only.  Thus, any other character breaks the sequence, and a new group is formed:
 
-Alternatively to whitespace, sub/superscripts are terminated by another sub/superscript and by closing braces of any kind:
+<code>
+    x₋₁₁                   x_{-11}
+    x₁²                    x_1^2
+    x₁y                    x_1 y
+    x₁_y                   x_{1_y}
+    x₁^y                   x_1^y
+</code>
+
+Such constructs are called “atoms”.  In these examples, their ''base'' is “x”.  Atoms can also have prescripts and stacked material, see below.  Note that subsequent use of multiple »_« (or multiple »^«) accumulates right-associatively, however, if you break a sequence, the new sub/superscript refers to the base again:
 
 <code>
     x_1^2                  x_1^2
     x_11^22                x_{11}^{22}
-    x_1_2                  x_1{}_2
-    (x_1)y                 (x_1)y
-    |x_1|y                 |x_1|y
+    x_1_2                  x_{1_2}
+    x_1_2^3                x_{1_2}^3
+    x^1^2_3                x^{1^2}_3
+    x_i^_k                 x_i{}_k
 </code>
 
 
@@ -55,11 +67,11 @@ But, if you want to write something like
 you have to input:
 
 <code>
-    _1_^3_2_^4 x_5_^7_6_^8        _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
-    ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+    _1^_^3_2^_^4 x_5^_^7_6^_^8    _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+    ₁^_³₂^⁴x₅^_⁷₆^⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
 </code>
 
-The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« would have worked, too, because also here, it's just important to break up the pairs.
+This shows how insertions of parameterless »_« and »^« tell Bobcat that this position in empty.
 
 By the way, the ''ordering'' within a pair is insignificant.
 
@@ -70,16 +82,16 @@ With »__« and »^^«, one can create stacked material.  The “index” or “
 
 There must not be whitespace before »__« or »^^«.  Although it would be syntactically still unambiguous if there was (because we have no prescripts here), it would be too confusing, given the analogy to normal sub/superscripts.  If there is whitespace, it is ignored, with a parse warning being raised.
 
-Sequenced »__« and »^^« are possible.  However, to a given base, you may only add at most ''one'' »^^« sequence and at most ''one'' »__« sequence.  The order of these two is not important (their inner order is, of course).  This can be used for <code lang="latex">\overbrace</code> and <code lang="latex">\underbrace</code> constructs.
+Sequenced »__« and »^^« are possible.  However, to a given base, you may only add at most ''one'' »^^« sequence and at most ''one'' »__« sequence.  The order of these two is not important.  This can be used for <code lang="latex">\overbrace</code> and <code lang="latex">\underbrace</code> constructs.
 
 <code>
-    x =^^a>b 1             x \stackrel{a>b}{=} 1
-    x =__a<b 0             x \stackrel[a>b]{}{=} 0  % with package "stackrel"
+    x =^^{a>b} 1           x \stackrel{a>b}{=} 1
+    x =__{a<b} 0           x \stackrel[a>b]{}{=} 0  % with package "stackrel"
     A →^^"transform" B     A \xrightarrow{\mathrm{transform}} B
     {A+B}^^⏞^^"sum"        \overbrace{A+B}^{\mathrm{sum}}
 </code>
 
-If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscripts.  Sub/superscripts within or after the stacking refer to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts themselves.  “Top-level” in this context means that by using subgroups, arbitrary material is allowed in anyway.
+If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscripts.  Sub/superscripts within or after the stacking refer to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts themselves.  “Top-level” in this context means that by using subgroups, arbitrary material is allowed anyway.
 
 
 == Whitespace ==
@@ -88,7 +100,7 @@ If you want to use »__« and »^^« and sub/superscripts for the same base, »_
 
 Terminating whitespace simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
 
-Every non-breaking space (0xa0) which doesn't terminate something, and every non-breaking thin space may denote a physical quantity, see below.
+Every non-breaking space (0xa0) which doesn't terminate some sort of script or root or matrix element, and every non-breaking thin space may denote a physical quantity, see below.
 
 === Explicit spacing ===
 
@@ -99,7 +111,7 @@ Subsequent explicit spacing simply accumulates, no matter how breaking or non-br
 
 == Roots ==
 
-Roots start with »√« (and only this).  Their radicand is whitespace-terminated.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+Roots start with »√« (and only this).  Their radicand is terminated as sub/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
 
 <code>
     √2π                    \sqrt{2\pi}
@@ -120,9 +132,8 @@ As a special convenience, superscript Unicode codepoints are allowed immediately
 Sums, integrals, and the like work accordingly, i. e. their limits have exactly the same syntax as sub-/superscripts:
 
 <code>
-    ∑_i=0^n x_i            \sum_{i=0}^n x_i
-    ∑_{i=0}^n x_i          \sum_{i=0}^n x_i
-    ∑_i=0ⁿ x_i             \sum_{i=0}^n x_i
+    ∑_{i=0}^n x_i          \sum_{i=0}^n x_i
+    ∑_{i=0}ⁿ x_i           \sum_{i=0}^n x_i
 </code>
 
 Note that Unicode distinguishes between \sum and \Sigma: ∑ and Σ.
@@ -132,10 +143,10 @@ You may use »__« and »^^« instead of »_« and »^«.  They have exactly the
 Multiple sub/superscripts accumulate:
 
 <code>
- ∑__0≤i≤m_k__0<j<n P(i,j)    \sum_{\substack{0\le i\le m_k\\ 0<j<n}} P(i,j)
+∑__{0≤i≤m_k}__{0<j<n} P(i,j)    \sum_{\substack{0\le i\le m_k\\ 0<j<n}} P(i,j)
 </code>
 
-Note that subscripts pile up downwards but superscripts do it upwards.
+Note that bottomscripts pile up downwards but topscripts do it upwards.
 
 
 == Mathematical accents ==
@@ -145,8 +156,10 @@ For mathematical accents, Bobcat uses the “combining diacritical marks” from
 <code>
               ẍ                       \ddot x
               ẍ̇                     \dot{\ddot x}
-            {xyz}̃                 \widetilde{xyz}
+            {xyz} ̃                \widetilde{xyz}
 </code>
+
+The last example shows that after a group, it is allowed to put one non-breaking space (0xa0) between the group and the accent for better rendering in some display programs.
 
 
 === The “prime” character ===
@@ -155,7 +168,7 @@ The prime character »′« seems to be a real issue because some people conside
 
 In LaTeX, it is given by <code lang="latex">\prime</code>, however, this is not in the exponent, so you must write <code lang="latex">$f^\prime(x)$</code>.  The same seems to be true for some screen fonts as well as for MathML 2.0.  See http://www.albany.edu/~hammond/gellmu/primeaccents2.xhtml for a more detailed discussion.
 
-However, the Unicode specs say that it is already in the exponent, as well as its doubled etc. siblings.  So, Bobcat also treats it as being already in the exponent.  Like LaTeX, you may use the apostrophe »'« (and <code>''</code>, <code>'''</code> etc) as a convenient shortcut:
+However, the Unicode specs say that it is already in the exponent, as well as its doubled etc. siblings.  So, Bobcat also treats it as being already in the exponent.  As in LaTeX, you may use the apostrophe »'« (and <code>''</code>, <code>'''</code> etc) as a convenient shortcut:
 
 <code>
              f'                         f'
@@ -194,9 +207,12 @@ By the way, the curly braces themselves must be escaped with \ if you want to ha
 
 All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat considers an opening and a closing brace a pair, and nothing else.  So, "(…)" is a group, as is "[…)" or "\{…⟩".  But "(…" or "[…[" are not considered as groups, therefore, you must enclose them with curly braces to make the grouping explicit: "{(…}" and "{[…[}".  Un-escaped curly braces must always nest properly.
 
+The ASCII double quotes "…" are grouping, too, although you can't nest further groups within them obviously.
+
+
 === Special case: the vertical line ===
 
-One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.  However, when parsing sub/superscripts (''not'' top/bottom scripts), single or double vertical bars behave like ''closing'' braces, i. e., they terminate the sub/superscript.
+One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  As an exception, "|" may close "⟨" to allow for bra-ket notation.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.  However, when parsing sub/superscripts (''not'' top/bottom scripts), single or double vertical bars behave like ''closing'' braces, i. e., they terminate the sub/superscript.
 
 For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ or ⟨ active.  It doesn't do any grouping.  Without an \{ or ⟨ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
 
@@ -293,6 +309,8 @@ In the following examples, I use the ~ for the non-breaking space:
 
 The backend or theme may render numbers differently.
 
+Within the unit, single units may be separated by arbitrary whitespace, including non-breaking one.  Additionally, Bobcat separates single units according to an internal dictionary, so it can detect that in »cm²/Vs«, there are the three units cm, V, and s.  The author may expand this dictionary with a directive.
+
 
 == Alignment ==
 
@@ -307,7 +325,7 @@ There is one subtle difference though: All odd-numbered »&« centre the followi
 
 Within an equation, every sequence of math groups (enclosed with e. g. {…}) with »&« within them is printed on top of each other and aligned according to the ampersands.  The AMSmath environments “split” and “aligned” will be used for realising this in LaTeX.
 
-Alignment doesn't survive across blocks.  So if you insert an empty line to an equation sequence, the following equations – as long as they form a block of their own – have other alignment points.
+Alignment doesn't survive across blocks.  So if you insert an empty line into an equation sequence, the following equations, if they form a block of their own, have other alignment positions.
 
 
 == Equation labelling and numbering ==
@@ -349,5 +367,5 @@ m_"rest" // √ {1 − {v² // c²}}
 in Bobcat.
 
 
- LocalWords:  sqrt xyz lang frac cdot mathrm wenn lll subformulas multi
+ LocalWords:  sqrt xyz lang frac cdot mathrm wenn lll subformulas multi ket
  LocalWords:  pythagoras utf ispell british AMSmath xrightarrow
