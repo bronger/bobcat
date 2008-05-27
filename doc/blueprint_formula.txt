@@ -207,7 +207,7 @@ By the way, the curly braces themselves must be escaped with \ if you want to ha
 
 All kinds of braces are grouping in Bobcat, not just { and }.  However, Bobcat considers an opening and a closing brace a pair, and nothing else.  So, "(…)" is a group, as is "[…)" or "\{…⟩".  But "(…" or "[…[" are not considered as groups, therefore, you must enclose them with curly braces to make the grouping explicit: "{(…}" and "{[…[}".  Un-escaped curly braces must always nest properly.
 
-The ASCII double quotes "…" are grouping, too, although you can't nest further groups within them obviously.
+The ASCII double quotes "…" and the text block notation `|…|` are grouping, too.
 
 
 === Special case: the vertical line ===
@@ -238,19 +238,19 @@ By the way, the above mathrm/text dichotomy is no error: On the top level, Bobca
 A matrix is given in Bobcat by
 
 <code>
-matrix:: 1   2   3   
-         4   2   6   
-         7   8   9  = …
+(⬛ 1   2   3   
+   4   2   6   
+   7   8   9)  = …
 </code>
 
-So, not only whitespace but also linebreaks are significant here.  However, the horizontal alignment in the source code is not important.
+So, not only whitespace but also linebreaks are significant here.  However, the horizontal alignment in the source code is not important.  The matrix is started by ⬛ (0x2b1b).
 
 You may give parameters to the matrix as a whole or to single cells in backquotes:
 
 <code>
-matrix:: `columns=lll` 1   2`c`   3   
-                       4      2`span=2`   
-                       7   8      9  = …
+(⬛`columns=lll` 1   2`c`   3   
+                4      2`span=2`   
+                7   8      9 )  = …
 </code>
 
 This means that all cells are left-aligned (default is centre), and that the second cell in the first row is centred.  You also see a column span. (Rowspans are not possible in matrices.)  Note that cell parameters must follow directly the cell contents without whitespace in between.  If a cell contains whitespace, enclose it in {…}.
@@ -258,23 +258,19 @@ This means that all cells are left-aligned (default is centre), and that the sec
 If you dislike this line break thing, you can also give the size explicitly:
 
 <code>
-matrix:: `size=3x3` 1 2 3  4 2 6  7 8 9 = …
+(⬛`size=3x3` 1 2 3  4 2 6  7 8 9 ) = …
 </code>
 
 Instead of “x”, you can also use “×” or »;« to separate the number of rows from the number of columns.
 
-By default, matrices are enclosed with (…).  With the parameters “braces”, “left brace”, and “right brace”, you can change that.
-
 
 === Vectors ===
 
-Vectors are slightly different from matrices because autodetecting the size is not feasible:
+Vectors and binomials are introduced with »⬍« (0x2b0d):
 
 <code>
-vector:: 3, 1 2 3 = …
+(⬍1 2 3) = …
 </code>
-
-The size parameter is the first, comma-separated argument.
 
 
 == Text blocks ==
