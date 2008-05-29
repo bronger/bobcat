@@ -11,6 +11,7 @@ In Bobcat however, it works like in the so-called Linear Formula Syntax by Micro
    ========                =======
 
     x_12 y                 x_{12}y
+    x_12+3                 x_{12} + 3
     x_12y                  x_{12y}
     x_12y²                 x_{12y^2}
     x_α₁β²                 x_{\alpha_1\beta^2}
@@ -94,24 +95,9 @@ Sequenced »__« and »^^« are possible.  However, to a given base, you may onl
 If you want to use »__« and »^^« and sub/superscripts for the same base, »__« and »^^« must come after all sub/superscripts.  Sub/superscripts within or after the stacking refer to the stacked material itself.  In other words, stacked material can contain all top-level material which is allowed in sub/superscripts, ''plus'' sub/superscripts themselves.  “Top-level” in this context means that by using subgroups, arbitrary material is allowed anyway.
 
 
-== Whitespace ==
-
-“Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0), tabs, and line endings.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
-
-Terminating whitespace simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
-
-Every non-breaking space (0xa0) which doesn't terminate some sort of script or root or matrix element, and every non-breaking thin space may denote a physical quantity, see below.
-
-=== Explicit spacing ===
-
-Every escaped whitespace doesn't terminate anything but inserts explicit spacing at this position.  The same is true for all non-spaces (neither 0x20 nor 0xa0), including the non-breaking thin space if it cannot be interpreted as part of a physical quantity.
-
-Subsequent explicit spacing simply accumulates, no matter how breaking or non-breaking whitespace is mixed.  It leads to explicit horizontal spacing in the output.  Note that there is also negative whitespace defined in Unicode.
-
-
 == Roots ==
 
-Roots start with »√« (and only this).  Their radicand is terminated as sub/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+Roots start with »√« (and only this).  Their radicand is delimited like sub/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
 
 <code>
     √2π                    \sqrt{2\pi}
@@ -212,7 +198,7 @@ The ASCII double quotes "…" and the text block notation `|…|` are grouping, 
 
 === Special case: the vertical line ===
 
-One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  As an exception, "|" may close "⟨" to allow for bra-ket notation.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.  However, when parsing sub/superscripts (''not'' top/bottom scripts), single or double vertical bars behave like ''closing'' braces, i. e., they terminate the sub/superscript.
+One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  As an exception, "|" may close "⟨" to allow for bra-ket notation.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.
 
 For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ or ⟨ active.  It doesn't do any grouping.  Without an \{ or ⟨ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
 
@@ -286,7 +272,7 @@ They are inserted as a parsed subgroup, and not on the scanner-level.  If the te
 
 == Physical quantities ==
 
-When the Bobcat parser encounters a non-breaking space of some kind, which doesn't just terminate the current formula element, it tries to parse the surrounding material as a physical quantity, which consists of a number (before the space) and/or a physical unit (after the space).
+When the Bobcat parser encounters a non-breaking space of some kind, which doesn't just terminate the current sub/super/top/bottom/prescript, it tries to parse the surrounding material as a physical quantity, which consists of a number (before the space) and/or a physical unit (after the space).
 
 The number must have the typical format used in programming languages, e.g. <code>1.3e-4</code>.  You may use a decimal point or a decimal comma.
 
@@ -304,6 +290,22 @@ In the following examples, I use the ~ for the non-breaking space:
 The backend or theme may render numbers differently.
 
 Within the unit, single units may be separated by arbitrary whitespace, including non-breaking one.  Additionally, Bobcat separates single units according to an internal dictionary, so it can detect that in »cm²/Vs«, there are the three units cm, V, and s.  The author may expand this dictionary with a directive.
+
+
+== Whitespace ==
+
+“Terminating whitespace” in this blueprint means the breaking or non-breaking space (0x20 and 0xa0), tabs, and line endings.  The reason why the non-breaking space is included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate things.
+
+Terminating whitespace simply separates tokens and doesn't lead directly to spacing behaviour (except of course, that the tokens may also be separated by the output engine somehow).
+
+Every non-breaking space (0xa0) which doesn't terminate some sort of script or root or matrix element, and every non-breaking thin space may denote a physical quantity, see above.
+
+
+=== Explicit spacing ===
+
+Every escaped whitespace (except for tab and line break) doesn't terminate anything but inserts explicit spacing at this position.  The same is true for all non-spaces (neither 0x20 nor 0xa0), including the non-breaking thin space if it cannot be interpreted as part of a physical quantity.
+
+Subsequent explicit spacing simply accumulates, no matter how breaking or non-breaking whitespace is mixed.  It leads to explicit horizontal spacing in the output.  Note that there is also negative whitespace defined in Unicode.
 
 
 == Alignment ==
