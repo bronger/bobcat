@@ -15,8 +15,8 @@ Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material
 und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle
 Parse-Position zurück.
 
-Die Eingangsparameter sind: excerpt, position, group_type, in_denominator.
-group_type kann dabei folgende Werte annehmen:
+Die Eingangsparameter sind: excerpt, position, group_type, in_denominator und
+in_unit.  group_type kann dabei folgende Werte annehmen:
 
 • "explicit": die Gruppe wurde mit einer »{« geöffnet.  Terminierung also nur
   durch »}«, und das nächste zu parsende Zeichen ist das unmittelbar danach.
@@ -91,6 +91,9 @@ bedeutet, daß zusätzlich zu den anderen möglichen Abbruchstellen an den
 typischen Bruch-Terminierungen (z. B. Vergleichsoperatoren) abgebrochen wird,
 und daß grundsätzlich das Abbruch-provozierende Zeichen das nächste zu parsende
 ist.
+
+in_unit=True bedeutet, daß zur Zeit eine physikalische Einheit geparst wird.
+Das wird an Tochteraufrufe grundsätzlich durchgeschliffen.
 
 
 *.* Der Central Loop
