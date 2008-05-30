@@ -4,7 +4,7 @@
 
 Sub- and superscripts work a little bit differently in Bobcat than in LaTeX. In LaTeX, only a single characters makes the sub/superscript.  Anything longer must be embraced with curly braces.
 
-In Bobcat however, it works like in the so-called Linear Formula Syntax by Microsoft (http://www.unicode.org/notes/tn28/UTN28-PlainTextMath.pdf): The first alphanumerical characters make the sub/superscript.  This is, if your subscript consists only of Unicode letters, Unicode digits (including sub/superscript digits), you needn't put it in curly braces:
+In Bobcat however, it works like in the so-called Linear Formula Syntax by Microsoft (http://www.unicode.org/notes/tn28/UTN28-PlainTextMath.pdf): The first alphanumerical characters make the sub/superscript.  This is, if your subscript consists only of Unicode letters and Unicode digits (including sub/superscript digits), you needn't put it in curly braces:
 
 <code>
     Bobcat                  LaTeX
@@ -107,7 +107,7 @@ Roots start with »√« (and only this).  Their radicand is delimited like sub/
     ³√ {2 π}               \sqrt[3]{2\pi}
     √³ {2 π}               \sqrt[3]{2\pi}
     ∛ 2π                   \sqrt[3]{2\pi}
-    ³ √2π                  ^3\sqrt{2\pi}
+    ³ √2π                  {}^3\sqrt{2\pi}
 </code>
 
 As a special convenience, superscript Unicode codepoints are allowed immediately before the root symbol.
