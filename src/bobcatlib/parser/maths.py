@@ -30,26 +30,29 @@ closing_braces = set(u")]}⟩⟧⟫⟭⟯")
 
 relational_operators = set(u"<=>"
                            + u"∴∵∻∼∽∾"
-                           + u"".join([unichr(i) for i in range(0x2241, 0x228c)])
+                           + u"≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋"
                            + u"⊏⊐⊑⊒"
-                           + u"".join([unichr(i) for i in range(0x22a6, 0x22ba)])
+                           + u"⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹"
                            + u"⋈⋍"
-                           + u"".join([unichr(i) for i in range(0x22d4, 0x2300)])
-                           + u"".join([unichr(i) for i in range(0x29e3, 0x29e7)])
-                           + u"".join([unichr(i) for i in range(0x2a66, 0x2ade)])
-                           + u"".join([unichr(i) for i in range(0x2af7, 0x2afc)]))
-arrows = set(u"".join([unichr(i) for i in range(0x2190, 0x2200)])
-             u"".join([unichr(i) for i in range(0x27f0, 0x2800)])
-             u"".join([unichr(i) for i in range(0x2900, 0x2980)])
-             u"".join([unichr(i) for i in range(0x2b00, 0x2b12)])
-             u"".join([unichr(i) for i in range(0x2b30, 0x2b4d)]))
+                           + u"⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭⋮⋯⋰⋱⋲⋳⋴⋵⋶⋷⋸⋹⋺⋻⋼⋽⋾⋿"
+                           + u"⧣⧤⧥⧦"
+                           + u"⩦⩧⩨⩩⩪⩫⩬⩭⩮⩯⩰⩱⩲⩳⩴⩵⩶⩷⩸⩹⩺⩻⩼⩽⩾⩿⪀⪁⪂⪃⪄⪅⪆⪇⪈⪉⪊⪋⪌⪍⪎⪏⪐⪑⪒⪓⪔⪕⪖⪗⪘⪙⪚⪛⪜⪝⪞⪟⪠⪡⪢⪣⪤⪥⪦⪧⪨⪩⪪⪫⪬⪭"
+                           u"⪮⪯⪰⪱⪲⪳⪴⪵⪶⪷⪸⪹⪺⪻⪼⪽⪾⪿⫀⫁⫂⫃⫄⫅⫆⫇⫈⫉⫊⫋⫌⫍⫎⫏⫐⫑⫒⫓⫔⫕⫖⫗⫘⫙⫚⫛⫝̸⫝"
+                           + u"⫷⫸⫹⫺⫻")
+arrows = set(u"←↑→↓↔↕↖↗↘↙↚↛↜↝↞↟↠↡↢↣↤↥↦↧↨↩↪↫↬↭↮↯↰↱↲↳↴↵↶↷↸↹↺↻↼↽↾↿⇀⇁⇂⇃⇄⇅⇆⇇⇈⇉⇊⇋⇌⇍⇎⇏⇐⇑⇒⇓⇔⇕⇖⇗⇘⇙⇚⇛⇜⇝⇞⇟⇠⇡⇢⇣⇤⇥⇦⇧⇨⇩⇪⇫⇬⇭⇮⇯⇰⇱⇲"
+             u"⇳⇴⇵⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿"
+             + u"⟰⟱⟲⟳⟴⟵⟶⟷⟸⟹⟺⟻⟼⟽⟾⟿"
+             + u"⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿⥀⥁"
+             u"⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿"
+             + u"⬀⬁⬂⬃⬄⬅⬆⬇⬈⬉⬊⬋⬌⬍⬎⬏⬐⬑"
+             + u"⬰⬱⬲⬳⬴⬵⬶⬷⬸⬹⬺⬻⬼⬽⬾⬿⭀⭁⭂⭃⭄⭅⭆⭇⭈⭉⭊⭋⭌")
 relational_and_arrows = relational_operators | arrows
 
 breaking_whitespace = set(u" " + u"".join([unichr(i) for i in range(0x2000, 0x200b)]) + u"\x205f")
 nonbreaking_whitespace = set(u" \x202f")
 whitespace = breaking_whitespace | nonbreaking_whitespace
 
-big_operators = set(u"∏∐∑⋀⋁⋂⋃" + u"".join([unichr(i) for i in range(0x2a00, 0x2a22)]))
+big_operators = set(u"∏∐∑⋀⋁⋂⋃" + u"⨀⨁⨂⨃⨄⨅⨆⨇⨈⨉⨊⨋⨌⨍⨎⨏⨐⨑⨒⨓⨔⨕⨖⨗⨘⨙⨚⨛⨜⨝⨞⨟⨠⨡")
 
 def is_letter(character):
     return unicodedata.category(character) in ["Lu", "Ll", "Lo", "Lt"]
