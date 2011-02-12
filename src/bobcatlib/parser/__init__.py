@@ -32,7 +32,7 @@ module."""
 
 # safefilename is not really used here, but it must be included so that the
 # codec is registered.
-from ..bobcatlib import safefilename as _safefilename
+from .. import safefilename as _safefilename
 
 # FixMe: All imports in parentheses should be turned into "import *" once the
 # fix for http://article.gmane.org/gmane.comp.python.python-3000.devel/12267
