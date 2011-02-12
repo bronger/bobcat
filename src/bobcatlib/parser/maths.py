@@ -61,14 +61,14 @@ number_pattern = None
 def set_decimal_point(character):
     global number_pattern
     assert character in [u",", u"."]
-    number_pattern = re.compile(u"(+|−|-)?[0-9]+(%s[0-9]+)?(e(+|−|-)?[0-9]+)?" % re.escape(character))
+    number_pattern = re.compile(u"(+|−|-)?[0-9]+({0}[0-9]+)?(e(+|−|-)?[0-9]+)?".format(re.escape(character)))
 set_decimal_point(u".")
 
 def parse_math_row(parent, text, position, end):
     return guarded_find("}", text, position, end)
 
 class IdentifierSet(object):
-    whitespace_re = u"[%s]+" % re.escape(u"".join(whitespace))
+    whitespace_re = u"[{0}]+".format(re.escape(u"".join(whitespace)))
     def __init__(self, identifiers=()):
         self.identifiers = set(identifiers)
     def add(self, identifier):
