@@ -12,6 +12,10 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""Very basic block-level parsing for Bobcat.  Here, I digest paragraph and
+block content models.
+"""
+
 from .common import guarded_match, guarded_search, guarded_find, Node
 # FixMe: The following import should become relative.  At the moment, it can't
 # due to <http://bugs.python.org/issue992389>.

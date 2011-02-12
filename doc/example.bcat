@@ -402,18 +402,22 @@ Displayed equations simply are not part of a paragraph.  Fractions look like thi
 
 And, with strechable parentheses:
 
-{(n+1 // n) `with label`}
+{(n+1 // n)}            `with label`
 
 Stretchable braces are directly inside of curly brackets (the label and
 whitespace doesn't count).  Functions are identified according to an internal
-table: {sin \alpha}.  You may also write {sin α}.  Roots work like {\root n}
+table*: {sin \alpha}.  You may also write {sin α}.  Roots work like {\root n}
 (or {√n}), cubic roots like {√³n} or {√^3 n}.  Equations can be aligned as in
 AMSMath:
 
 { a  &= 2 b }
+
 { 2c &= b   }
 
-Text in equations is enclosed with "..." as in OpenOffice.org.
+Empty lines within equation arrays are optional.  Text in equations is enclosed
+with "..." as in OpenOffice.org.
+
+* which will be expandable by the author
 
 
 6.1. Physical quantities

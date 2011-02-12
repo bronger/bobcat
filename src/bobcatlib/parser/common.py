@@ -12,10 +12,14 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""Common elements for all parser modules such as the Node class.
+Additionally, we have here general helper routines for searching in strings.
+"""
+
 __all__ = ["guarded_match", "guarded_search", "guarded_find", "Node"]
 
 import weakref
-from ..bobcatlib import common
+from .. import common
 
 def guarded_match(pattern, excerpt, pos=0):
     """Does a regexp match, avoiding any escaped characters in the match.

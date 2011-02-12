@@ -102,14 +102,14 @@ And this is _definitely the last one_.
         self.document.parse(text)
     def test(self):
         """the plot generated with Graphviz from a given parse tree should be as expected"""
-        helpers.visualize_tree(self.document.tree_list(), "test.plain")
-        actual_result = open("test.plain").read()
-        desired_result = open("test-desired.plain").read()
+        helpers.visualize_tree(self.document.tree_list(), "test.canon")
+        actual_result = open("test.canon").read()
+        desired_result = open("test-desired.canon").read()
         self.assertEqual(actual_result, desired_result,
                          "Graphviz generated a plot which was different from the expected one")
     def tearDown(self):
         os.remove("test.bcat")
-        os.remove("test.plain")
+        os.remove("test.canon")
     def shortDescription(self):
         description = super(TestVisualizeTree, self).shortDescription()
         return "helpers.visualize_tree: " + (description or "")
