@@ -54,40 +54,53 @@ whitespace = breaking_whitespace | nonbreaking_whitespace
 
 big_operators = set(u"∏∐∑⋀⋁⋂⋃" + u"⨀⨁⨂⨃⨄⨅⨆⨇⨈⨉⨊⨋⨌⨍⨎⨏⨐⨑⨒⨓⨔⨕⨖⨗⨘⨙⨚⨛⨜⨝⨞⨟⨠⨡")
 
+
 def is_letter(character):
     return unicodedata.category(character) in ["Lu", "Ll", "Lo", "Lt"]
 
+
 number_pattern = None
+
 def set_decimal_point(character):
     global number_pattern
     assert character in [u",", u"."]
     number_pattern = re.compile(u"(+|−|-)?[0-9]+({0}[0-9]+)?(e(+|−|-)?[0-9]+)?".format(re.escape(character)))
+
 set_decimal_point(u".")
+
 
 def parse_math_row(parent, text, position, end):
     return guarded_find("}", text, position, end)
 
+
 class IdentifierSet(object):
     whitespace_re = u"[{0}]+".format(re.escape(u"".join(whitespace)))
+
     def __init__(self, identifiers=()):
         self.identifiers = set(identifiers)
+
     def add(self, identifier):
         """The identifier must be whitespace-normalised!"""
         self.identifiers.add(identifier)
         self.pattern = None
+
     def match(self, excerpts, pos=0):
         if not self.pattern:
             regular_expression = u"|".join(re.escape(self.identifiers))
             regular_expression.replace(u" ", whitespace_re)
             self.pattern = re.compile(regular_expression, re.UNICODE)
         return self.pattern.match(unicode(excerpt), pos)
+
 builtin_functions = IdentifierSet(
     u"sin", u"cos", u"tan", u"cot", u"sec", u"csc", u"arcsin", u"arccos", u"arctan", u"arccot",
     u"arcsec", u"arccsc", u"sinh", u"cosh", u"tanh", u"coth", u"arg", u"deg", u"dim", u"exp",
     u"lg", u"ln", u"log", u"mod", u"hom", u"ker", u"sgn")
+
 builtin_big_identifiers = IdentifierSet(
     u"lim inf", u"lim sup", u"max", u"min", u"inf", u"sup", u"Pr", u"gcd", u"det", u"lim")
+
 builtin_identifiers = IdentifierSet()
+
 
 class MathEquation(Node):
     def __init__(self, parent):
