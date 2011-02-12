@@ -12,6 +12,11 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""Very basic inline-level parsing for Bobcat.  Here, I digest the inline
+content model and associated elements.  In particular, text nodes are treated
+here.
+"""
+
 # FixMe: This import should be turned into "import *" once the fix for
 # http://article.gmane.org/gmane.comp.python.python-3000.devel/12267 has
 # arrived here.  (Probably not befor Python 3.0.)  Of course, the __all__
@@ -66,8 +71,9 @@ def parse_inline(parent, text, position, end):
     while position < end:
         delimiter_match = guarded_search(inline_delimiter, text, position, end)
         if delimiter_match:
-            textnode = Text(parent)
-            position = textnode.parse(text, position, delimiter_match.start())
+            if position < delimiter_match.start():
+                textnode = Text(parent)
+                position = textnode.parse(text, position, delimiter_match.start())
             delimiter = delimiter_match.group()
             if delimiter == "_":
                 if isinstance(parent, Emphasize):

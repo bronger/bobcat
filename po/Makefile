@@ -1,9 +1,9 @@
 .PHONY: update
 
-all: de.gmo fr.gmo
+all: de.gmo
 
 %.gmo : %.po
-	cd ../src ; xgettext --output=../po/bobcat.pot bobcat.py bobcat_rating.py
+	find ../src -name "*.py" | xargs xgettext --output=bobcat.pot
 	msgmerge --update $< bobcat.pot
 	msgfmt --output-file=$@ $<
 	mkdir -p `basename $@ .gmo`

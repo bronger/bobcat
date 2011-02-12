@@ -12,6 +12,10 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""Node classes for cross referencing of all kinds.  Additionally, you find the
+references managers here.
+"""
+
 from .common import Node
 from .. import common
 

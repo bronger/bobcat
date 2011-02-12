@@ -12,6 +12,9 @@
 #    see <http://bobcat.origo.ethz.ch/wiki/Licence>.
 #
 
+"""The Document, Section, and associated node classes.
+"""
+
 from .common import guarded_match, guarded_search, guarded_find, Node
 from .basic_block import parse_blocks
 from .basic_inline import parse_inline

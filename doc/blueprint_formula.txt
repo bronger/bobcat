@@ -1,0 +1,288 @@
+== Sub- and superscripts (or indices and exponents) ==
+
+Sub- and superscripts work a little bit different in Bobcat than in LaTeX. First, they are terminated by whitespace rather than braces:
+
+<code>
+    Bobcat                  LaTeX
+   ========                =======
+
+    x_12 y                 x_{12}y
+    x_12y                  x_{12y}
+    x_{12}y                x_{12y}
+    x_1{2}y                x_{12y}
+</code>
+
+Alternatively, they are terminated by another sub-/superscript:
+
+<code>
+    x_1^2                  x_1^2
+    x_11^22                x_{11}^{22}
+    x_1_2                  x_1{}_2
+</code>
+
+
+=== Tensors ===
+
+The last line shows tensor notation.  This also allows for prescripts:
+
+<code>
+    _1^3_2^4 x_5^7_6^8     _1^3{}_2^4x_5^7{}_6^8
+    ₁³₂⁴x₅⁷₆⁸              _1^3{}_2^4x_5^7{}_6^8
+</code>
+
+So the space after the “4” is necessary only if no sub/superscript unicode codepoints are used.  This leads in the print output to
+
+<code>
+                     ₃₄ ₇₈
+                       x
+                     ¹² ⁵⁶
+</code>
+
+But, if you want to write something like
+
+<code>
+                      ₃ ₄  ₇ ₈
+                         x
+                     ¹ ²  ⁵ ⁶
+</code>
+
+you have to input:
+
+<code>
+    _1_^3_2_^4 x_5_^7_6_^8        _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+    ₁_³_₂_⁴x₅_⁷_₆_⁸               _1{}^3{}_2{}^4x_5{}^7{}_6{}^8
+</code>
+
+The upper notation shows how the inserting of »_« (»^« would have worked, too) breaks up the pairs of sub- and superscript, thus leaving an empty space. In the lower notation, »^« instead of »_« would have worked, too, because also here, it's just important to break up the pairs.
+
+By the way, the ''ordering'' within a pair is insignificant.
+
+
+== Whitespace ==
+
+“Whitespace” in this blueprint means all breaking or non-breaking, non-zero-length whitespace which Unicode offers.  The reason why the non-breaking spaces are included is that it should be possible to group things in the formula so that the editor doesn't break it, however, it must still be possible to terminate exponents.
+
+
+== Roots ==
+
+Roots start with »√« (and only this).  Their radicand is whitespace-terminated as for sub-/superscripts.  However, whitespace is allowed between the root symbol and the radicand for the sake of readability.  It is not allowed between the root symbol and an optional root exponent.
+
+<code>
+    √2π                    \sqrt{2\pi}
+    √ 2π                   \sqrt{2\pi}
+    √ {2 π}                \sqrt{2\pi}
+    √^3 {2 π}              \sqrt[3]{2\pi}
+    ³√ {2 π}               \sqrt[3]{2\pi}
+    √³ {2 π}               \sqrt[3]{2\pi}
+    ³ √2π                  ^3\sqrt{2\pi}
+</code>
+
+As a special convenience, superscript Unicode codepoints are allowed immediately before the root symbol.
+
+
+== Big operators ==
+
+Sums, integrals, and the like work accordingly, i. e. their limits have exactly the same syntax as sub-/superscripts:
+
+<code>
+    ∑_i=0^n x_i            \sum_{i=0}^n x_i
+    ∑_{i=0}^n x_i          \sum_{i=0}^n x_i
+    ∑_i=0ⁿ x_i             \sum_{i=0}^n x_i
+</code>
+
+Granted, the middle form (the one that resembles LaTeX) is the best one. Although the first form may be just a matter of getting accustomed to it … Note that Unicode distinguishes clearly between \sum and \Sigma: ∑ and Σ.
+
+
+== Mathematical accents ==
+
+For mathematical accents, Bobcat uses the “combining diacritical marks” from Unicode.  In particular, this means that their use is ''postfix'' (in contrast to LaTeX's prefix notation).  For wide accents, you have to put the accent on the closing brace (which your editor may display as the accents being positioned after the brace):
+
+<code>
+              ẍ                       \ddot x
+              ẍ̇                     \dot{\ddot x}
+            {xyz}̃                 \widetilde{xyz}
+</code>
+
+=== The “prime” character ===
+
+The prime character »′« seems to be a real issue because some people consider it in the exponent and some do not.
+
+In LaTeX, it is given by <code lang="latex">\prime</code>, however, this is not in the exponent, so you must write <code lang="latex">$f^\prime(x)$</code>.  The same seems to be true for some screen fonts as well as for MathML 2.0.  See
+http://www.albany.edu/~hammond/gellmu/primeaccents2.xhtml for a more detailed discussion.
+
+However, the Unicode specs say that it is already in the exponent, as well as its doubled etc. siblings.  So, Bobcat also treats it as being already in the exponent.  Like LaTeX, you may use the apostrophe »'« (and <code>''</code>, <code>'''</code> etc) as a convenient shortcut:
+
+<code>
+             f'                         f'
+             f′                         f'
+</code>
+
+
+== Fractions ==
+
+Fractions are in Bobcat more like TeX's rather than LaTeX's syntax but Bobcat uses // instead of <code>\over</code>.  If the most inner braces/parentheses/brackets nest neatly, you don't even need the grouping braces:
+
+<code>
+    1 // 2               \frac{1}{2}
+  2 + 3 // 2·4           \frac{2+3}{2\cdot 4}
+   3 {1//2}              3\frac{1}{2}
+  1 // 2 // 3            \frac{1}{\frac{2}{3}}
+  4 + (2 // 3)           4 + \left(\frac{2}{3}\right)
+</code>
+
+Rationale for using // instead of just »/«: Division takes precedence over addition, so an author could think that <code>2 + 3 / 2</code> is rendered like <code lang="latex">2 + \frac{3}{2}</code>.  However, this may be discussed.
+
+
+=== Stretchable braces ===
+
+In Bobcat, all braces are stretchable by default, so LaTeX's <code lang="latex">\left</code> and <code lang="latex">\right</code> are not necessary.  If you want to have a brace non-stretched, put curly braces around it.
+
+Giving the size of the brace explicitly is not yet planned in Bobcat.
+
+By the way, the curly braces themselves must be escaped with \ if you want to have them as-is, as in LaTeX.
+
+
+== Text within a formula ==
+
+Bobcat's counterpart of AMSMath's <code lang="latex">\text</code> is <code>"..."</code>.  This idea was taken from OpenOffice.org:
+
+<code>
+   m_"Ruhe"              m_\mathrm{Ruhe}
+   a ", wenn " b>0       a \text{, wenn } b>0
+</code>
+
+In contrast to LaTeX, it is not possible in Bobcat to use any form of markup in such text insertions.  They must be a plain sequence of characters.  The reason is that anything else cannot be translated to MathML (and is bad style anyway).
+
+By the way, the above mathrm/text dichotomy is no error: On the top level, Bobcat will emit a <code lang="latex">\text</code> macro, however anywhere else, it will emit <code lang="latex">\mathrm</code> to prevent it from assuming the markup from the surrounding text (e.g. italics).
+
+== Matrices and vectors ==
+
+A matrix is given in Bobcat by
+
+<code>
+matrix:: 1   2   3   
+         4   2   6   
+         7   8   9  = …
+</code>
+
+So, not only whitespace but also linebreaks are significant here.  However, the horizontal alignment in the source code is not important.
+
+You may give parameters to the matrix as a whole or to single cells in backquotes:
+
+<code>
+matrix:: `columns=lll` 1   2`c`   3   
+                       4      2`span=2`   
+                       7   8      9  = …
+</code>
+
+This means that all cells are left-aligned (default is centre), and that the second cell in the first row is centred.  You also see a column span. (Rowspans are not possible in matrices.)  Note that cell parameters must follow directly the cell contents without whitespace in between.  If a cell contains whitespace, enclose it in {…}.
+
+If you dislike this line break thing, you can also give the size explicitly:
+
+<code>
+matrix:: `size=3x3` 1 2 3  4 2 6  7 8 9 = …
+</code>
+
+Instead of “x”, you can also use “×” or »;« to separate the number of rows from the number of columns.
+
+By default, matrices are enclosed with (…).  With the parameters “braces”, “left brace”, and “right brace”, you can change that.
+
+
+=== Vectors ===
+
+Vectors are slightly different from matrices because autodetecting the size is not feasible:
+
+<code>
+vector:: 3, 1 2 3 = …
+</code>
+
+The size parameter is the first, comma-separated argument.
+
+
+== Text blocks ==
+
+Text blocks are entered as <code>`|name of text block|`</code>, so enclosed in backquotes and pipe signs.  This is a handy means to include subformulas:
+
+<code>
+{√ `|radicand|`}
+
+|radicand|:: {2π}
+</code>
+
+Note that alignment markers are removed before the insertion.
+
+
+== Physical quantities ==
+
+When the Bobcat parser encounters a non-breaking space of some kind, which doesn't just terminate the current formula element, it tries to parse the surrounding material as a physical quantity, which consists of a number (before the space) and/or a physical unit (after the space).
+
+The number must have the typical format used in programming languages, e.g. <code>1.3e-4</code>.  You may use a decimal point or a decimal comma.
+
+The unit is implicitly a formula (so even outside formulae, you needn't use curly braces), however, if it contains whitespace, you must enclode it with curly braces.  All consecutive Latin letters, as well as µ and Å (and maybe a few others) are interpreted as units, which means that they will be printed upright, among other things.
+
+In the following examples, I use the ~ for the non-breaking space:
+
+<code>
+   2,34e16            $2{,}34\cdot10^{16}$
+     3~m              \unit[3]{m}
+    ~m//s             $\mathrm{\frac{m}{s}}$
+ {A = 3~cm²}          $A = 3\mathrm{cm^2}$
+</code>
+
+The backend or theme may render numbers differently.
+
+
+== Alignment ==
+
+Horizontal alignment over multiple displayed equations is done with the ampersand &.  By default, the parts of the formula are left-aligned.
+
+<code>
+{8.44x &+ 55y  &= 0}
+
+{3.1 x &- 0.7y &= -1.1}
+</code>
+
+If you need other alignment, use <code>`c`</code>, <code>`align=.`</code> etc directly after the ampersands.
+
+By the way, the empty line between sequenced displayed equations is optional.
+
+
+== Equation labelling and numbering ==
+
+By default, Bobcat will produce numbering for all displayed equations.  This can be changed so that only equations with a label get a number.  Labels are given in backquotes behind the displayed equation:
+
+<code>
+{a² + b² = c²}   `pythagoras`
+</code>
+
+
+== Built-in functions ==
+
+Functions such as sin or cos are recognised according to a built-in table.  If you want to write <code lang="latex">$sin$</code>(sic!), you must write <code>{si n}</code> or <code>{s in}</code> or <code>{s i n}</code> in Bobcat.  The author can add new built-ins with a directive:
+
+<code>
+add built-in functions:: glob, blob
+
+{y = glob(x)}
+</code>
+
+
+== The whole thing in action ==
+
+So, one famous equation of special relativity is
+
+<code lang="latex">
+\frac{m_\mathrm{Ruhe}}{\sqrt{1-\frac{v^2}{c^2}}}
+</code>
+
+in LaTeX and
+
+<code>
+m_"Ruhe" // √ {1 - {v² // c²}}
+</code>
+
+in Bobcat.
+
+
+ LocalWords:  sqrt xyz lang frac cdot Ruhe mathrm wenn lll subformulas
+ LocalWords:  pythagoras
