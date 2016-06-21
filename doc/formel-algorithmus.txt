@@ -15,8 +15,16 @@ Die zentrale Funktion ist parse_math_row.  Sie scannt mathematisches Material
 und gibt exakt ein Mathematik-Element (eventuell NoneNode), sowie die aktuelle
 Parse-Position zurück.
 
-Die Eingangsparameter sind: excerpt, position, group_type, in_denominator und
-in_unit.  group_type kann dabei folgende Werte annehmen:
+Die Eingangsparameter sind: excerpt, position, group_type, current_sequence und
+in_unit.
+
+current_sequence ist dabei entweder "", "subscripts" oder "superscripts".  Es
+bezeichnet die aktuelle Sub/Superskript-Sequenz, also ob es gerade „nach unten“
+oder „nach oben“ geht.  In {1^2^3} ist die Sequenz beispielsweise durchgehend
+"superscripts".  In {1₂_3} ist es durchgehende "subscripts".  Wenn nicht gerade
+Sub/Superskripte geparst werden, ist dieser Parameter "" und ungenutzt.
+
+group_type kann dabei folgende Werte annehmen:
 
 • "explicit": die Gruppe wurde mit einer »{« geöffnet.  Terminierung also nur
   durch »}«, und das nächste zu parsende Zeichen ist das unmittelbar danach.
@@ -27,33 +35,37 @@ in_unit.  group_type kann dabei folgende Werte annehmen:
   schließende explizite Klammer, dann ist sie selbst das nächste zu parsende
   Zeichen.
 
-• "|", "‖": die Gruppe wurde mit eben jenem Zeichen eröffnet.  Terminierung
-  durch schließende implizite Klammern inklusive »|« bzw.(sic!) »‖«, dann ist
-  das nächste zu parsende Zeichen unmittelbar dahinter.  Oder durch eine
-  schließende explizite Klammer, dann ist sie selbst das nächste zu parsende
-  Zeichen.
+• "|", "⟨", "‖": die Gruppe wurde mit eben jenem Zeichen eröffnet.
+  Terminierung durch schließende implizite Klammern inklusive »|«, »|«,
+  bzw.(sic!) »‖«, dann ist das nächste zu parsende Zeichen unmittelbar
+  dahinter.  Oder durch eine schließende explizite Klammer, dann ist sie selbst
+  das nächste zu parsende Zeichen.
 
-• "sub/superscript": die Gruppe ist _ein_ Sub-, Super- oder Präskript.
-  Terminierung durch »_«, »^«, »__«, »^^«, schließende explizite oder implizite
-  Klammern inklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0,
-  Zeilenumbruch).  In allen Fällen ist das zum Abbruch geführte Zeichen das
-  nächste, was vom Aufrufer geparst wird.
+• "explicit subscript", "explicit superscript", "implicit subscript", "implicit
+  superscript", "topscript", "bottomscript": die Gruppe ist eines dieser Dinge.
+  "_", "^" etc. sind nicht das erste Zeichen, das geparst wird (das wird schon
+  vom Aufrufer übernommen), sondern das unmittelbar folgende.  Terminieren tun
+  nicht-alphanumerische Zeichen sowie Zeichen aus dem falschen „Stockwerk“
+  (z. B. bei "₂x" terminiert das "x").
 
-• "top/bottomscript": die Gruppe ist _ein_ Top- oder Bottomskript.
-  Terminierung durch »__«, »^^«, schließende explizite oder implizite Klammern
-  exklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  In
-  allen Fällen ist das zum Abbruch geführte Zeichen das nächste, was vom
-  Aufrufer geparst wird.
+  Ein "_" terminiert nur dann, wenn current_sequence="superscripts" ist.  Ein
+  "^" terminiert nur dann, wenn current_sequence="subscripts" ist.  Ansonsten
+  greift die Regel der Rechts-Assoziativität von Sub/Superskripten.
 
-• "radicand" oder "unit": die Gruppe ist ein Wurzel-Radikand oder eine
-  physikalische Einheit.  Terminierung durch schließende explizite oder
-  implizite Klammern exklusive »|« und »‖«, oder Whitespace (0x9, 0x20, 0xa0,
-  Zeilenumbruch).  In allen Fällen ist das zum Abbruch geführte Zeichen das
-  nächste, was vom Aufrufer geparst wird.
+  Fängt das Skript sofort mit einer öffnenden Klammer an, wird damit natürlich
+  math_parse_row nochmal aufgerufen, dann aber sofort abgebrochen.  Das zum
+  Abbruch geführte Zeichen ist das nächste, was vom Aufrufer geparst wird.
 
-• "matrix element": die Gruppe ist ein Matrix-Element.  Terminierung durch
-  Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch).  Das zum Abbruch geführte
-  Zeichen das nächste, was vom Aufrufer geparst wird.
+• "operator-terminated": die Gruppe ist ein Radikand oder eine physikalische
+  Einheit.  Terminierung durch alles, was nicht Buchstabe oder Ziffer ist (im
+  weitesten Unicode-Sinne).  Insbesondere terminieren die
+  Sub-/Superskript-Ziffern und -Minuszeichen _nicht_.  Das zum Abbruch geführte
+  Zeichen ist das nächste, was vom Aufrufer geparst wird.
+
+• "whitespace-terminated": die Gruppe ist ein Matrix-Element.  Terminierung
+  durch Whitespace (0x9, 0x20, 0xa0, Zeilenumbruch) oder eine schließende
+  Klammer.  Das zum Abbruch geführte Zeichen das nächste, was vom Aufrufer
+  geparst wird.
 
 parse_math_row wird praktisch die gesamte Arbeit machen.  Insbesondere wird die
 MathGroup-Klasse keine parse-Methode brauchen.  Aber auch MathIdentifier,
@@ -66,7 +78,7 @@ der Element und rekursiven Aufrufen von parse_math_row dient.
 parse_math_row muß bei _jeder_ öffnenden Klammerung sich selbst rekursiv
 aufrufen, bei impliziter Klammerung mit der Klammer als dem nächsten zu
 parsenden Zeichen.  Im Falle von impliziter Klammerung _und_ wenn das erste
-Element auch wirklich eine Klammer ist (kann im Nenner vo Brüchen nämlich auch
+Element auch wirklich eine Klammer ist (kann im Nenner von Brüchen nämlich auch
 nicht der Fall sein) setzt das neue parse_math_row ganz zu Beginn
 opening_brace=True.
 
@@ -86,14 +98,15 @@ denn das nullte Element würde ja nicht zum Zähler des Bruchs dazugehören.  Be
 Interpunktion, menschlichem Text, Pfeilen und Relationszeichen wird der Wert
 entsprechend auf die aktuelle Kinderlistenlänge + 1 erhöht.
 
-in_denominator=True bedeutet, daß gerade ein Nenner geparst wird.  Das
-bedeutet, daß zusätzlich zu den anderen möglichen Abbruchstellen an den
-typischen Bruch-Terminierungen (z. B. Vergleichsoperatoren) abgebrochen wird,
-und daß grundsätzlich das Abbruch-provozierende Zeichen das nächste zu parsende
-ist.
-
 in_unit=True bedeutet, daß zur Zeit eine physikalische Einheit geparst wird.
 Das wird an Tochteraufrufe grundsätzlich durchgeschliffen.
+
+in_denominator=True wird in parse_math_row selber gesetzt (wenn es zu
+Optimierung führt), wenn der Elter eine MathFraction ist.  Es bedeutet, daß
+gerade ein Nenner geparst wird.  Das bedeutet wiederum, daß zusätzlich zu den
+anderen möglichen Abbruchstellen an den typischen Bruch-Terminierungen
+(z. B. Vergleichsoperatoren) abgebrochen wird, und daß grundsätzlich das
+Abbruch-provozierende Zeichen das nächste zu parsende ist.
 
 
 *.* Der Central Loop
@@ -101,10 +114,8 @@ Das wird an Tochteraufrufe grundsätzlich durchgeschliffen.
 
 Schritte in parse_math_row, während durch das Excerpt gewandert wird:
 
-  1. Ist man Whitespace-terminiert und es wird Whitespace gefunden, bricht die
-     Schleife ab.  Wird eine schließende Klammer oder ein Betrags- oder
-     Normstrich gefunden, bricht die Schleife ebenso ab.  Das nächste zu
-     parsende Zeichen für die Mutterroutine ist dann diese schließende Klammer.
+  1. Ist man Operator-terminiert und es wird nicht-alphanumerisches Material
+     gefunden, bricht die Schleife ab.
 
   2. Wird eine öffnende Klammer gefunden, wird parse_math_row für das folgende
      erneut aufgerufen und das Ergebnis an die Kinderliste des Rückgabewertes
@@ -114,8 +125,7 @@ Schritte in parse_math_row, während durch das Excerpt gewandert wird:
      numerator_index in eine eigene, neue Gruppe rerootet und die als Zähler
      einer neuen MathFraction hinzugefügt.  Die MathFraction wird in die
      aktuelle Gruppe eingehängt.  Dann wird parse_math_row zum Sammeln des
-     Nenners aufgerufen, wobei group_type durchgeschliffen wird und
-     in_denominator=True ist.
+     Nenners aufgerufen, wobei group_type durchgeschliffen wird.
 
   4. Akzente: Zeichen mit diakritischen Zeichen müssen zerlegt werden, und
      folgende Combining Diacriticals zur Liste der Akzente hinzugefügt werden.
@@ -179,4 +189,5 @@ Ich brauche ein Set mit allen Vergleichsoperatoren.
  LocalWords:  flyspell type sub superscript Präskript geparst top bottomscript
  LocalWords:  Bottomskript standalone sic radicand matrix element nominator
  LocalWords:  index nullte Relationszeichen Kinderlistenlänge rerootet unit
- LocalWords:  denominator numerator
+ LocalWords:  denominator numerator operator subscript topscript current
+   LocalWords:  sequence subscripts superscripts
