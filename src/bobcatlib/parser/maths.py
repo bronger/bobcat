@@ -49,7 +49,7 @@ arrows = set(u"←↑→↓↔↕↖↗↘↙↚↛↜↝↞↟↠↡↢↣↤�
              + u"⬰⬱⬲⬳⬴⬵⬶⬷⬸⬹⬺⬻⬼⬽⬾⬿⭀⭁⭂⭃⭄⭅⭆⭇⭈⭉⭊⭋⭌")
 relational_and_arrows = relational_operators | arrows
 
-breaking_whitespace = set(u" " + u"".join([unichr(i) for i in range(0x2000, 0x200b)]) + u"\x205f")
+breaking_whitespace = set(u" " + u"".join(unichr(i) for i in range(0x2000, 0x200b)) + u"\x205f")
 nonbreaking_whitespace = set(u" \x202f")
 whitespace = breaking_whitespace | nonbreaking_whitespace
 
