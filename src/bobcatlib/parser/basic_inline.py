@@ -22,6 +22,7 @@ here.
 # arrived here.  (Probably not befor Python 3.0.)  Of course, the __all__
 # attribute must be properly set in common.py.
 from .common import (Node, guarded_search)
+from . import maths
 import re
 
 class Text(Node):
@@ -45,7 +46,7 @@ class Text(Node):
         """Pass `text` to the emitter."""
         self.root().emit(self.text)
 
-inline_delimiter = re.compile(ur"[_`]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
+inline_delimiter = re.compile(ur"[_`{]|<(\w|[$%&/()=?{}\[\]*+~#;,:.-@|])+>", re.UNICODE)
 def parse_inline(parent, text, position, end):
     """Parse the source for inline elements like emphasize or footnode and add
     those elements to the current parental node.
@@ -84,6 +85,9 @@ def parse_inline(parent, text, position, end):
             elif delimiter.startswith("<"):
                 hyperlink = Hyperlink(parent)
                 position = hyperlink.parse(text, position, delimiter_match.end())
+            elif delimiter == "{":
+                equation = maths.MathEquation(parent)
+                position = equation.parse(text, position, end)
         else:
             textnode = Text(parent)
             position = textnode.parse(text, position, end)
