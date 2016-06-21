@@ -198,11 +198,19 @@ The ASCII double quotes "…" and the text block notation `|…|` are grouping, 
 
 === Special case: the vertical line ===
 
-One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing.  As an exception, "|" may close "⟨" to allow for bra-ket notation.  So, "|…|" as well as "|…)" are groups, but "(…|" is not.
+One special case are single or double vertical bars.  Although they open and close a group as all other delimiters, the exact “kind” must match for a closing. So, "|…|" is a group, but neither are "|…)" nor "(…|".  Instead, "|…)" closes any group implicitly opened before with "[", "(" etc.  Additionally, "(…|" opens a new "|…|" group if there comes a second "|".  Otherwise, the single "|" ist just a streachable vertical bar.
 
-For a stretchable vertical bar in the sense of “such that”, one must use Unicode codepoint \0x2223 (DIVIDES), with an open \{ or ⟨ active.  It doesn't do any grouping.  Without an \{ or ⟨ as the currently open grouping, it means the binary operator „divides“, and doesn't stretch.
+This sounds confusing but should do the right thing in almost all cases.  In particular, it handles three important cases properly:
 
-The pipe sign, when used with subscripts, is interpreted as a deep vertical bar with the meaning “at the location …” or “with constant …” (in e. g. thermodynamics).
+1. the notation of absolute value "|…|"
+
+2. the bra-ket notation "〈…|…〉".  However, a single bra "〈…|" must be ended explicitly, e. g. "{〈…|}" or "{A = 〈…|}".
+
+3. the set notation "\{ x | x < A \}"
+
+If the vertical bar should not be strechable, enclose it with {} or use Unicode codepoint \0x2223 (DIVIDES).
+
+The "|" sign, when used with subscripts, is interpreted as a deep vertical bar with the meaning “at the location …” or “with constant …” (in e. g. thermodynamics).
 
 
 == Text within a formula ==
