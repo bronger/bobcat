@@ -86,7 +86,7 @@ class Excerpt(unicode):
     #
     # pylint: disable-msg=E1101
     entity_pattern = re.compile(r"((0x(?P<hex>[0-9a-fA-F]+))|(#(?P<dec>[0-9]+)));")
-    whitespace_pattern = re.compile(r"(\A\s+)|(\s+\Z)|(\s{2,})|([\t\n\r\f\v])")
+    whitespace_pattern = re.compile(r"(\A\s+)|(\s+\Z)|(\s{2,})|([\t\n\r\f\v])", re.UNICODE)
     @classmethod
     def get_next_match(cls, original_text, substitutions, offset=0):
         """Return the next input method match in `original_text`.  The search
