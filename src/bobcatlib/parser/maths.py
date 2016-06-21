@@ -98,8 +98,7 @@ builtin_functions = IdentifierSet(
     u"lg", u"ln", u"log", u"mod", u"hom", u"ker", u"sgn")
 
 builtin_big_identifiers = IdentifierSet(
-    u"lim inf", u"lim sup", u"max", u"min", u"inf", u"sup", u"Pr", u"gcd", u"det", u"lim")
-
+    u"lim inf", u"lim sup", u"max", u"min", u"inf", u"sup", u"Pr", u"gcd", u"det", u"lim")
 builtin_identifiers = IdentifierSet()
 
 
