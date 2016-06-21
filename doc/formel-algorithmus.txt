@@ -28,8 +28,8 @@ in_unit.  group_type kann dabei folgende Werte annehmen:
   Zeichen.
 
 • "|", "‖": die Gruppe wurde mit eben jenem Zeichen eröffnet.  Terminierung
-  durch schließende implizite Klammern inklusive »|« bzw.(sic!) »‖«, dann ist das
-  nächste zu parsende Zeichen unmittelbar dahinter.  Oder durch eine
+  durch schließende implizite Klammern inklusive »|« bzw.(sic!) »‖«, dann ist
+  das nächste zu parsende Zeichen unmittelbar dahinter.  Oder durch eine
   schließende explizite Klammer, dann ist sie selbst das nächste zu parsende
   Zeichen.
 
