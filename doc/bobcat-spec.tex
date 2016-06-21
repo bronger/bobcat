@@ -517,12 +517,6 @@ plus the extension ``\verb|.bim|''.
 \end{attributes}
 
 
-\contentmodel{Math}{<FixMe: To be done>}{}
-\begin{attributes}
-  \attribute{block}{bool}{\lstinline{True} if it's a block equation,
-    \lstinline{False} if it's an inline equation.}
-\end{attributes}
-
 
 \contentmodel{IndexEntry}{IndexEntryPart\kern0.1em\{1,3\}}{}
 
@@ -531,6 +525,18 @@ plus the extension ``\verb|.bim|''.
 \contentmodel{IndexEntryPart}{\textit{inline}\rep}{}
 
 ~
+
+\subsubsection{Content models for tables}
+
+~
+
+\subsubsection{Content models for formulas}
+
+\contentmodel{Math}{<FixMe: To be done>}{}
+\begin{attributes}
+  \attribute{block}{bool}{\lstinline{True} if it's a block equation,
+    \lstinline{False} if it's an inline equation.}
+\end{attributes}
 
 \section{Backend requirements}
 
