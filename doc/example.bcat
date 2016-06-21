@@ -402,7 +402,7 @@ Displayed equations simply are not part of a paragraph.  Fractions look like thi
 
 And, with strechable parentheses:
 
-{(n+1 // n)}            `with label`
+{(n+1 // n)} `with label`
 
 Stretchable braces are directly inside of curly brackets (the label and
 whitespace doesn't count).  Functions are identified according to an internal
@@ -410,9 +410,8 @@ table*: {sin \alpha}.  You may also write {sin α}.  Roots work like {\root n}
 (or {√n}), cubic roots like {√³n} or {√^3 n}.  Equations can be aligned as in
 AMSMath:
 
-{ a  &= 2 b }
-
-{ 2c &= b   }
+{ a  @= 2 b }
+{ 2c @= b   }
 
 Empty lines within equation arrays are optional.  Text in equations is enclosed
 with "..." as in OpenOffice.org.
@@ -426,11 +425,11 @@ with "..." as in OpenOffice.org.
 In this section, I write ~ instead of the non-breaking space so that you can
 see where it is.  A thin space may also be used instead.
 
-Three metres are written 3~m or {3~m}.  { A = 4 cm² = s². } is equivalent to
+Three metres are written 3~m or {3~m}.  { A = 4~cm² = s². } is equivalent to
 LaTeX's ```\[A = \unit[4]{cm^2} = s^2 \]```.  Metres alone can be written ~m,
 and a mere number can be written 4,3e-10~ (the formatting of the exponent
 depends on the backend).  You may use exponents and fractions in the unit:
-{4 {m//s}}
+{4~{m//s}}
 
 
 7. Text blocks
