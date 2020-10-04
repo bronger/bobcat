@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# This file is Python 2.7.
 
 """Test module for testing all doctests found in bobcatlib's modules.  This
 module builds a text suite automatically from all doctests found in bobcatlib's
